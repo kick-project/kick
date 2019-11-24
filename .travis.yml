@@ -12,11 +12,11 @@ jobs:
       script: make depsdev
     - stage: test
       script: make test
+    - stage: release
+      script: make release
 
-deploy:
-  - provider: script
-    skip_cleanup: true
-    script: make release
-    on:
-      tags: true
-      condition: $TRAVIS_OS_NAME = linux
+stages:
+  - devdeps
+  - test
+  - name: release
+    if: tag =~ ^v\d+\.\d+(?:\.\d+)?$
