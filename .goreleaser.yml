@@ -22,7 +22,7 @@ changelog:
 brews:
   - github:
       owner: crosseyed
-      name: homebrew-tap
+      name:  prjstart-tap
     folder: Formula
     homepage:  https://github.com/crosseyed/prjstart
     description: Tool to generate new projects from boilerplates

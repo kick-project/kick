@@ -12,3 +12,11 @@ jobs:
       script: make depsdev
     - stage: test
       script: make test
+
+deploy:
+  - provider: script
+    skip_cleanup: true
+    script: make release
+    on:
+      tags: true
+      condition: $TRAVIS_OS_NAME = linux
