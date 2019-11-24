@@ -64,8 +64,14 @@ lint:
 deploy: build
 	@echo TODO
 
-release: _isreleased
+release:
 	@VERSION=$(VERSION) $(DOTENV) make _release
+
+.PHONY: tag
+tag:
+	git fetch --tags
+	git tag v$(VERSION)
+	git push --tags
 
 deps: go.mod
 ifeq ($(USEGITLAB),true)
@@ -162,9 +168,6 @@ _test_setup_gitserver:
 
 _release:
 	@echo "### Releasing $(VERSION)"
-	git fetch --tags
-	git tag v$(VERSION)
-	git push --tags
 	goreleaser
 
 REPORTS = reports/html/coverage.html
