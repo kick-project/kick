@@ -1,0 +1,33 @@
+# This is an example goreleaser.yaml file with some sane defaults.
+# Make sure to check the documentation at http://goreleaser.com
+builds:
+- env:
+  - CGO_ENABLED=0
+  main: ./cmd/prjstart/main.go
+  goos:
+    - linux
+    - darwin
+  goarch:
+    - amd64
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "{{ .Env.VERSION }}"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+    - '^docs:'
+    - '^test:'
+brews:
+  - github:
+      owner: crosseyed
+      name: homebrew-tap
+    folder: Formula
+    homepage:  https://github.com/crosseyed/prjstart
+    description: Tool to generate new projects from boilerplates
+    test: |
+      system "#{bin}/prjstart -v"
+    skip_upload: true
+    url_template: "https://github.com/crosseyed/{{ .ProjectName }}/releases/download/{{ .Env.VERSION }}/{{ .ArtifactName }}"
+

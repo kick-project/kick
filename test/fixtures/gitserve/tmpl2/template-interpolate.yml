@@ -1,0 +1,3 @@
+# prjstart:template
+project: {{.Project.NAME}}
+home: {{.Env.HOME}}
