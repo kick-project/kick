@@ -144,12 +144,12 @@ _test: _test_setup
 _test_setup:
 	@mkdir -p tmp
 	@mkdir -p reports/html
-	make _test_setup_home
-	make _test_setup_gitserver
+	@make _test_setup_home 2> /dev/null > /dev/null
+	@make _test_setup_gitserver 2> /dev/null > /dev/null
 	@sync
 
 _test_setup_home:
-	cp -r test/fixtures/home tmp/
+	@cp -r test/fixtures/home tmp/
 
 _test_setup_gitserver:
 	@mkdir -p tmp/gitserveclient
