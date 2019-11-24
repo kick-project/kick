@@ -7,34 +7,103 @@ boilerplates.
 
 # Quickstart
 
-Create Hello World project. Templates are rendered using Go's text/template
-```bash
-mkdir -p ~/prjs/helloworld
-cat > ~/prjs/helloworld/project.yaml <<EOF
-# prj:render <--- Tell modeline to render file as a template. Line is stripped out from output file.
-project: {{.Project.NAME}}
-home: {{.Env.HOME}}
-EOF
+Add a set of variables that will be used in your project.
+Variables are stored in `~/.env`. All the variables defined here
+are passed to templates along with all environment variables as
+`.Env.$VARIABLE`
 
-cat > ~/prjs/helloworld/README.md <<EOF
-# Hello World 
-This file will not be rendered as a template
-EOF
+`~/.env`
+```dotenv
+AUTHOR=First Last <first.last@somedomain.com>
 ```
 
-Simple directory render
+Create a project that will be used as an example to generate go projects.
+Templates are rendered using Go's text/template
 ```bash
-mkdir -p ~/prjs/directoryrender/\{\{.Env.USER\}\}
-touch ~/prjs/directoryrender/\{\{.Env.USER\}\}/emptyfile
+mkdir -p ~/prjs/prjgo
+```
+
+`~/prjs/prjgo/AUTHORS`
+```yaml
+# prj:render <--- This modeline tells prjstart to render file as a template. Line is stripped out from output file.
+{{.Env.AUTHOR}}
+```
+
+`~/prjs/prjgo/README.md`
+```markdown
+# prj:render
+# {{.Project.NAME}}
+```
+
+`~/prjs/prjgo/.gitignore`
+```.gitignore
+# Vim
+.*.swp
+
+# Mac
+.DS_Store
+
+/vendor/
+```
+
+Add a binary
+```bash
+mkdir -p ~/prjs/prjgo/cmd/\{\{.Project.NAME\}\}
+touch ~/prjs/prjgo/cmd/\{\{.Project.NAME\}\}/main.go 
+```
+
+`~/prjs/prjgo/cmd/\{\{.Project.NAME\}\}/main.go`
+```go
+// prj:render
+package main
+
+import "fmt"
+
+func main() {
+    fmt.Println("Project {{.Project.NAME}}")
+}
 ```
 
 Add the following file `~/.prjstart.yml`
 ```yaml
 templates:
-    - name: helloworld
-      url: ~/prjs/helloworld
-      desc: Hello World
-    - name: directoryrender
-      url: ~/prjs/directoryrender
-      desc: Example Directory render
+    - name: goproject
+      url: ~/prjs/prjgo
 ```
+
+Create the project using go
+```bash
+prjstart start goproject ~/mynewproject
+```
+
+# Git templates
+
+```bash
+cd ~/prjs/prjgo
+git init
+git add .
+git commit -m "first commit"
+git push --set-upstream git@github.com/owner/prjgo.git master
+```
+
+Modify `~/.prjstart.yml`
+```yaml
+templates:
+    - name: goproject
+      url: http://github.com/owner/prjgo.git
+```
+
+Start a new project with the recently checked in boilerplate
+```bash
+prjstart start goproject ~/myproject
+```
+
+# Variables
+Variables are either environment variables, variables defined in `~/.env`
+or project variables.
+
+To list available project variables run
+```bash
+prjstart list --vars
+```
+

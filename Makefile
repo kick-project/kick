@@ -40,7 +40,7 @@ buildauto:
 	fswatch -o cmd/* internal/* --one-per-batch | xargs -n1 -I{} bash -c 'echo "make build # $$(date)"; make build; echo'
 
 install:
-	@VERSION=$(VERSION) make _install
+	@VERSION=$(VERSION) $(DOTENV) make _install
 
 installauto:
 	fswatch -o cmd/* internal/* --one-per-batch | xargs -n1 -I{} bash -c 'echo "make install # $$(date)"; make install; echo'
@@ -116,7 +116,9 @@ ifeq ($(HASCMD),true)
 endif
 
 .PHONY: _install
-_intstall: $(NAME)
+_install: $(GOPATH)/bin/$(NAME)
+
+$(GOPATH)/bin/$(NAME): $(NAME)
 	install -m 755 $(NAME) $(GOPATH)/bin/$(NAME)
 
 _deps:
