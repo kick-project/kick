@@ -154,8 +154,8 @@ _test_setup_home:
 _test_setup_gitserver:
 	@mkdir -p tmp/gitserveclient
 	-kill -0 $$(cat tmp/server.pid) 2>/dev/null >/dev/null || go run test/fixtures/testserver.go
-	-find test/fixtures/gitserve -mindepth 1 -maxdepth 1 -type d -exec cp -r {} tmp/gitserveclient \;
-	-for i in $$(pwd)/tmp/gitserveclient/*; do cd $$i; git init; git add .; git commit -m "Initial commit"; git push --set-upstream http://127.0.0.1:5000/$$(basename $$(pwd)).git master; done
+	@-find test/fixtures/gitserve -mindepth 1 -maxdepth 1 -type d -exec cp -r {} tmp/gitserveclient \;
+	@-for i in $$(pwd)/tmp/gitserveclient/*; do cd $$i; git init; git add .; git commit -m "Initial commit"; git push --set-upstream http://127.0.0.1:5000/$$(basename $$(pwd)).git master; done
 	@sync
 
 _release:
