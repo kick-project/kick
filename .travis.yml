@@ -1,22 +1,29 @@
 language: go
 go:
-  - "1.13.4"
-
+- 1.13.4
 cache:
   directories:
-    - $GOPATH
-
+  - "$GOPATH"
 jobs:
   include:
-    - stage: depsdev
-      script: make depsdev
-    - stage: test
-      script: make test
-    - stage: release
-      script: make release
-
+  - stage: depsdev
+    script: make depsdev
+  - stage: test
+    script: make test
+  - stage: release
+    script: make release
 stages:
-  - devdeps
-  - test
-  - name: release
-    if: tag =~ ^v\d+\.\d+(?:\.\d+)?$
+- devdeps
+- test
+- name: release
+  if: tag =~ ^v\d+\.\d+(?:\.\d+)?$
+deploy:
+  provider: releases
+  api_key:
+    secure: AlF7EQBCare+EYmMnUgg6TCxQAt5q0iw/LW3sQIuf1lJAK5yS9OeuMZYwZJNCO7FF+usVsmijV5ZwUzHil0FD8COJf6yoYb5g3c5iIiHBpJkDW/jLiglZN0p+j00n/aP+l6VYg6GAj+64G08NeAWbKVcGr85iTcVuZ2xQZKH3H2u5nawnDmloie4fLwEnXabi3ufnD9DE25h3u1bnlDPcve8E3C0XW79NJrMVruMBsWtT2WkfcnDmRfCKY4s82kiEQjTAQ/cS1p3AZM1FqwiWsXVSbPBFb9xkdDMWdJGsg8HagiSfyqyXJw7jEc4lMzAlD56z90as6xsxS0IxDv1DnDjizb0yDyyLrIoVuURj8H45hvxPyiVXg8DmyJn0adHDWCByKCodid/Fn2K6aFNYqp/3hU0Ye/do8E1lEkiYcj31dpp5YAgrcpmtG9+fEgYIRRvveZpDDnhtqsuTHvQu0oXMbTM5eJ7P8jl7VCB2nMhH2QWjxUR6kpAB7rEk1pt1SruPMF883bfPYDnCpa93dDPykGZWPN8c89+jsmohJTTQwtXB09dDe1TvJLZHK3/N1ip4F77hH8N4C3T8cEkVu7CS+vy3i7yX+WIp8gCkSi+AkWoS5THVUF3e78Mb0uRIkUjre2Ap9Ub7zbRQEJy1TviU/pgyqBtFWYN0GuToHk=
+  file: dist/*
+  file_glob: true
+  skip_cleanup: true
+  on:
+    repo: crosseyed/prjstart
+    tags: true
