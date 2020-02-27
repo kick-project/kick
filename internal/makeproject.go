@@ -64,7 +64,7 @@ func (s *MakeProject) SetDest(dest string) {
 func (s *MakeProject) Run() int {
 	path := s.localpath
 	base := s.localpath
-	skipRegex, err := regexp.Compile(fmt.Sprintf(`^%s/.git`, base))
+	skipRegex, err := regexp.Compile(fmt.Sprintf(`^%s/.git(?:/|$)`, base))
 	utils.ChkErr(err, utils.Epanicf)
 	s.checkDstExists()
 	errWalk := filepath.Walk(path, func(srcPath string, info os.FileInfo, err error) error {
