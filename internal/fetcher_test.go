@@ -58,7 +58,16 @@ func TestHttpParseHTTPSPORT(t *testing.T) {
 }
 
 func TestGitParse(t *testing.T) {
-	url := "git@127.0.0.1:5000/serve/git/template.git"
+	url := "git@127.0.0.1/serve/git/template.git"
+	expectedServer := "127.0.0.1"
+	expectedProject := "template"
+	expectedPath := "127.0.0.1/serve/git"
+
+	testParsing(t, gitParse, url, expectedServer, expectedPath, expectedProject)
+}
+
+func TestGitParse2(t *testing.T) {
+	url := "git@127.0.0.1:serve/git/template.git"
 	expectedServer := "127.0.0.1"
 	expectedProject := "template"
 	expectedPath := "127.0.0.1/serve/git"

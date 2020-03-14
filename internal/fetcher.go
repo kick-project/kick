@@ -241,7 +241,7 @@ func httpParse(uri string) (server string, path string, project string, match bo
 }
 
 func gitParse(uri string) (server, path, project string, match bool) {
-	r := regexp.MustCompile(`^git@([^(?:/|:)]+)(?:/|:\d+)(.*?)([^/]+?)(?:\.git)?$`)
+	r := regexp.MustCompile(`^git@([^(?:/|:)]+)(?:/|:)(.*?)([^/]+?)(?:\.git)?$`)
 	m := r.FindStringSubmatch(uri)
 	if len(m) > 3 {
 		return m[1], filepath.Clean(filepath.Join(m[1], m[2])), m[3], true
