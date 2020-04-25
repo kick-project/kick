@@ -7,6 +7,7 @@ builds:
   goos:
     - linux
     - darwin
+    - windows
   goarch:
     - amd64
 checksum:
@@ -19,15 +20,49 @@ changelog:
     exclude:
     - '^docs:'
     - '^test:'
+
+archives:
+- name_template: '{{ .ProjectName }}-{{ .Os }}-{{ .Version }}.{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
+  replacements:
+    386: i386
+    amd64: x86_64
+  format_overrides:
+  - goos: windows
+    format: zip
+      
 brews:
   - github:
       owner: crosseyed
       name:  prjstart-tap
     folder: Formula
     homepage:  https://github.com/crosseyed/prjstart
-    description: Tool to generate new projects from boilerplates
+    description: Rapid boilerplate tool
     test: |
       system "#{bin}/prjstart -v"
     skip_upload: true
     url_template: "https://github.com/crosseyed/{{ .ProjectName }}/releases/download/{{ .Env.VERSION }}/{{ .ArtifactName }}"
+  
+scoop:
+  bucket:
+    owner: goreleaser
+    name: scoop-bucket
+  homepage:  https://goreleaser.com
+  description: Deliver Go binaries as fast and easily as possible
+  license: Apache 2
 
+nfpms:
+  - file_name_template: '{{ .ProjectName }}-{{ .Version }}.{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
+    replacements:
+      darwin: macos
+      386: i386
+      amd64: x86_64
+    homepage:  https://github.com/crosseyed/prjstart
+    description: Rapid boilerplate tool
+    maintainer: Dexter Plameras
+    license: Apache 2
+    vendor: Project Start
+    formats:
+    - deb
+    - rpm
+    dependencies:
+    - git

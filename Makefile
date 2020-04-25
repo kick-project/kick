@@ -2,6 +2,7 @@ SHELL = /bin/bash
 
 # Project
 NAME := $(shell basename $$(pwd))
+GOPATH := $(shell go env GOPATH)
 VERSION ?= $(shell cat VERSION)
 COMMIT := $(shell test -d .git && git rev-parse --short HEAD)
 BUILD_INFO := $(COMMIT)-$(shell date -u +"%Y%m%d-%H%M%SZ")
@@ -28,7 +29,8 @@ GOFILES := $(shell find cmd pkg internal src -name '*.go' 2> /dev/null)
 GODIRS = $(shell find . -type d -maxdepth 1 -mindepth 1 | egrep 'cmd|internal|pkg|api')
 
 .PHONY: build _build _build_xcompile browsetest cattest clean deps _deps depsdev deploy _go.mod _go.mod_err \
-        _isreleased lint release _release _release_gitlab test _test _test_setup _test_setup_home _test_setup_gitserver
+        _isreleased lint release _release _release_gitlab test _test _test_setup _test_setup_home _test_setup_gitserver \
+		unit codecomplexity codecoverage _unit _codecomplexity _codecoverage 
 
 #
 # End user targets
@@ -53,7 +55,18 @@ testsetup:
 	@$(DOTENV) make _test_setup
 
 test: deps
-	@$(DOTENV) make _test
+	@$(DOTENV) make _unit
+	@$(DOTENV) make _codecoverage
+	@$(DOTENV) make _codecomplexity
+
+unit: deps
+	@$(DOTENV) make _unit
+
+codecoverage: 
+	@$(DOTENV) make _codecoverage
+
+codecomplexity:
+	@$(DOTENV) make _codecomplexity
 
 testauto:
 	fswatch -o cmd/* internal/* test/* --one-per-batch | xargs -n1 -I{} bash -c 'echo "make test # $$(date)"; make test; echo'
@@ -132,22 +145,26 @@ _deps:
 	$(GOMODOPTS) go mod vendor
 
 GOGETS := github.com/jstemmer/go-junit-report github.com/golangci/golangci-lint/cmd/golangci-lint \
-		  github.com/ains/go-test-html github.com/fzipp/gocyclo github.com/joho/godotenv/cmd/godotenv \
+		  github.com/ains/go-test-html github.com/goreleaser/goreleaser github.com/fzipp/gocyclo github.com/joho/godotenv/cmd/godotenv \
 		  github.com/crosseyed/versionbump/cmd/versionbump github.com/stretchr/testify github.com/sosedoff/gitkit
 .PHONY: $(GOGETS)
 $(GOGETS):
 	go get -u $@
 
-_test: _test_setup
+_unit: _test_setup
 	### Unit Tests
 	@(go test -timeout 5s -covermode atomic -coverprofile=./reports/coverage.out -v ./...; echo $$? > reports/exitcode.txt) 2>&1 | tee reports/test.txt
 	@cat ./reports/test.txt | go-junit-report > reports/junit.xml
+	@exit $$(cat reports/exitcode.txt)
+
+_codecoverage: _test_setup
 	### Code Coverage
 	@go tool cover -func=./reports/coverage.out | tee ./reports/coverage.txt
 	@go tool cover -html=reports/coverage.out -o reports/html/coverage.html
+
+_codecomplexity: _test_setup
 	### Cyclomatix Complexity Report
 	@gocyclo -avg $(GODIRS) | grep -v _test.go | tee reports/cyclocomplexity.txt
-	@exit $$(cat reports/exitcode.txt)
 
 _test_setup:
 	@mkdir -p tmp
@@ -187,9 +204,9 @@ endif
 # File targets
 #
 $(NAME): dist/$(NAME)_$(OS)_$(ARCH)/$(NAME)
-	install -m 755 dist/$(NAME)_darwin_$(ARCH)/$(NAME) $(NAME)
+	install -m 755 dist/$(NAME)_$(OS)_$(ARCH)/$(NAME) $(NAME)
 
-dist/$(NAME)_darwin_$(ARCH)/$(NAME): $(GOFILES) internal/version.go
+dist/$(NAME)_$(OS)_$(ARCH)/$(NAME): $(GOFILES) internal/version.go
 	@mkdir -p dist
 	goreleaser --snapshot --skip-publish --rm-dist
 
