@@ -41,14 +41,6 @@ brews:
       system "#{bin}/prjstart -v"
     skip_upload: true
     url_template: "https://github.com/crosseyed/{{ .ProjectName }}/releases/download/{{ .Env.VERSION }}/{{ .ArtifactName }}"
-  
-scoop:
-  bucket:
-    owner: goreleaser
-    name: scoop-bucket
-  homepage:  https://goreleaser.com
-  description: Deliver Go binaries as fast and easily as possible
-  license: Apache 2
 
 nfpms:
   - file_name_template: '{{ .ProjectName }}-{{ .Version }}.{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
