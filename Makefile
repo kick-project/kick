@@ -80,6 +80,9 @@ deploy: build
 release:
 	@VERSION=$(VERSION) $(DOTENV) make _release 2> /dev/null
 
+release_publish:
+	@VERSION=$(VERSION) $(DOTENV) goreleaser release
+
 .PHONY: tag
 tag:
 	git fetch --tags
