@@ -187,8 +187,9 @@ _test_setup_gitserver:
 	@sync
 
 _release:
-	@echo "### Releasing $(VERSION)"
-	goreleaser
+	@echo "### Releasing v$(VERSION)"
+	git tag v$(VERSION)
+	git push --tags
 
 REPORTS = reports/html/coverage.html
 .PHONY: $(REPORTS)
