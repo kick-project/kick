@@ -1,4 +1,4 @@
-[![Go Report Card](https://goreportcard.com/badge/crosseyed/prjstart)](https://goreportcard.com/report/crosseyed/prjstart) [![Build Status](https://travis-ci.org/crosseyed/prjstart.svg?branch=master)](https://travis-ci.org/crosseyed/prjstart) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/crosseyed/prjstart/blob/master/LICENSE)
+[![Go Report Card](https://goreportcard.com/badge/crosseyed/prjstart)](https://goreportcard.com/report/crosseyed/prjstart) ![Go](https://github.com/crosseyed/prjstart/workflows/Go/badge.svg?branch=master) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/crosseyed/prjstart/blob/master/LICENSE)
 
 # Project Start - prjstart
 
