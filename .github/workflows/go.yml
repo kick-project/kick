@@ -40,6 +40,8 @@ jobs:
     - name: Unit tests
       run: |
         export PATH=$(go env GOPATH)/bin:$PATH
+        git config --global user.email "noreply@github.com"
+        git config --global user.name "Unit Testing"
         make unit
     
     - name: Code coverage
