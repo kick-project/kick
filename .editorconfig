@@ -1,7 +1,7 @@
 [Makefile]
 indent_style = tab
 
-[.golangci.yml]
+[*.yml]
 indent_style = space
 indent_size = 2
 
