@@ -99,7 +99,7 @@ depsdev:
 ifeq ($(USEGITLAB),true)
 	@mkdir -p $(ROOT)/.cache/{go,gomod}
 endif
-	@make $(GOGETS)
+	@GO111MODULE=on make $(GOGETS)
 
 bumpmajor:
 	git fetch --tags
@@ -147,12 +147,12 @@ _deps:
 	$(GOMODOPTS) go mod tidy
 	$(GOMODOPTS) go mod vendor
 
-GOGETS := github.com/jstemmer/go-junit-report github.com/golangci/golangci-lint/cmd/golangci-lint \
+GOGETS := github.com/jstemmer/go-junit-report github.com/golangci/golangci-lint/cmd/golangci-lint@v1.25.0 \
 		  github.com/goreleaser/goreleaser github.com/fzipp/gocyclo github.com/joho/godotenv/cmd/godotenv \
 		  github.com/crosseyed/versionbump/cmd/versionbump github.com/sosedoff/gitkit
 .PHONY: $(GOGETS)
 $(GOGETS):
-	cd /tmp; go get -u $@
+	cd /tmp; go get $@
 
 _unit: _test_setup
 	@make _test_setup_gitserver
