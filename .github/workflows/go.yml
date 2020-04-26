@@ -9,7 +9,7 @@ on:
 jobs:
 
   build:
-    name: Build
+    name: Tests
     runs-on: ubuntu-latest
     steps:
 
@@ -30,27 +30,15 @@ jobs:
     - name: Git checkout
       uses: actions/checkout@v2
     
-    - name: Build
+    - name: Dependencies
       run: |
         export PATH=$(go env GOPATH)/bin:$PATH
         make depsdev
         make deps
-        make build
     
-    - name: Unit tests
+    - name: Unit tests / Code coverage / Code complexity
       run: |
         export PATH=$(go env GOPATH)/bin:$PATH
         git config --global user.email "noreply@github.com"
         git config --global user.name "Unit Testing"
-        make unit
-    
-    - name: Code coverage
-      run: |
-        export PATH=$(go env GOPATH)/bin:$PATH
-        # TODO - Can't spin up a server in github
-        # make codecoverage
-    
-    - name: Code complexity
-      run: |
-        export PATH=$(go env GOPATH)/bin:$PATH
-        make codecomplexity
+        make test
