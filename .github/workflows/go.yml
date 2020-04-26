@@ -40,8 +40,7 @@ jobs:
     - name: Unit tests
       run: |
         export PATH=$(go env GOPATH)/bin:$PATH
-        # TODO - Can't spin up a server in github
-        # make unit
+        make unit
     
     - name: Code coverage
       run: |

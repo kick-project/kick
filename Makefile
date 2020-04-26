@@ -152,6 +152,7 @@ $(GOGETS):
 	go get -u $@
 
 _unit: _test_setup
+	@make _test_setup_gitserver
 	### Unit Tests
 	@(go test -timeout 5s -covermode atomic -coverprofile=./reports/coverage.out -v ./...; echo $$? > reports/exitcode.txt) 2>&1 | tee reports/test.txt
 	@cat ./reports/test.txt | go-junit-report > reports/junit.xml
@@ -170,7 +171,6 @@ _test_setup:
 	@mkdir -p tmp
 	@mkdir -p reports/html
 	@make _test_setup_home 2> /dev/null > /dev/null
-	@make _test_setup_gitserver 2> /dev/null > /dev/null
 	@sync
 
 _test_setup_home:
@@ -178,7 +178,10 @@ _test_setup_home:
 
 _test_setup_gitserver:
 	@mkdir -p tmp/gitserveclient
-	-kill -0 $$(cat tmp/server.pid) 2>/dev/null >/dev/null || go run test/fixtures/testserver.go
+	@-kill -0 $$(cat tmp/server.pid) 2>/dev/null >/dev/null || go run test/fixtures/testserver.go
+	@echo "Waiting for git server to launch on 5000..."
+	@bash -c 'while ! nc -z localhost 5000; do sleep 0.1; done'
+	@echo "git server launched"
 	@-find test/fixtures/gitserve -mindepth 1 -maxdepth 1 -type d -exec cp -r {} tmp/gitserveclient \;
 	@-for i in $$(pwd)/tmp/gitserveclient/*; do cd $$i; git init; git add .; git commit -m "Initial commit"; git push --set-upstream http://127.0.0.1:5000/$$(basename $$(pwd)).git master; done
 	@sync
