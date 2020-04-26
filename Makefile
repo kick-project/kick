@@ -26,7 +26,7 @@ ROOT = $(shell pwd)
 GOMODOPTS = GO111MODULE=on
 GOGETOPTS = GO111MODULE=off
 GOFILES := $(shell find cmd pkg internal src -name '*.go' 2> /dev/null)
-GODIRS = $(shell find . -type d -maxdepth 1 -mindepth 1 | egrep 'cmd|internal|pkg|api')
+GODIRS = $(shell find . -maxdepth 1 -mindepth 1 -type d | egrep 'cmd|internal|pkg|api')
 
 .PHONY: build _build _build_xcompile browsetest cattest clean deps _deps depsdev deploy _go.mod _go.mod_err \
         _isreleased lint release _release _release_gitlab test _test _test_setup _test_setup_home _test_setup_gitserver \
