@@ -44,7 +44,7 @@ jobs:
       run: |
         export PATH=$(go env GOPATH)/bin:$PATH
         # Run make depsdev if $(GOPATH)/bin directory is older then 24 hours
-        (find $(go env GOPATH)/bin -maxdepth 0 -ctime +1 | grep . > /dev/null && (make depsdev; touch $(go env GOPATH)/bin)) || true
+        ((find $(go env GOPATH)/bin -maxdepth 0 -ctime +1 | grep . > /dev/null 2> /dev/null || !test -d $(go env GOPATH)/bin) && (make depsdev; touch $(go env GOPATH)/bin)) || true
         make deps
     
     - name: Unit tests / Code coverage / Code complexity
