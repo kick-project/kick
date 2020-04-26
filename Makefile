@@ -148,11 +148,11 @@ _deps:
 	$(GOMODOPTS) go mod vendor
 
 GOGETS := github.com/jstemmer/go-junit-report github.com/golangci/golangci-lint/cmd/golangci-lint \
-		  github.com/ains/go-test-html github.com/goreleaser/goreleaser github.com/fzipp/gocyclo github.com/joho/godotenv/cmd/godotenv \
-		  github.com/crosseyed/versionbump/cmd/versionbump github.com/stretchr/testify github.com/sosedoff/gitkit
+		  github.com/goreleaser/goreleaser github.com/fzipp/gocyclo github.com/joho/godotenv/cmd/godotenv \
+		  github.com/crosseyed/versionbump/cmd/versionbump github.com/sosedoff/gitkit
 .PHONY: $(GOGETS)
 $(GOGETS):
-	go get -u $@
+	cd /tmp; go get -u $@
 
 _unit: _test_setup
 	@make _test_setup_gitserver
