@@ -78,7 +78,7 @@ deploy: build
 	@echo TODO
 
 release:
-	@VERSION=$(VERSION) $(DOTENV) make _release
+	@VERSION=$(VERSION) $(DOTENV) make _release 2> /dev/null
 
 .PHONY: tag
 tag:
@@ -188,6 +188,7 @@ _test_setup_gitserver:
 
 _release:
 	@echo "### Releasing v$(VERSION)"
+	@make --no-print-directory _isreleased 2> /dev/null
 	git tag v$(VERSION)
 	git push --tags
 
