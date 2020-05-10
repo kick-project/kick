@@ -15,17 +15,31 @@ type parseFunc = func(uri string) (server string, path string, project string, m
 
 // Gitclient gitclient
 type Gitclient struct {
-	uri     string
-	basedir string
-	output  *os.File
-	ref     string
+	uri       string
+	basedir   string
+	forcepath bool
+	output    *os.File
+	ref       string
 }
 
-func New(uri, base string, output *os.File) *Gitclient {
+// Options is a set of options to past to New
+type Options struct {
+	// Uri is git git URI to check out
+	Uri       string
+	// BaseDir is the directory where the structure is built
+	BaseDir   string 
+	// ForcePath sets base directory 
+	ForcePath bool
+	// OutPut redirect output to file
+	OutPut    *os.File
+}
+
+func New(options Options) *Gitclient {
 	s := &Gitclient{
-		uri:     uri,
-		basedir: base,
-		output:  output,
+		uri:       options.Uri,
+		basedir:   options.BaseDir,
+		output:    options.OutPut,
+		forcepath: options.ForcePath,
 	}
 	return s
 }
@@ -88,6 +102,24 @@ func (d *Gitclient) Pull() {
 	}
 }
 
+// Tags will list all tags
+func (d *Gitclient) Tags() []string {
+	taglist := []string{}
+
+	r := d.plainopen()
+	iter, err := r.Tags()
+	utils.ChkErr(err, utils.Elogf, "Error listing tags %s: %+v", d.uri, err)
+
+	fn := func(tag *plumbing.Reference) error {
+		taglist = append(taglist, tag.Name().Short())
+		return nil
+	}
+	err = iter.ForEach(fn)
+	utils.ChkErr(err, utils.Elogf, "Error listing tags %s: %+v", d.uri, err)
+
+	return taglist
+}
+
 // Checkout checks out a reference. If ref is an empty string will checkout using the internally set ref
 func (d *Gitclient) Checkout(ref string) {
 	if ref != "" {
@@ -131,6 +163,16 @@ func (d *Gitclient) LocalPath() string {
 	}
 	p := filepath.Join(d.basedir, srvPath, dir)
 	return p
+}
+
+func (d *Gitclient) plainopen() *git.Repository {
+	p := d.LocalPath()
+	if p == "" {
+		return nil
+	}
+	r, err := git.PlainOpen(p)
+	utils.ChkErr(err, utils.Elogf, "Error opening path '%s': %+v", p, err)
+	return r
 }
 
 func parseGitRemote(uri string) (server, path, project string) {

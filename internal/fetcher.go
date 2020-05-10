@@ -2,9 +2,8 @@ package internal
 
 import (
 	"github.com/crosseyed/prjstart/internal/gitclient"
+	"github.com/crosseyed/prjstart/internal/utils"
 	"os"
-	"os/user"
-	"path/filepath"
 	"strings"
 )
 
@@ -29,11 +28,16 @@ func NewFetcher(config *ConfigStruct) *Fetcher {
 func (d *Fetcher) GetTmpl(tmpl string) string {
 	for _, t := range d.config.Templates {
 		if t.Name == tmpl {
-			path := expandPath(t.URL)
+			path := utils.ExpandPath(t.URL)
 			if strings.HasPrefix(path, "/") {
 				return path
 			}
-			client := gitclient.New(t.URL, BaseProjectPath(d.config.Home), os.Stdout)
+			options := gitclient.Options {
+				Uri:     t.URL,
+				BaseDir: BaseProjectPath(d.config.Home),
+				OutPut:  os.Stdout,
+			}
+			client := gitclient.New(options)
 			if !client.LocalOnly() {
 				client.Sync()
 			}
@@ -41,15 +45,6 @@ func (d *Fetcher) GetTmpl(tmpl string) string {
 		}
 	}
 	return ""
-}
-
-func expandPath(path string) string {
-	if strings.HasPrefix(path, "~/") {
-		usr, _ := user.Current()
-		dir := usr.HomeDir
-		path = filepath.Join(dir, path[2:])
-	}
-	return path
 }
 
 // GetAllSets fetches all sets
@@ -64,7 +59,12 @@ func (d *Fetcher) GetAllSets() []string {
 
 // GetSet fetches sets and returns the patch
 func (d *Fetcher) GetSet(uri string) string {
-	client := gitclient.New(uri, BaseSetPath(d.config.Home), os.Stdout)
+	options := gitclient.Options {
+		Uri:     uri,
+		BaseDir: BaseProjectPath(d.config.Home),
+		OutPut:  os.Stdout,
+	}
+	client := gitclient.New(options)
 	if !client.LocalOnly() {
 		client.Sync()
 	}

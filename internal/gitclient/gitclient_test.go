@@ -1,13 +1,34 @@
 package gitclient
 
 import (
+	"github.com/crosseyed/prjstart/internal/utils"
 	"github.com/stretchr/testify/assert"
+	"os"
+	"regexp"
 	"testing"
 )
 
 //
 // Tests
 //
+func TestGitClient_Tag(t *testing.T) {
+	url := "http://127.0.0.1:5000/tmpl1.git"
+	base := utils.TempDir()
+	options := Options {
+		Uri: url,
+		BaseDir: base,
+		OutPut: os.Stdout,
+	}
+	client := New(options)
+	client.Sync()
+	tags := client.Tags()
+	tlen := len(tags)
+	for _, tag := range tags {
+		assert.Regexp(t, regexp.MustCompile(`^\d+\.\d+\.\d+$`), tag)
+	} 
+	assert.Greater(t, tlen, 0)
+}
+
 func TestHttpParseHTTP(t *testing.T) {
 	url := "http://git.com/serve/git/template.git"
 	expectedServer := "git.com"

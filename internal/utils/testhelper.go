@@ -1,4 +1,4 @@
-package internal
+package utils
 
 import (
 	"path"
@@ -16,4 +16,16 @@ func FixtureDir() (fixturedir string) {
 		panic(err)
 	}
 	return fixturedir
+}
+
+func TempDir() (tempdir string) {
+	_, filename, _, ok := runtime.Caller(1)
+	if !ok {
+		panic("Can not get filename")
+	}
+	tempdir, err := filepath.Abs(path.Join(path.Dir(filename), "..", "..", "tmp"))
+	if err != nil {
+		panic(err)
+	}
+	return tempdir
 }
