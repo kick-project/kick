@@ -186,7 +186,7 @@ _test_setup_gitserver:
 	@bash -c 'while ! nc -z localhost 5000; do sleep 0.1; done'
 	@echo "git server launched"
 	@-find test/fixtures/gitserve -mindepth 1 -maxdepth 1 -type d -exec cp -r {} tmp/gitserveclient \;
-	@-for i in $$(pwd)/tmp/gitserveclient/*; do cd $$i; git init; git add .; git commit -m "Initial commit"; git push --set-upstream http://127.0.0.1:5000/$$(basename $$(pwd)).git master; done
+	@-for i in $$(pwd)/tmp/gitserveclient/*; do cd $$i; git init; git add .; git commit -m "Initial commit"; git tag 7.7.7; git push --set-upstream http://127.0.0.1:5000/$$(basename $$(pwd)).git master; git push --tags; done
 	@sync
 
 _release:
