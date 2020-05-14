@@ -2,14 +2,15 @@ package main
 
 import (
 	"fmt"
-	"github.com/crosseyed/prjstart/internal"
-	"github.com/sevlyar/go-daemon"
-	"github.com/sosedoff/gitkit"
 	"log"
 	"net/http"
 	"os"
 	"path/filepath"
 	"sync"
+
+	"github.com/crosseyed/prjstart/internal/config"
+	"github.com/sevlyar/go-daemon"
+	"github.com/sosedoff/gitkit"
 )
 
 var TestServerSync sync.Mutex
@@ -41,7 +42,7 @@ func main() {
 
 type TestServerStruct struct {
 	server *http.Server
-	config *internal.ConfigStruct
+	config *config.Config
 	home   string
 }
 
@@ -108,7 +109,7 @@ func (s *TestServerStruct) gitServer(dir string) *http.Server {
 }
 
 func (s *TestServerStruct) loadConfig() {
-	s.config = internal.LoadConfig(s.home, "")
+	s.config = config.Load(s.home, "")
 }
 
 func StartTestServer(home string, servpath string) {

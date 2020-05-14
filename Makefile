@@ -54,10 +54,11 @@ clean:
 testsetup:
 	@$(DOTENV) make _test_setup
 
-test: deps
-	@$(DOTENV) make _unit
-	@$(DOTENV) make _codecoverage
-	@$(DOTENV) make _codecomplexity
+test:
+	@-$(DOTENV) make _unit
+	@-$(DOTENV) make _codecoverage
+	@-$(DOTENV) make _codecomplexity
+	@exit $$(cat reports/exitcode.txt)
 
 unit: deps
 	@$(DOTENV) make _unit
@@ -185,9 +186,19 @@ _test_setup_gitserver:
 	@echo "Waiting for git server to launch on 5000..."
 	@bash -c 'while ! nc -z localhost 5000; do sleep 0.1; done'
 	@echo "git server launched"
-	@-find test/fixtures/gitserve -mindepth 1 -maxdepth 1 -type d -exec cp -r {} tmp/gitserveclient \;
-	@-for i in $$(pwd)/tmp/gitserveclient/*; do cd $$i; git init; git add .; git commit -m "Initial commit"; git tag 7.7.7; git push --set-upstream http://127.0.0.1:5000/$$(basename $$(pwd)).git master; git push --tags; done
+	@make _test_setup_gitclient
+	@make _test_setup_metadata
+
+_test_setup_gitclient:
+	@-(find test/fixtures/gitserve -mindepth 1 -maxdepth 1 -type d -exec cp -r {} tmp/gitserveclient \;) 2>&1 > /dev/null
+	@-(for i in $$(pwd)/tmp/gitserveclient/*; do cd $$i; git init; git add .; git commit -m "Initial commit"; git tag 7.7.7; git push --set-upstream http://127.0.0.1:5000/$$(basename $$(pwd)).git master; git push --tags; done) 2> /dev/null > /dev/null
 	@sync
+
+_test_setup_metadata:
+	@-rm -rf tmp/metadata 2> /dev/null > /dev/null
+	@mkdir -p tmp/metadata
+	@-(find test/fixtures/metadata -mindepth 1 -maxdepth 1 -type d -exec cp -r {} tmp/metadata \;) 2>&1 > /dev/null
+	@-(for i in $$(pwd)/tmp/metadata/templates/*; do cd $$i; git init; git add .; git commit -m 'Initial commit';make release; make bumpmajor; make release; git push --set-upstream http://127.0.0.1:5000/$$(basename $$(pwd)).git master; git push --tags; done) 2> /dev/null > /dev/null
 
 _release:
 	@echo "### Releasing v$(VERSION)"
@@ -198,7 +209,11 @@ _release:
 REPORTS = reports/html/coverage.html
 .PHONY: $(REPORTS)
 $(REPORTS):
+ifeq ($(OS),darwin)
 	@test -f $@ && open $@
+else ifeq ($(OS),linux)
+	@test -f $@ && xdg-open $@
+endif
 
 # Check versionbump
 _isreleased:

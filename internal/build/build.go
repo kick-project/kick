@@ -1,12 +1,10 @@
-package internal
+package build
 
 import (
 	"bufio"
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/crosseyed/prjstart/internal/template"
-	"github.com/crosseyed/prjstart/internal/utils"
 	"io"
 	"io/ioutil"
 	"os"
@@ -14,30 +12,40 @@ import (
 	"regexp"
 	"strings"
 	"sync"
+
+	"github.com/crosseyed/prjstart/internal/gitclient/tclient"
+	"github.com/crosseyed/prjstart/internal/globals"
+	"github.com/crosseyed/prjstart/internal/template"
+	"github.com/crosseyed/prjstart/internal/utils"
+	"github.com/crosseyed/prjstart/internal/utils/errutils"
 )
 
 const (
 	MLnone = iota
 	MLrender
+	MLignore
 )
 
-type MakeProject struct {
+type Build struct {
 	localpath string
 	src       string
 	dest      string
-	tmp       string
+	builddir  string
 }
 
-func (s *MakeProject) SetTemp(id string) {
+func (s *Build) buildDir(id string) {
 	d, err := ioutil.TempDir(os.Getenv("TEMP"), fmt.Sprintf("prjstart-%s-", id))
-	utils.ChkErr(err, utils.Epanicf)
-	s.tmp = d
+	errutils.Epanicf(err, "Build Error: %v", err)
+	s.builddir = d
 }
 
 // SetSrc sets the source template and localpath
-func (s *MakeProject) SetSrc(src string) {
-	dwnlder := NewFetcher(Config)
-	localpath := dwnlder.GetTmpl(src)
+func (s *Build) SetSrc(src string) {
+	s.buildDir(src)
+	dwnldr := tclient.TClient{
+		Config: globals.Config,
+	}
+	localpath := dwnldr.Get(src)
 	if localpath == "" {
 		fmt.Fprintf(os.Stderr, `template "%s" not found`, src) // nolint
 		utils.Exit(-1)
@@ -57,23 +65,23 @@ func (s *MakeProject) SetSrc(src string) {
 	s.localpath = localpath
 }
 
-func (s *MakeProject) SetDest(dest string) {
+func (s *Build) SetDest(dest string) {
 	s.dest = dest
 }
 
-func (s *MakeProject) Run() int {
+func (s *Build) Run() int {
 	path := s.localpath
 	base := s.localpath
 	skipRegex, err := regexp.Compile(fmt.Sprintf(`^%s/.git(?:/|$)`, base))
-	utils.ChkErr(err, utils.Epanicf)
+	errutils.Epanicf(err, "Build Error: %v", err)
 	s.checkDstExists()
 	errWalk := filepath.Walk(path, func(srcPath string, info os.FileInfo, err error) error {
 		if skipRegex.MatchString(srcPath) {
 			return nil
 		}
 		relative := strings.Replace(srcPath, base, "", 1)
-		relative = RenderDir(relative, Vars)
-		dstPath := filepath.Join(s.tmp, relative)
+		relative = renderDir(relative, globals.Vars)
+		dstPath := filepath.Join(s.builddir, relative)
 
 		if err != nil {
 			_, _ = fmt.Fprintf(os.Stderr, "Warning: skipping file %s: %s", srcPath, err.Error())
@@ -86,8 +94,8 @@ func (s *MakeProject) Run() int {
 			dstPath: dstPath,
 			mlen:    20, // TODO - Hardcoded modeline
 		}
-		err = pair.Route()
-		utils.ChkErr(err, utils.Epanicf)
+		err = pair.route()
+		errutils.Epanicf(err, "Build Error: %v", err)
 
 		return nil
 	})
@@ -96,15 +104,15 @@ func (s *MakeProject) Run() int {
 		return 255
 	}
 
-	err = os.Rename(s.tmp, s.dest)
-	utils.ChkErr(err, utils.Epanicf)
+	err = os.Rename(s.builddir, s.dest)
+	errutils.Epanicf(err, "Build Error: %v", err)
 	return 0
 }
 
-func (s *MakeProject) checkDstExists() {
+func (s *Build) checkDstExists() {
 	stat, err := os.Stat(s.dest)
 	if !os.IsNotExist(err) {
-		utils.ChkErr(err, utils.Epanicf)
+		errutils.Epanicf(err, "Build Error: %v", err)
 	}
 	if stat != nil {
 		fmt.Printf("Path '%s' exists. Aborting.", s.dest) // nolint
@@ -123,15 +131,19 @@ type filePair struct {
 	mu      sync.Mutex
 }
 
-func (s *filePair) Route() error {
+func (s *filePair) route() error {
 	action, lnum := s.hasModeLine()
 	switch {
 	case s.srcInfo.IsDir():
-		return s.Mkdir()
+		return s.mkdir()
+	case s.skipFile():
+		return nil
 	case lnum > 0 && action == MLrender:
-		s.Render(lnum)
+		s.render(lnum)
+	case lnum > 0 && action == MLignore:
+		return nil
 	case s.srcInfo.Mode().IsRegular():
-		return s.Copy()
+		return s.copy()
 	default:
 		msg := fmt.Sprintf("error FILENOTREGULAR: %s\n", s.dstPath)
 		fmt.Println(msg)
@@ -140,17 +152,31 @@ func (s *filePair) Route() error {
 	return nil
 }
 
-func (s *filePair) Mkdir() error {
+// skipFile determines known files to skip
+func (s *filePair) skipFile() bool {
+	rvalue := false
+	switch {
+	case strings.HasSuffix(s.srcPath, ".prjmaster.yml"):
+		rvalue = true
+	case strings.HasSuffix(s.srcPath, ".prjorg.yml"):
+		rvalue = true
+	case strings.HasSuffix(s.srcPath, ".prjmod.yml"):
+		rvalue = true
+	}
+	return rvalue
+}
+
+func (s *filePair) mkdir() error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if _, err := os.Stat(s.dstPath); os.IsNotExist(err) {
 		err = os.Mkdir(s.dstPath, 0777)
-		utils.ChkErr(err, utils.Epanicf)
+		errutils.Epanicf(err, "Build Error: %v", err)
 	}
 	return nil
 }
 
-func (s *filePair) Copy() error {
+func (s *filePair) copy() error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	sourceFileStat, err := os.Stat(s.srcPath)
@@ -177,20 +203,20 @@ func (s *filePair) Copy() error {
 	return err
 }
 
-func (s *filePair) StripModeline(lnum uint8) string {
+func (s *filePair) stripModeline(lnum uint8) string {
 	inF, err := os.Open(s.srcPath)
-	utils.ChkErr(err, utils.Epanicf, "Can not open '%s': %s", s.srcPath, err) // nolint
-	defer inF.Close()                                                         // nolint
+	errutils.Epanicf(err, "Can not open '%s': %s", s.srcPath, err) // nolint
+	defer inF.Close()                                              // nolint
 
 	tmpdir := os.Getenv("TMPDIR")
 	outF, err := ioutil.TempFile(tmpdir, "prjstart-")
-	utils.ChkErr(err, utils.Epanicf, "Can not create tempfile: %s", err) // nolint
-	defer outF.Close()                                                   // nolint
+	errutils.Epanicf(err, "Can not create tempfile: %s", err) // nolint
+	defer outF.Close()                                        // nolint
 
 	var cnt uint8
 	cnt = 0
 	scner := bufio.NewScanner(inF)
-	scner.Split(ScanLines)
+	scner.Split(scanLines)
 	for scner.Scan() {
 		b := scner.Bytes()
 		// Strip modeline
@@ -201,22 +227,22 @@ func (s *filePair) StripModeline(lnum uint8) string {
 			}
 		}
 		_, err := outF.Write(b)
-		utils.ChkErr(err, utils.Epanicf, "Error writing to file '%s': %s", outF.Name(), err) // nolint
+		errutils.Epanicf(err, "Error writing to file '%s': %s", outF.Name(), err) // nolint
 	}
 	return outF.Name()
 }
 
-func (s *filePair) Render(mline uint8) error {
+func (s *filePair) render(mline uint8) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
 	// Remove modeline
-	tempPath := s.StripModeline(mline)
+	tempPath := s.stripModeline(mline)
 	defer func() {
 		os.Remove(tempPath)
 	}()
 
-	template.TmplFile2File(tempPath, s.dstPath, Vars)
+	template.File2File(tempPath, s.dstPath, globals.Vars)
 	return nil
 }
 
@@ -228,20 +254,21 @@ func (s *filePair) hasModeLine() (action int, lnum uint8) {
 	if len == 0 {
 		len = 5
 	}
-	regex, err := regexp.Compile(`prj:(render)`)
-	utils.ChkErr(err, utils.Epanicf, "Error compiling regex: %s", err) // nolint
+	mlactions := hasML{}.Init()
 	source, err := os.Open(s.srcPath)
-	utils.ChkErr(err, utils.Epanicf, "Error opening read file '%s': %s", s.srcPath, err)
-	defer source.Close()
+	errutils.Efatalf(err, "Can not open file %s: %v", s.srcPath, err)
 
+	defer source.Close()
 	scner := bufio.NewScanner(source)
 	for scner.Scan() {
 		lnum++
 		line := scner.Bytes()
-		hasMatch := regex.Match(line)
-		if hasMatch {
-			action = MLrender
-			break
+		for _, mlaction := range mlactions {
+			hasMatch := mlaction.Regex.Match(line)
+			if hasMatch {
+				action = mlaction.Action
+				break
+			}
 		}
 		if lnum > len {
 			lnum = 0
@@ -251,13 +278,37 @@ func (s *filePair) hasModeLine() (action int, lnum uint8) {
 	return action, lnum
 }
 
-// ScanLines is a split function for a Scanner that returns each line of
+type hasML []hasMLAction
+
+func (ml hasML) Init() hasML {
+	ml = append(ml, regexCompile(`prj:render\W?`, MLrender))
+	ml = append(ml, regexCompile(`prj:ignore\W?`, MLignore))
+	return ml
+}
+
+func regexCompile(rex string, action int) hasMLAction {
+	regex, err := regexp.Compile(rex)
+	errutils.Epanicf(err, "Error compiling regex: %s", err) // nolint
+	ml := hasMLAction{
+		Regex:  regex,
+		Action: action,
+	}
+	return ml
+}
+
+// hasMLAction contains a regex and an action of MLignore, MLrender or MLnone
+type hasMLAction struct {
+	Regex  *regexp.Regexp
+	Action int
+}
+
+// scanLines is a split function for a Scanner that returns each line of
 // text, WITHOUT stripping any trailing end-of-line marker. The returned line may
 // be empty. The end-of-line marker is one optional carriage return followed
 // by one mandatory newline. In regular expression notation, it is `\r?\n`.
 // The last non-empty line of input will be returned even if it has no
 // newline.
-func ScanLines(data []byte, atEOF bool) (advance int, token []byte, err error) {
+func scanLines(data []byte, atEOF bool) (advance int, token []byte, err error) {
 	if atEOF && len(data) == 0 {
 		return 0, nil, nil
 	}
@@ -273,29 +324,12 @@ func ScanLines(data []byte, atEOF bool) (advance int, token []byte, err error) {
 	return 0, nil, nil
 }
 
-// RenderDir scans directory names for template markers and renders the directory path as a template
-func RenderDir(path string, prjvars *template.TmplVars) string {
+// renderDir scans directory names for template markers and renders the directory path as a template
+func renderDir(path string, prjvars *template.TmplVars) string {
 	regex := regexp.MustCompile(`{{[^}}]+}}`)
 	if !regex.MatchString(path) {
 		return path
 	}
-	path = template.TmplTxt2String(path, prjvars)
+	path = template.Txt2String(path, prjvars)
 	return path
-}
-
-// BaseProjectPath returns the path to the project path
-func BaseProjectPath(home string) string {
-	if home == "" {
-		home = os.Getenv("HOME")
-	}
-	p := filepath.Join(home, ".prjstart", "projects")
-	return p
-}
-
-func BaseSetPath(home string) string {
-	if home == "" {
-		home = os.Getenv("HOME")
-	}
-	p := filepath.Join(home, ".prjstart", "sets")
-	return p
 }

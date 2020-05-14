@@ -35,7 +35,7 @@ func (v ByVersion) Len() int {
 }
 
 func (v ByVersion) Swap(i, j int) {
-	v[i], v[j] = v[j], v[i] 
+	v[i], v[j] = v[j], v[i]
 }
 
 func (v ByVersion) Less(i, j int) bool {
@@ -51,7 +51,7 @@ func lessVersion(i, j string) bool {
 	} else if *imajor > *jmajor {
 		return false
 	}
-	
+
 	if *iminor < *jminor {
 		return true
 	} else if *iminor > *jminor {
@@ -65,7 +65,7 @@ func lessVersion(i, j string) bool {
 	return false
 }
 
-func LatestVersion (versions ...string) (string) {
+func LatestVersion(versions ...string) string {
 	sort.Sort(sort.Reverse(ByVersion(versions)))
 	return versions[0]
 }

@@ -2,11 +2,14 @@ package subcmds
 
 import (
 	"fmt"
-	"github.com/crosseyed/prjstart/internal"
-	terminal "github.com/wayneashleyberry/terminal-dimensions"
 	"os"
 	"sort"
 	"text/tabwriter"
+
+	"github.com/crosseyed/prjstart/internal"
+	"github.com/crosseyed/prjstart/internal/config"
+	"github.com/crosseyed/prjstart/internal/globals"
+	terminal "github.com/wayneashleyberry/terminal-dimensions"
 )
 
 // List starts the list sub command
@@ -40,8 +43,8 @@ func ListLocal(opts *internal.OptList) int {
 }
 
 func ShortOutput() {
-	templates := internal.Config.Templates
-	sort.Sort(internal.SortByName(templates))
+	templates := globals.Config.Templates
+	sort.Sort(config.SortByName(templates))
 	data := []string{}
 	for _, t := range templates {
 		name := t.Name
@@ -77,8 +80,8 @@ func shortOutput(data []string) {
 
 func VerboseOutput() {
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.TabIndent)
-	templates := internal.Config.Templates
-	sort.Sort(internal.SortByName(templates))
+	templates := globals.Config.Templates
+	sort.Sort(config.SortByName(templates))
 	for _, stub := range templates {
 		fmt.Fprintf(w, "%s\t%s\n", stub.Name, stub.URL)
 	}
@@ -97,22 +100,7 @@ func VariablesLongOutput() int {
 
 // ListRemote lists remote templates
 func ListRemote() int {
-	fmt.Println("Remote: ")
-	for _, uri := range internal.Config.SetURLs {
-		f := internal.NewFetcher(internal.Config)
-		path := f.GetSet(uri)
-		if path == "" {
-			fmt.Printf("Cloud not fetch: %s\n", uri)
-			continue
-		}
-		set := internal.LoadSet(path, "")
-		for _, tmpl := range set.Templates {
-			fmt.Printf("URI: %s\n", uri)
-			fmt.Printf("  Name: %s\n", tmpl.Name)
-			fmt.Printf("  URL: %s\n", tmpl.URL)
-			fmt.Printf("  Desc: %s\n", tmpl.Desc)
-		}
-	}
+	// TODO
 	return 0
 }
 

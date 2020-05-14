@@ -1,7 +1,9 @@
 package internal
 
 import (
-	"github.com/crosseyed/prjstart/internal/utils"
+	"os"
+
+	"github.com/crosseyed/prjstart/internal/utils/errutils"
 	"github.com/docopt/docopt-go"
 )
 
@@ -21,11 +23,12 @@ Options:
     start         Start a project.
     list          List projects/variables.
 `
-var UsageMainRemoteFeature = `Generate project scaffolding from a predefined set of templates
+var UsageMainFFREMOTE = `Generate project scaffolding from a predefined set of templates
 
 Usage:
     prjstart start
     prjstart list
+    prjstart search
     prjstart install
 
 Options:
@@ -33,6 +36,7 @@ Options:
     -v --version  Print version.
     start         Start a project.
     list          List available project options.
+    search        Search for available templates.
     install       Install a template.
 `
 
@@ -57,6 +61,16 @@ Options:
     -h --help     Print help.
     -u --url      Print URL.
     -v --vars     Show Variables.
+`
+
+var UsageSearch = `Search for templates
+
+Usage:
+	prjstart search [--long] <template>
+
+Options:
+	-h --help     Print help.
+	-l --long     Long output.
 `
 
 var UsageListRemoteFeature = `List templates
@@ -94,10 +108,16 @@ Options:
 type OptMain struct {
 	Start   bool `docopt:"start"`
 	List    bool `docopt:"list"`
+	Search  bool `docopt:"search"`
 	Install bool `docopt:"install"`
 }
 
 func GetOptMain(args []string) *OptMain {
+	var (
+		opts     docopt.Opts
+		err      error
+		FFREMOTE string = os.Getenv("FFREMOTE")
+	)
 	filterArgs := []string{}
 	i := 0
 	for _, arg := range args {
@@ -108,11 +128,15 @@ func GetOptMain(args []string) *OptMain {
 		filterArgs = append(filterArgs, arg)
 		break
 	}
-	opts, err := docopt.ParseArgs(UsageMain, filterArgs, Version)
-	utils.ChkErr(err, utils.Epanicf, "Can not parse usage doc: %s", err) // nolint
+	if FFREMOTE == "true" {
+		opts, err = docopt.ParseArgs(UsageMainFFREMOTE, filterArgs, Version)
+	} else {
+		opts, err = docopt.ParseArgs(UsageMain, filterArgs, Version)
+	}
+	errutils.Epanicf(err, "Can not parse usage doc: %s", err) // nolint
 	o := new(OptMain)
 	err = opts.Bind(o)
-	utils.ChkErr(err, utils.Epanicf, "Can not bind to structure: %s", err) // nolint
+	errutils.Epanicf(err, "Can not bind to structure: %s", err) // nolint
 	return o
 }
 
@@ -124,10 +148,10 @@ type OptStart struct {
 
 func GetOptStart(args []string) *OptStart {
 	opts, err := docopt.ParseArgs(UsageStart, args, "")
-	utils.ChkErr(err, utils.Epanicf, "Can not parse usage doc: %s", err) // nolint
+	errutils.Epanicf(err, "Can not parse usage doc: %s", err) // nolint
 	o := new(OptStart)
 	err = opts.Bind(o)
-	utils.ChkErr(err, utils.Epanicf, "Can not bind to structure: %s", err) // nolint
+	errutils.Epanicf(err, "Can not bind to structure: %s", err) // nolint
 	return o
 }
 
@@ -142,10 +166,25 @@ type OptList struct {
 
 func GetOptList(args []string) *OptList {
 	opts, err := docopt.ParseArgs(UsageList, args, "")
-	utils.ChkErr(err, utils.Epanicf, "Can not parse usage doc: %s", err) // nolint
+	errutils.Epanicf(err, "Can not parse usage doc: %s", err) // nolint
 	o := new(OptList)
 	err = opts.Bind(o)
-	utils.ChkErr(err, utils.Epanicf, "Can not bind to structure: %s", err) // nolint
+	errutils.Epanicf(err, "Can not bind to structure: %s", err) // nolint
+	return o
+}
+
+type OptSearch struct {
+	Search bool   `docopt:"search"`
+	Long   bool   `docopt:"--long"`
+	Local  string `docopt:"<template>"`
+}
+
+func GetOptSearch(args []string) *OptSearch {
+	opts, err := docopt.ParseArgs(UsageSearch, args, "")
+	errutils.Epanicf(err, "Can not parse usage doc: %s", err) // nolint
+	o := new(OptSearch)
+	err = opts.Bind(o)
+	errutils.Epanicf(err, "Can not bind to structure: %s", err) // nolint
 	return o
 }
 
@@ -158,9 +197,9 @@ type OptInstall struct {
 
 func GetOptInstall(args []string) *OptInstall {
 	opts, err := docopt.ParseArgs(UsageInstall, args, "")
-	utils.ChkErr(err, utils.Epanicf, "Can not parse usage doc: %s", err) // nolint
+	errutils.Epanicf(err, "Can not parse usage doc: %s", err) // nolint
 	o := new(OptInstall)
 	err = opts.Bind(o)
-	utils.ChkErr(err, utils.Epanicf, "Can not bind to structure: %s", err) // nolint
+	errutils.Epanicf(err, "Can not bind to structure: %s", err) // nolint
 	return o
 }

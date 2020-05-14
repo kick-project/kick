@@ -1,0 +1,7 @@
+name: master1
+short: master1 short
+description: master1 description
+
+orgs:
+  - https://127.0.0.1/org1.git
+  - https://127.0.0.1/org2.git

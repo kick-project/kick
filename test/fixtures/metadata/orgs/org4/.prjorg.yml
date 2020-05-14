@@ -1,0 +1,7 @@
+name: org4
+short: org4 short
+description: org4 description
+
+templates:
+  - http://127.0.0.1/t7.git
+  - http://127.0.0.1/t8.git
