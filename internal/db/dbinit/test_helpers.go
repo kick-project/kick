@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 )
 
 func InitTestDB() string {
-	p, err := filepath.Abs(filepath.Join("..", "..", "..", "tmp", "Test.db"))
+	_, b, _, _ := runtime.Caller(0)
+	p, err := filepath.Abs(filepath.Join(filepath.Dir(b), "..", "..", "..", "tmp", "Test.db"))
 	if err != nil {
 		panic(fmt.Sprintf("filepath.Abs %s error: %v", p, err))
 	}
