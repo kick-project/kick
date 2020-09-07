@@ -1,21 +1,29 @@
 package compression
 
 import (
-	"fmt"
+	"path/filepath"
 	"testing"
 
-	"github.com/crosseyed/prjstart/internal/db/dbinit"
+	"github.com/crosseyed/prjstart/internal/checksum"
+	"github.com/crosseyed/prjstart/internal/utils"
 )
 
 func TestCompress(t *testing.T) {
-	src := dbinit.InitTestDB()
-	dst := fmt.Sprintf("%s.gz", src)
+	src := filepath.Join(utils.TempDir(), "compression", "plaintext.txt")
+	dst := filepath.Join(utils.TempDir(), "compression", "plaintext.txt.gz")
+	sumfile := dst + ".sha256"
 	sz, err := Compress(src, dst)
+	if err != nil {
+		t.Error(err)
+	}
+	pass, _, err := checksum.VerifySha256sum(dst, sumfile)
 	switch {
 	case sz == 0:
 		t.Fail()
 	case err != nil:
 		t.Error(err)
+		t.Fail()
+	case !pass:
 		t.Fail()
 	}
 }
@@ -25,19 +33,21 @@ func TestDecompress(t *testing.T) {
 		sz  int64
 		err error
 	)
-	chkErr := func() {
-		switch {
-		case sz == 0:
-			t.Fail()
-		case err != nil:
-			t.Error(err)
-			t.Fail()
-		}
+	src := filepath.Join(utils.TempDir(), "compression", "compressedtext.txt.gz")
+	dst := filepath.Join(utils.TempDir(), "compression", "compressedtext.txt")
+	sumfile := dst + ".sha256"
+	sz, err = Decompress(src, dst)
+	if err != nil {
+		t.Error(err)
 	}
-	src := dbinit.InitTestDB()
-	dst := fmt.Sprintf("%s.gz", src)
-	sz, err = Compress(src, dst)
-	chkErr()
-	sz, err = Decompress(dst, src)
-	chkErr()
+	pass, _, err := checksum.VerifySha256sum(dst, sumfile)
+	switch {
+	case sz == 0:
+		t.Fail()
+	case err != nil:
+		t.Error(err)
+		t.Fail()
+	case !pass:
+		t.Fail()
+	}
 }

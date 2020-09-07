@@ -29,7 +29,7 @@ GOFILES := $(shell find cmd pkg internal src -name '*.go' 2> /dev/null)
 GODIRS = $(shell find . -maxdepth 1 -mindepth 1 -type d | egrep 'cmd|internal|pkg|api')
 
 .PHONY: build _build _build_xcompile browsetest cattest clean deps _deps depsdev deploy _go.mod _go.mod_err \
-        _isreleased lint release _release _release_gitlab test _test _test_setup _test_setup_home _test_setup_gitserver \
+        _isreleased lint release _release _release_gitlab test _test _test_setup _test_setup_dirs _test_setup_gitserver \
 		unit codecomplexity codecoverage _unit _codecomplexity _codecoverage 
 
 #
@@ -174,11 +174,13 @@ _codecomplexity: _test_setup
 _test_setup:
 	@mkdir -p tmp
 	@mkdir -p reports/html
-	@make _test_setup_home 2> /dev/null > /dev/null
+	@make _test_setup_dirs 2> /dev/null > /dev/null
 	@sync
 
-_test_setup_home:
+_test_setup_dirs:
 	@cp -r test/fixtures/home tmp/
+	@cp -r test/fixtures/checksum tmp/
+	@cp -r test/fixtures/compression tmp/
 
 _test_setup_gitserver:
 	@mkdir -p tmp/gitserveclient
