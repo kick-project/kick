@@ -7,11 +7,11 @@ import (
 )
 
 func FixtureDir() (fixturedir string) {
-	_, filename, _, ok := runtime.Caller(1)
+	_, filename, _, ok := runtime.Caller(0)
 	if !ok {
 		panic("Can not get filename")
 	}
-	fixturedir, err := filepath.Abs(path.Join(path.Dir(filename), "..", "..", "..", "test", "fixtures"))
+	fixturedir, err := filepath.Abs(path.Join(path.Dir(filename), "..", "..", "test", "fixtures"))
 	if err != nil {
 		panic(err)
 	}
@@ -19,7 +19,7 @@ func FixtureDir() (fixturedir string) {
 }
 
 func TempDir() (tempdir string) {
-	_, filename, _, ok := runtime.Caller(1)
+	_, filename, _, ok := runtime.Caller(0)
 	if !ok {
 		panic("Can not get filename")
 	}
