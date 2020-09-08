@@ -59,16 +59,41 @@ func Load(homedir, prjstart string) *Config {
 	return &conf
 }
 
+var GLOBALCONFIG string = "prjglobal.yml"
+
+type Global struct {
+	Name        string   `yaml:"name"`
+	Short       string   `yaml:"short"`
+	Description string   `yaml:"description"`
+	Orgs        []string `yaml:"masters"`
+}
+
+func (m *Global) Load(globalconfig string) *Global {
+	if globalconfig == "" {
+		globalconfig = GLOBALCONFIG
+	}
+	if _, err := os.Stat(globalconfig); os.IsNotExist(err) {
+		return nil
+	}
+
+	f, err := ioutil.ReadFile(globalconfig)
+	errutils.Efatalf(err, "Can not read file %s: %v", globalconfig, err)
+
+	err = yaml.Unmarshal([]byte(f), m)
+	errutils.Efatalf(err, "Can not unmarshal file %s: %v", globalconfig, err)
+	return m
+}
+
 var MASTERCONFIG string = "prjmaster.yml"
 
 type Master struct {
 	Name        string   `yaml:"name"`
 	Short       string   `yaml:"short"`
 	Description string   `yaml:"description"`
-	Orgs        []string `yaml:"orgs"`
+	Templates   []string `yaml:"templates"`
 }
 
-func (m *Master) Load(masterconfig string) *Master {
+func (o *Master) Load(masterconfig string) *Master {
 	if masterconfig == "" {
 		masterconfig = MASTERCONFIG
 	}
@@ -79,32 +104,7 @@ func (m *Master) Load(masterconfig string) *Master {
 	f, err := ioutil.ReadFile(masterconfig)
 	errutils.Efatalf(err, "Can not read file %s: %v", masterconfig, err)
 
-	err = yaml.Unmarshal([]byte(f), m)
-	errutils.Efatalf(err, "Can not unmarshal file %s: %v", masterconfig, err)
-	return m
-}
-
-var ORGCONFIG string = ".prjorg.yml"
-
-type Org struct {
-	Name        string   `yaml:"name"`
-	Short       string   `yaml:"short"`
-	Description string   `yaml:"description"`
-	Templates   []string `yaml:"templates"`
-}
-
-func (o *Org) Load(orgconfig string) *Org {
-	if orgconfig == "" {
-		orgconfig = ORGCONFIG
-	}
-	if _, err := os.Stat(orgconfig); os.IsNotExist(err) {
-		return nil
-	}
-
-	f, err := ioutil.ReadFile(orgconfig)
-	errutils.Efatalf(err, "Can not read file %s: %v", orgconfig, err)
-
 	err = yaml.Unmarshal([]byte(f), o)
-	errutils.Efatalf(err, "Can not unmarshal file %s: %v", orgconfig, err)
+	errutils.Efatalf(err, "Can not unmarshal file %s: %v", masterconfig, err)
 	return o
 }
