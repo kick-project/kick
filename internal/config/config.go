@@ -26,12 +26,6 @@ func (a SortByName) Len() int           { return len(a) }
 func (a SortByName) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 func (a SortByName) Less(i, j int) bool { return strings.Compare(a[j].Name, a[i].Name) > 0 }
 
-type SetList struct {
-	Set         string         `yaml:"set"`
-	Description string         `yaml:"desc"`
-	Templates   []TemplateStub `yaml:"templates"`
-}
-
 type TemplateStub struct {
 	Name string `yaml:"name"`
 	URL  string `yaml:"url"`
