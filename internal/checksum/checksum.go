@@ -11,7 +11,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/crosseyed/prjstart/internal/utils"
+	"github.com/crosseyed/prjstart/internal/utils/errutils"
 )
 
 func Sha256SumFile(srcFile string, sumfile string) (sum string, err error) {
@@ -46,10 +46,10 @@ func Sha256Sum(rdr io.Reader) (bytesum []byte, err error) {
 
 func VerifySha256sum(srcFile, sumfile string) (pass bool, sum string, err error) {
 	srcAbs, err := filepath.Abs(srcFile)
-	utils.ChkErr(err, utils.Efatalf, "Can not get absoulte path for %s: %v", srcFile, err)
+	errutils.Efatalf(err, "Can not get absoulte path for %s: %v", srcFile, err)
 
 	sumfileDir, err := filepath.Abs(filepath.Dir(sumfile))
-	utils.ChkErr(err, utils.Efatalf, "Can not get absoulte path for %s: %v", sumfile, err)
+	errutils.Efatalf(err, "Can not get absoulte path for %s: %v", sumfile, err)
 
 	// Get original checksum
 	file, err := os.Open(sumfile)
@@ -81,7 +81,7 @@ func VerifySha256sum(srcFile, sumfile string) (pass bool, sum string, err error)
 		return false, "", fmt.Errorf("Failed to open file %s: %w", srcFile, err)
 	}
 	bytesum, err := Sha256Sum(srcIO)
-	utils.ChkErr(err, utils.Efatalf, "Can not get sha256sum for %s: %v", srcAbs, err)
+	errutils.Efatalf(err, "Can not get sha256sum for %s: %v", srcAbs, err)
 	sum = fmt.Sprintf("%x", bytesum)
 
 	if origsum != "" && sum == origsum {

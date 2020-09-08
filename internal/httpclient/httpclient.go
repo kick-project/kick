@@ -6,7 +6,7 @@ import (
 	"net/url"
 
 	"github.com/crosseyed/prjstart/internal/file"
-	"github.com/crosseyed/prjstart/internal/utils"
+	"github.com/crosseyed/prjstart/internal/utils/errutils"
 )
 
 func checkUri(uri string) (valid bool, err error) {
@@ -26,7 +26,7 @@ func Download(uri string, fname string) error {
 		return err
 	}
 	resp, err := http.Get(uri)
-	if utils.ChkErr(err, utils.Elogf, "Can not fetch URL %s: %v", uri, err) {
+	if errutils.Elogf(err, "Can not fetch URL %s: %v", uri, err) {
 		return err
 	}
 	defer resp.Body.Close()

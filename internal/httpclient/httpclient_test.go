@@ -7,9 +7,6 @@ import (
 	"testing"
 
 	"github.com/crosseyed/prjstart/internal/checksum"
-	"github.com/crosseyed/prjstart/internal/compression"
-	"github.com/crosseyed/prjstart/internal/db"
-	"github.com/crosseyed/prjstart/internal/db/dbinit"
 	"github.com/crosseyed/prjstart/internal/utils"
 )
 
@@ -22,20 +19,6 @@ func TestDownload(t *testing.T) {
 	}
 
 	// Test server
-	p, err := filepath.Abs(filepath.Join(utils.TempDir(), "serve_metadata", "metadata.db"))
-	errchk()
-
-	d := dbinit.Init{
-		DB: db.New("sqlite3", p),
-	}
-	d.Init()
-
-	written, err := compression.Compress(p, p+".gz")
-	errchk()
-	if written == 0 {
-		t.Fatal("No data was written")
-	}
-
 	servdir := filepath.Join(utils.TempDir(), "metadata", "serve")
 	hdlr := http.FileServer(http.Dir(servdir))
 

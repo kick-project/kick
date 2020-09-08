@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/crosseyed/prjstart/internal/db"
-	"github.com/crosseyed/prjstart/internal/utils"
+	"github.com/crosseyed/prjstart/internal/utils/errutils"
 )
 
 func TestInit(t *testing.T) {
@@ -49,7 +49,7 @@ func TestInit(t *testing.T) {
 	)
 	for rows.Next() {
 		err := rows.Scan(&count, &template, &master, &global)
-		if utils.ChkErr(err, utils.Efatalf, "Can not scan row: %v", err) {
+		if errutils.Efatalf(err, "Can not scan row: %v", err) {
 			break
 		}
 	}

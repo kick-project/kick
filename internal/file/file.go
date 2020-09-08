@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/crosseyed/prjstart/internal/utils"
+	"github.com/crosseyed/prjstart/internal/utils/errutils"
 )
 
 func Reader2File(rdr io.Reader, dst string) (written int64, err error) {
@@ -51,7 +51,7 @@ func (a *AtomicWrite) tempfile() (*os.File, error) {
 		return a.file, nil
 	}
 	f, err := ioutil.TempFile("", "")
-	if utils.ChkErr(err, utils.Elogf, "Can not open temp file: %v", err) {
+	if errutils.Elogf(err, "Can not open temp file: %v", err) {
 		return nil, err
 	}
 	a.file = f
