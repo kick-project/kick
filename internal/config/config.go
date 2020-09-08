@@ -15,9 +15,9 @@ var USERCONFIG string = ".prjstart.yml"
 var USERCONFIGDIR string = ".prjstart"
 
 type Config struct {
-	Home      string
-	SetURLs   []string       `yaml:"sets"`
-	Templates []TemplateStub `yaml:"templates"`
+	Home       string
+	MasterURLs []string       `yaml:"masters"`
+	Templates  []TemplateStub `yaml:"templates"`
 }
 
 type SortByName []TemplateStub
@@ -30,7 +30,6 @@ type TemplateStub struct {
 	Name string `yaml:"name"`
 	URL  string `yaml:"url"`
 	Desc string `yaml:"desc"`
-	Set  string `yaml:"set"`
 }
 
 // Load loads the main cli config config
