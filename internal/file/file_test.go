@@ -1,4 +1,4 @@
-package atomicfile
+package file
 
 import (
 	"os"

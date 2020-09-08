@@ -14,9 +14,15 @@ import (
 	"github.com/crosseyed/prjstart/internal/utils"
 )
 
-func Sha256sum(srcFile string, sumfile string) (sum string, err error) {
-	bytesum, err := sha256sum(srcFile)
-
+func Sha256SumFile(srcFile string, sumfile string) (sum string, err error) {
+	srcIO, err := os.Open(srcFile)
+	if err != nil {
+		return "", fmt.Errorf("Failed to open file %s: %w", srcFile, err)
+	}
+	bytesum, err := Sha256Sum(srcIO)
+	if err != nil {
+		return "", fmt.Errorf("Failed to generate checksum: %w", err)
+	}
 	fname := filepath.Base(srcFile)
 	sum = fmt.Sprintf("%x %s\n", bytesum, fname)
 	dstIO, err := ioutil.TempFile("", "")
@@ -29,14 +35,9 @@ func Sha256sum(srcFile string, sumfile string) (sum string, err error) {
 	return sum, err
 }
 
-func sha256sum(srcFile string) (bytesum []byte, err error) {
-	srcIO, err := os.Open(srcFile)
-	if err != nil {
-		return nil, fmt.Errorf("Failed to open file %s: %s", srcFile, err)
-	}
-
+func Sha256Sum(rdr io.Reader) (bytesum []byte, err error) {
 	hash := sha256.New()
-	if _, err := io.Copy(hash, srcIO); err != nil {
+	if _, err := io.Copy(hash, rdr); err != nil {
 		log.Fatal(err)
 	}
 	bytesum = hash.Sum(nil)
@@ -75,7 +76,11 @@ func VerifySha256sum(srcFile, sumfile string) (pass bool, sum string, err error)
 	}
 
 	// Get checksum from source
-	bytesum, err := sha256sum(srcAbs)
+	srcIO, err := os.Open(srcAbs)
+	if err != nil {
+		return false, "", fmt.Errorf("Failed to open file %s: %w", srcFile, err)
+	}
+	bytesum, err := Sha256Sum(srcIO)
 	utils.ChkErr(err, utils.Efatalf, "Can not get sha256sum for %s: %v", srcAbs, err)
 	sum = fmt.Sprintf("%x", bytesum)
 

@@ -1,4 +1,4 @@
-package atomicfile
+package file
 
 import (
 	"fmt"
@@ -10,7 +10,7 @@ import (
 )
 
 func Reader2File(rdr io.Reader, dst string) (written int64, err error) {
-	a := New(dst)
+	a := NewAtomicWrite(dst)
 	written, err = a.Slurp(rdr)
 	if err != nil {
 		return written, err
@@ -28,7 +28,7 @@ type AtomicWrite struct {
 	written int64
 }
 
-func New(dst string) *AtomicWrite {
+func NewAtomicWrite(dst string) *AtomicWrite {
 	return &AtomicWrite{
 		dst: dst,
 	}
