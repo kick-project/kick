@@ -1,11 +1,10 @@
 package metadata
 
 type Global struct {
-	File   string
-	DBFile string
+	File string
 }
 
-func (g *Global) Load() error {
+func (g *Global) Load(config string) error {
 	return nil
 }
 
@@ -16,13 +15,13 @@ func (g *Global) ToDB() error {
 type Master struct {
 }
 
-func (g *Master) Load() error {
-	return nil
-}
-
-func (g *Master) ToDB() error {
+func (m *Master) Load(config string) error {
 	return nil
 }
 
 type Template struct {
+}
+
+func (t *Template) Load(config string) error {
+	return nil
 }

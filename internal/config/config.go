@@ -58,7 +58,7 @@ type Global struct {
 	Name        string   `yaml:"name"`
 	Short       string   `yaml:"short"`
 	Description string   `yaml:"description"`
-	Orgs        []string `yaml:"masters"`
+	Masters     []string `yaml:"masters"`
 }
 
 func (m *Global) Load(globalconfig string) *Global {
