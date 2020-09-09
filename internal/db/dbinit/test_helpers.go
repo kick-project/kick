@@ -14,7 +14,7 @@ func InitTestDB() string {
 		panic(fmt.Sprintf("filepath.Abs %s error: %v", p, err))
 	}
 	os.Remove(p)
-	i := New(p)
+	i := New("", p)
 	i.Init()
 	return p
 }

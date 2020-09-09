@@ -17,7 +17,7 @@ func TestInit(t *testing.T) {
 		return
 	}
 	os.Remove(p)
-	i := New(p)
+	i := New("", p)
 	i.Init()
 
 	db_ := db.New("sqlite3", p)

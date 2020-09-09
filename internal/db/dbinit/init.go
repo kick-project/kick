@@ -68,13 +68,14 @@ type Init struct {
 	DB *db.DB
 }
 
-func New(datasource string) *Init {
+func New(driver, datasource string) *Init {
 	home := os.Getenv("HOME")
 	confdir := config.USERCONFIGDIR
 	fpath := filepath.Join(home, confdir, DBFILE)
 	dbfile := dfaults.String(fpath, datasource)
+	driver = dfaults.String("sqlite3", driver)
 	return &Init{
-		DB: db.New("sqlite3", dbfile),
+		DB: db.New(driver, dbfile),
 	}
 }
 
