@@ -8,7 +8,13 @@ import (
 )
 
 func logErr(err error, format string, v ...interface{}) bool {
-	if err == nil {
+	isError := false
+	for _, e := range v {
+		if _, ok := e.(error); ok {
+			isError = true
+		}
+	}
+	if !isError {
 		return false
 	}
 	log.SetFlags(log.LstdFlags | log.Lshortfile)

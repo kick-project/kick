@@ -61,8 +61,9 @@ CREATE TABLE IF NOT EXISTS versions (
 CREATE UNIQUE INDEX IF NOT EXISTS idx_versions_templateid_version ON versions (templatesid, version);
 `
 
-var INSERTGLOBAL string = `INSERT OR REPLACE INTO global (url, name, desc) VALUES (?, ?, ?)`
-var INSERTMASTER string = `INSERT OR REPLACE INTO master (url, name, desc, globalid) SELECT ?, ?, ?, id FROM global WHERE url=?`
+var INSERTGLOBAL string = `INSERT INTO global (url, name, desc) VALUES (?, ?, ?)`
+var INSERTMASTER string = `INSERT INTO master (url, name, desc, globalid) SELECT ?, ?, ?, id FROM global WHERE global.url=?`
+var INSERTTEMPLATE string = `INSERT INTO templates (url, name, desc, masterid) SELECT ?, ?, ?, id FROM master where master.url=?`
 
 type Init struct {
 	DB *db.DB
@@ -83,7 +84,7 @@ func (s *Init) Init() {
 	s.DB.Lock()
 	s.DB.Open()
 	defer s.DB.Unlock()
-	defer s.DB.Open()
+	defer s.DB.Close()
 	s.createSchema()
 	return
 }
@@ -100,4 +101,14 @@ func (s *Init) execWrapper(query string, queryArgs ...interface{}) {
 	if err != nil {
 		log.Fatalf("SQL Error creating defaults: %v", err)
 	}
+}
+
+func (s *Init) MockSearchData() {
+	s.DB.Lock()
+	s.DB.Open()
+	defer s.DB.Unlock()
+	defer s.DB.Close()
+	s.execWrapper(INSERTGLOBAL, "git@localhost/global1.git", "global1", "my global 1")
+	s.execWrapper(INSERTMASTER, "git@localhost/master1.git", "master1", "my master 1", "git@localhost/global1.git")
+	s.execWrapper(INSERTTEMPLATE, "git@localhost/template1.git", "template1", "my template 1", "git@localhost/master1.git")
 }
