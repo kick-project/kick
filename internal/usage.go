@@ -133,10 +133,10 @@ func GetOptMain(args []string) *OptMain {
 	} else {
 		opts, err = docopt.ParseArgs(UsageMain, filterArgs, Version)
 	}
-	errutils.Epanicf(err, "Can not parse usage doc: %s", err) // nolint
+	errutils.Epanicf("Can not parse usage doc: %s", err) // nolint
 	o := new(OptMain)
 	err = opts.Bind(o)
-	errutils.Epanicf(err, "Can not bind to structure: %s", err) // nolint
+	errutils.Epanicf("Can not bind to structure: %s", err) // nolint
 	return o
 }
 
@@ -148,10 +148,10 @@ type OptStart struct {
 
 func GetOptStart(args []string) *OptStart {
 	opts, err := docopt.ParseArgs(UsageStart, args, "")
-	errutils.Epanicf(err, "Can not parse usage doc: %s", err) // nolint
+	errutils.Epanicf("Can not parse usage doc: %s", err) // nolint
 	o := new(OptStart)
 	err = opts.Bind(o)
-	errutils.Epanicf(err, "Can not bind to structure: %s", err) // nolint
+	errutils.Epanicf("Can not bind to structure: %s", err) // nolint
 	return o
 }
 
@@ -166,25 +166,25 @@ type OptList struct {
 
 func GetOptList(args []string) *OptList {
 	opts, err := docopt.ParseArgs(UsageList, args, "")
-	errutils.Epanicf(err, "Can not parse usage doc: %s", err) // nolint
+	errutils.Epanicf("Can not parse usage doc: %s", err) // nolint
 	o := new(OptList)
 	err = opts.Bind(o)
-	errutils.Epanicf(err, "Can not bind to structure: %s", err) // nolint
+	errutils.Epanicf("Can not bind to structure: %s", err) // nolint
 	return o
 }
 
 type OptSearch struct {
-	Search bool   `docopt:"search"`
-	Long   bool   `docopt:"--long"`
-	Local  string `docopt:"<template>"`
+	Search   bool   `docopt:"search"`
+	Long     bool   `docopt:"--long"`
+	Template string `docopt:"<template>"`
 }
 
 func GetOptSearch(args []string) *OptSearch {
 	opts, err := docopt.ParseArgs(UsageSearch, args, "")
-	errutils.Epanicf(err, "Can not parse usage doc: %s", err) // nolint
+	errutils.Epanicf("Can not parse usage doc: %s", err) // nolint
 	o := new(OptSearch)
 	err = opts.Bind(o)
-	errutils.Epanicf(err, "Can not bind to structure: %s", err) // nolint
+	errutils.Epanicf("Can not bind to structure: %s", err) // nolint
 	return o
 }
 
@@ -197,9 +197,9 @@ type OptInstall struct {
 
 func GetOptInstall(args []string) *OptInstall {
 	opts, err := docopt.ParseArgs(UsageInstall, args, "")
-	errutils.Epanicf(err, "Can not parse usage doc: %s", err) // nolint
+	errutils.Epanicf("Can not parse usage doc: %s", err) // nolint
 	o := new(OptInstall)
 	err = opts.Bind(o)
-	errutils.Epanicf(err, "Can not bind to structure: %s", err) // nolint
+	errutils.Epanicf("Can not bind to structure: %s", err) // nolint
 	return o
 }

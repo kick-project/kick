@@ -2,7 +2,7 @@
 # Make sure to check the documentation at http://goreleaser.com
 builds:
 - env:
-  - CGO_ENABLED=0
+  - CGO_ENABLED=1
   main: ./cmd/prjstart/main.go
   goos:
     - linux

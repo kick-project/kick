@@ -29,9 +29,10 @@
             "mode": "auto",
             "program": "${workspaceFolder}/cmd/prjstart",
             "env": {
-                "FFREMOTE": "true"
+                "FFREMOTE": "true",
+                "FF_MOCK_DB": "true"
             },
-            "args": ["search", "mytemplate"]
+            "args": ["search", "-l", "template1"]
         },
     ]
 }

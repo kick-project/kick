@@ -42,13 +42,13 @@ func Load(homedir, prjstart string) *Config {
 	}
 
 	f, err := ioutil.ReadFile(conffile)
-	errutils.Efatalf(err, "Can not read file %s: %v", conffile, err)
+	errutils.Efatalf("Can not read file %s: %v", conffile, err)
 	conf := Config{
 		Home: homedir,
 	}
 
 	err = yaml.Unmarshal([]byte(f), &conf)
-	errutils.Efatalf(err, "Can not unmarshal file %s: %v", conffile, err)
+	errutils.Efatalf("Can not unmarshal file %s: %v", conffile, err)
 	return &conf
 }
 
@@ -56,6 +56,7 @@ var GLOBALCONFIG string = "prjglobal.yml"
 
 type Global struct {
 	Name        string   `yaml:"name"`
+	URL         string   `yaml:"url"`
 	Short       string   `yaml:"short"`
 	Description string   `yaml:"description"`
 	Masters     []string `yaml:"masters"`
@@ -70,10 +71,10 @@ func (m *Global) Load(globalconfig string) *Global {
 	}
 
 	f, err := ioutil.ReadFile(globalconfig)
-	errutils.Efatalf(err, "Can not read file %s: %v", globalconfig, err)
+	errutils.Efatalf("Can not read file %s: %v", globalconfig, err)
 
 	err = yaml.Unmarshal([]byte(f), m)
-	errutils.Efatalf(err, "Can not unmarshal file %s: %v", globalconfig, err)
+	errutils.Efatalf("Can not unmarshal file %s: %v", globalconfig, err)
 	return m
 }
 
@@ -81,6 +82,7 @@ var MASTERCONFIG string = "prjmaster.yml"
 
 type Master struct {
 	Name        string   `yaml:"name"`
+	URL         string   `yaml:"url"`
 	Short       string   `yaml:"short"`
 	Description string   `yaml:"description"`
 	Templates   []string `yaml:"templates"`
@@ -95,9 +97,9 @@ func (o *Master) Load(masterconfig string) *Master {
 	}
 
 	f, err := ioutil.ReadFile(masterconfig)
-	errutils.Efatalf(err, "Can not read file %s: %v", masterconfig, err)
+	errutils.Efatalf("Can not read file %s: %v", masterconfig, err)
 
 	err = yaml.Unmarshal([]byte(f), o)
-	errutils.Efatalf(err, "Can not unmarshal file %s: %v", masterconfig, err)
+	errutils.Efatalf("Can not unmarshal file %s: %v", masterconfig, err)
 	return o
 }

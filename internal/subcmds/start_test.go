@@ -7,11 +7,12 @@ import (
 
 	"github.com/crosseyed/prjstart/internal/config"
 	"github.com/crosseyed/prjstart/internal/globals"
+	"github.com/crosseyed/prjstart/internal/utils"
 )
 
 func TestStart(t *testing.T) {
-	tmpdir, _ := filepath.Abs("../../tmp")
-	home, _ := filepath.Abs("../../tmp/home")
+	tmpdir := utils.TempDir()
+	home, _ := filepath.Abs(filepath.Join(tmpdir, "home"))
 	globals.Config = config.Load(home, "")
 	path, _ := ioutil.TempDir(tmpdir, "start-")
 	path = filepath.Join(path, "tmpl")

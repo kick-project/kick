@@ -96,7 +96,7 @@ func (s *SQL) SearchTemplate(template string, fnrow func(name, url, desc string,
 	defer s.DB.Close()
 
 	rows, err := db.Query(MATCHTEMPLATE, template, template, template)
-	errutils.Efatalf(err, "Can not Query database: %v", err)
+	errutils.Efatalf("Can not Query database: %v", err)
 
 	for rows.Next() {
 		var (
@@ -112,7 +112,7 @@ func (s *SQL) SearchTemplate(template string, fnrow func(name, url, desc string,
 			installed   bool
 		)
 		err := rows.Scan(&name, &url, &desc, &master_name, &master_url, &master_desc, &global_name, &global_url, &global_desc, &installed)
-		errutils.Efatalf(err, "Can not scan row: %v", err)
+		errutils.Efatalf("Can not scan row: %v", err)
 
 		fnrow(name, url, desc, master_name, master_url, master_desc, global_name, global_url, global_desc)
 	}

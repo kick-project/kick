@@ -35,7 +35,7 @@ type Build struct {
 
 func (s *Build) buildDir(id string) {
 	d, err := ioutil.TempDir(os.Getenv("TEMP"), fmt.Sprintf("prjstart-%s-", id))
-	errutils.Epanicf(err, "Build Error: %v", err)
+	errutils.Epanicf("Build Error: %v", err)
 	s.builddir = d
 }
 
@@ -73,7 +73,7 @@ func (s *Build) Run() int {
 	path := s.localpath
 	base := s.localpath
 	skipRegex, err := regexp.Compile(fmt.Sprintf(`^%s/.git(?:/|$)`, base))
-	errutils.Epanicf(err, "Build Error: %v", err)
+	errutils.Epanicf("Build Error: %v", err)
 	s.checkDstExists()
 	errWalk := filepath.Walk(path, func(srcPath string, info os.FileInfo, err error) error {
 		if skipRegex.MatchString(srcPath) {
@@ -95,7 +95,7 @@ func (s *Build) Run() int {
 			mlen:    20, // TODO - Hardcoded modeline
 		}
 		err = pair.route()
-		errutils.Epanicf(err, "Build Error: %v", err)
+		errutils.Epanicf("Build Error: %v", err)
 
 		return nil
 	})
@@ -105,14 +105,14 @@ func (s *Build) Run() int {
 	}
 
 	err = os.Rename(s.builddir, s.dest)
-	errutils.Epanicf(err, "Build Error: %v", err)
+	errutils.Epanicf("Build Error: %v", err)
 	return 0
 }
 
 func (s *Build) checkDstExists() {
 	stat, err := os.Stat(s.dest)
 	if !os.IsNotExist(err) {
-		errutils.Epanicf(err, "Build Error: %v", err)
+		errutils.Epanicf("Build Error: %v", err)
 	}
 	if stat != nil {
 		fmt.Printf("Path '%s' exists. Aborting.", s.dest) // nolint
@@ -171,7 +171,7 @@ func (s *filePair) mkdir() error {
 	defer s.mu.Unlock()
 	if _, err := os.Stat(s.dstPath); os.IsNotExist(err) {
 		err = os.Mkdir(s.dstPath, 0777)
-		errutils.Epanicf(err, "Build Error: %v", err)
+		errutils.Epanicf("Build Error: %v", err)
 	}
 	return nil
 }
@@ -205,13 +205,13 @@ func (s *filePair) copy() error {
 
 func (s *filePair) stripModeline(lnum uint8) string {
 	inF, err := os.Open(s.srcPath)
-	errutils.Epanicf(err, "Can not open '%s': %s", s.srcPath, err) // nolint
-	defer inF.Close()                                              // nolint
+	errutils.Epanicf("Can not open '%s': %s", s.srcPath, err) // nolint
+	defer inF.Close()                                         // nolint
 
 	tmpdir := os.Getenv("TMPDIR")
 	outF, err := ioutil.TempFile(tmpdir, "prjstart-")
-	errutils.Epanicf(err, "Can not create tempfile: %s", err) // nolint
-	defer outF.Close()                                        // nolint
+	errutils.Epanicf("Can not create tempfile: %s", err) // nolint
+	defer outF.Close()                                   // nolint
 
 	var cnt uint8
 	cnt = 0
@@ -227,7 +227,7 @@ func (s *filePair) stripModeline(lnum uint8) string {
 			}
 		}
 		_, err := outF.Write(b)
-		errutils.Epanicf(err, "Error writing to file '%s': %s", outF.Name(), err) // nolint
+		errutils.Epanicf("Error writing to file '%s': %s", outF.Name(), err) // nolint
 	}
 	return outF.Name()
 }
@@ -256,7 +256,7 @@ func (s *filePair) hasModeLine() (action int, lnum uint8) {
 	}
 	mlactions := hasML{}.Init()
 	source, err := os.Open(s.srcPath)
-	errutils.Efatalf(err, "Can not open file %s: %v", s.srcPath, err)
+	errutils.Efatalf("Can not open file %s: %v", s.srcPath, err)
 
 	defer source.Close()
 	scner := bufio.NewScanner(source)
@@ -288,7 +288,7 @@ func (ml hasML) Init() hasML {
 
 func regexCompile(rex string, action int) hasMLAction {
 	regex, err := regexp.Compile(rex)
-	errutils.Epanicf(err, "Error compiling regex: %s", err) // nolint
+	errutils.Epanicf("Error compiling regex: %s", err) // nolint
 	ml := hasMLAction{
 		Regex:  regex,
 		Action: action,

@@ -26,7 +26,7 @@ func Download(uri string, fname string) error {
 		return err
 	}
 	resp, err := http.Get(uri)
-	if errutils.Elogf(err, "Can not fetch URL %s: %v", uri, err) {
+	if errutils.Elogf("Can not fetch URL %s: %v", uri, err) {
 		return err
 	}
 	defer resp.Body.Close()

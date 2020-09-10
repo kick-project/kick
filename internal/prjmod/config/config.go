@@ -9,7 +9,7 @@ import (
 
 func read2bytes(f string) []byte {
 	b, err := ioutil.ReadFile(f)
-	errutils.Epanicf(err, "Can not read file %s: %v", f, err) // nolint
+	errutils.Epanicf("Can not read file %s: %v", f, err) // nolint
 	return b
 }
 
@@ -29,7 +29,7 @@ func (m *Master) Load(f string) {
 	b := read2bytes(f)
 
 	err := yaml.Unmarshal(b, m)
-	errutils.Epanicf(err, "Can not unmarshal file: %s: %v", f, err)
+	errutils.Epanicf("Can not unmarshal file: %s: %v", f, err)
 }
 
 type Org struct {
@@ -43,7 +43,7 @@ func (o *Org) Load(f string) {
 	b := read2bytes(f)
 
 	err := yaml.Unmarshal(b, o)
-	errutils.Epanicf(err, "Can not unmarshal file: %s: %v", f, err)
+	errutils.Epanicf("Can not unmarshal file: %s: %v", f, err)
 }
 
 type Template struct {

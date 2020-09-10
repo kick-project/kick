@@ -27,14 +27,14 @@ func (d *Gitclient) Sync() {
 
 func (d *Gitclient) EachTag(fn func(tag string) (stop bool)) {
 	wd, err := os.Getwd()
-	errutils.Epanicf(err, "Can not get working directory: %v", err)
+	errutils.Epanicf("Can not get working directory: %v", err)
 	err = os.Chdir(wd)
-	errutils.Epanicf(err, "Can not change directory to %s: %v", wd, err)
+	errutils.Epanicf("Can not change directory to %s: %v", wd, err)
 
 	defer os.Chdir(wd)
 
 	err = os.Chdir(d.Local)
-	errutils.Epanicf(err, "Can not change directory to %s: %v", wd, err)
+	errutils.Epanicf("Can not change directory to %s: %v", wd, err)
 	for _, t := range d.Tags() {
 		d.Checkout(t)
 		stop := fn(t)
@@ -74,15 +74,15 @@ func (d *Gitclient) Pull() {
 		return
 	}
 	r, err := git.PlainOpen(p)
-	errutils.Elogf(err, "Error opening path '%s': %+v", p, err)
+	errutils.Elogf("Error opening path '%s': %+v", p, err)
 
 	w, err := r.Worktree()
-	errutils.Elogf(err, "Error reading path '%s': %+v", p, err)
+	errutils.Elogf("Error reading path '%s': %+v", p, err)
 
 	pullopts := &git.PullOptions{}
 	err = w.Pull(pullopts)
 	if err != git.NoErrAlreadyUpToDate {
-		errutils.Elogf(err, "Error cloning %s: %+v", d.URL, err)
+		errutils.Elogf("Error cloning %s: %+v", d.URL, err)
 	}
 }
 
@@ -92,14 +92,14 @@ func (d *Gitclient) Tags() []string {
 
 	r := d.plainopen()
 	iter, err := r.Tags()
-	errutils.Elogf(err, "Error listing tags %s: %+v", d.URL, err)
+	errutils.Elogf("Error listing tags %s: %+v", d.URL, err)
 
 	fn := func(tag *plumbing.Reference) error {
 		taglist = append(taglist, tag.Name().Short())
 		return nil
 	}
 	err = iter.ForEach(fn)
-	errutils.Elogf(err, "Error listing tags %s: %+v", d.URL, err)
+	errutils.Elogf("Error listing tags %s: %+v", d.URL, err)
 
 	return taglist
 }
@@ -114,20 +114,20 @@ func (d *Gitclient) Checkout(ref string) {
 		return
 	}
 	r, err := git.PlainOpen(d.Local)
-	errutils.Elogf(err, "Error opening path '%s': %+v", d.Local, err)
+	errutils.Elogf("Error opening path '%s': %+v", d.Local, err)
 
 	refObj, err := r.Reference(plumbing.ReferenceName(d.Ref), true)
-	errutils.Elogf(err, "Error reading reference for path '%s': %+v", d.Local, err)
+	errutils.Elogf("Error reading reference for path '%s': %+v", d.Local, err)
 
 	chkops := &git.CheckoutOptions{
 		Hash: refObj.Hash(),
 	}
 
 	w, err := r.Worktree()
-	errutils.Elogf(err, "Error reading path '%s': %+v", d.Local, err)
+	errutils.Elogf("Error reading path '%s': %+v", d.Local, err)
 
 	err = w.Checkout(chkops)
-	errutils.Elogf(err, "Error checkout out: %+v", err)
+	errutils.Elogf("Error checkout out: %+v", err)
 }
 
 func (d *Gitclient) plainopen() *git.Repository {
@@ -136,6 +136,6 @@ func (d *Gitclient) plainopen() *git.Repository {
 		return nil
 	}
 	r, err := git.PlainOpen(p)
-	errutils.Elogf(err, "Error opening path '%s': %+v", p, err)
+	errutils.Elogf("Error opening path '%s': %+v", p, err)
 	return r
 }

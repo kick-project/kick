@@ -1,11 +1,8 @@
 package search
 
 import (
-	"fmt"
-	"io"
 	"io/ioutil"
 	"os"
-	"text/tabwriter"
 
 	"github.com/crosseyed/prjstart/internal/db/dbinit"
 	"github.com/crosseyed/prjstart/internal/db/queries"
@@ -30,7 +27,7 @@ func (s *Search) update() {
 		return
 	}
 	dbfile, err := ioutil.TempFile("", "prjstart-*.db")
-	errutils.Efatalf(err, "Can not create temporary file: %v", err)
+	errutils.Efatalf("Can not create temporary file: %v", err)
 	dbfile.Close()
 	i := dbinit.New("", dbfile.Name())
 	i.Init()
@@ -41,17 +38,8 @@ func (s *Search) update() {
 }
 
 // Search searches using term for available packages.
-func (s *Search) Search(term string, output io.Writer) {
+func (s *Search) Search(term string, fnrow func(template_name, template_url, template_desc, master_name, master_url, master_desc, global_name, global_url, globalc_desc string)) {
 	s.update()
 	d := queries.New("sqlite3", s.connectstr)
-	w := tabwriter.NewWriter(output, 0, 0, 1, ' ', tabwriter.TabIndent)
-	fnrow := func(template_name, template_url, template_desc string, master_name, master_url, master_desc, global_name, global_url, global_desc string) {
-		fmt.Fprintf(w, "\tTemplate:\t%s\n", template_name)
-		fmt.Fprintf(w, "\tFull Install Handle:\t%s/%s/%s\n", global_name, master_name, master_desc)
-		fmt.Fprintf(w, "\tURL:\t%s\n", template_url)
-		fmt.Fprintf(w, "\tDescription:\t%s\n", template_desc)
-		w.Flush()
-	}
-
 	d.SearchTemplate(term, fnrow)
 }

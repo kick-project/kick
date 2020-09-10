@@ -49,7 +49,7 @@ func TestInit(t *testing.T) {
 	)
 	for rows.Next() {
 		err := rows.Scan(&count, &template, &master, &global)
-		if errutils.Efatalf(err, "Can not scan row: %v", err) {
+		if errutils.Efatalf("Can not scan row: %v", err) {
 			break
 		}
 	}

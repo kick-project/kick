@@ -7,38 +7,42 @@ import (
 	"github.com/crosseyed/prjstart/internal/utils"
 )
 
-func logErr(err error, format string, v ...interface{}) bool {
-	isError := false
+func logErr(format string, v ...interface{}) bool {
+	hasError := false
 	for _, e := range v {
 		if _, ok := e.(error); ok {
-			isError = true
+			hasError = true
+			break
 		}
 	}
-	if !isError {
+	if !hasError {
 		return false
 	}
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
-	out := fmt.Sprintf(format, v...)
-	log.Output(3, out) // nolint
+	out := fmt.Errorf(format, v...)
+	log.Output(3, out.Error()) // nolint
 	log.SetFlags(log.LstdFlags)
 	return true
 }
 
-func Epanicf(err error, format string, v ...interface{}) bool {
-	hasErr := logErr(err, format, v...)
+// Epanicf will log an error and panic if any argument passed to format is an error
+func Epanicf(format string, v ...interface{}) bool {
+	hasErr := logErr(format, v...)
 	if !hasErr {
 		return false
 	}
-	panic(err)
+	panic(fmt.Errorf(format, v...))
 	return true
 }
 
-func Elogf(err error, format string, v ...interface{}) bool { // nolint
-	return logErr(err, format, v...)
+// Elogf will log an error if any argument passed to format is an error
+func Elogf(format string, v ...interface{}) bool { // nolint
+	return logErr(format, v...)
 }
 
-func Efatalf(err error, format string, v ...interface{}) bool { // nolint
-	hasErr := logErr(err, format, v...)
+// Efatalf will log an error and exit if any argument passed to fatal is an error
+func Efatalf(format string, v ...interface{}) bool { // nolint
+	hasErr := logErr(format, v...)
 	if !hasErr {
 		return hasErr
 	}
