@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/crosseyed/prjstart/internal/config"
 	"github.com/crosseyed/prjstart/internal/file"
 	"github.com/crosseyed/prjstart/internal/utils/errutils"
 	"gopkg.in/yaml.v2"
@@ -16,10 +17,11 @@ type TemplateStub struct {
 	Desc string `yaml:"desc"`
 }
 
-var GLOBALMETA string = "metadata.global.yml"
+var globalmeta string = "metadata.global.yml"
 
 // Global is the global metadata
 type Global struct {
+	Config      config.Config
 	Name        string   `yaml:"name"`
 	URL         string   `yaml:"url"`
 	Description string   `yaml:"description"`
@@ -27,13 +29,20 @@ type Global struct {
 }
 
 // Build builds the metadata from configuration file settings
-func (g *Global) Build(configfile string) {
+func (g *Global) Build(conf config.Global) {
+	g.Name = conf.Name
+	g.URL = conf.URL
+	g.Description = conf.Description
+
+	for _, url := range conf.Masters {
+		_ = url
+	}
 }
 
 // Load loads from a yamlfile
 func (g *Global) Load(yamlfile string) {
 	if yamlfile == "" {
-		yamlfile = GLOBALMETA
+		yamlfile = globalmeta
 	}
 	if _, err := os.Stat(yamlfile); os.IsNotExist(err) {
 		return
@@ -50,7 +59,7 @@ func (g *Global) Load(yamlfile string) {
 // Save saves to yamlfile.
 func (g *Global) Save(yamlfile string) {
 	if yamlfile == "" {
-		yamlfile = GLOBALMETA
+		yamlfile = globalmeta
 	}
 	d, err := filepath.Abs(filepath.Dir(yamlfile))
 	errutils.Epanicf("Can not get absolute path: %w", err)
@@ -66,7 +75,7 @@ func (g *Global) Save(yamlfile string) {
 	errutils.Efatalf("Can not write to file: %w", err)
 }
 
-var MASTERMETA string = "metadata.master.yml"
+var mastermeta string = "metadata.master.yml"
 
 type Master struct {
 	Name        string   `yaml:"name"`
@@ -82,7 +91,7 @@ func (m *Master) Build(configfile string) {
 // Load loads from a yaml file
 func (m *Master) Load(yamlfile string) {
 	if yamlfile == "" {
-		yamlfile = MASTERMETA
+		yamlfile = mastermeta
 	}
 	if _, err := os.Stat(yamlfile); os.IsNotExist(err) {
 		return
@@ -98,7 +107,7 @@ func (m *Master) Load(yamlfile string) {
 // Save saves to yamlfile.
 func (m *Master) Save(yamlfile string) {
 	if yamlfile == "" {
-		yamlfile = GLOBALMETA
+		yamlfile = globalmeta
 	}
 	d, err := filepath.Abs(filepath.Dir(yamlfile))
 	errutils.Epanicf("Can not get absolute path: %w", err)

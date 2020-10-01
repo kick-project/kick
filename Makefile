@@ -1,14 +1,14 @@
 SHELL = /bin/bash
 
 # Project
-NAME := $(shell basename $$(pwd))
+NAME := prjstart
 GOPATH := $(shell go env GOPATH)
 VERSION ?= $(shell cat VERSION)
 COMMIT := $(shell test -d .git && git rev-parse --short HEAD)
 BUILD_INFO := $(COMMIT)-$(shell date -u +"%Y%m%d-%H%M%SZ")
 HASCMD := $(shell test -d cmd && echo "true")
-OS := $(shell uname | tr '[:upper:]' '[:lower:]')
-ARCH := $(shell uname -m | perl -p -e 's/x86_64/amd64/; s/i386/386/')
+GOOS ?= $(shell uname | tr '[:upper:]' '[:lower:]')
+GOARCH ?= $(shell uname -m | perl -p -e 's/x86_64/amd64/; s/i386/386/')
 
 RELEASE_DESCRIPTION := Standard release
 
@@ -28,73 +28,105 @@ GOGETOPTS = GO111MODULE=off
 GOFILES := $(shell find cmd pkg internal src -name '*.go' 2> /dev/null)
 GODIRS = $(shell find . -maxdepth 1 -mindepth 1 -type d | egrep 'cmd|internal|pkg|api')
 
-.PHONY: build _build _build_xcompile browsetest cattest clean deps _deps depsdev deploy _go.mod _go.mod_err \
-        _isreleased lint release _release _release_gitlab test _test _test_setup _test_setup_dirs _test_setup_gitserver \
-		unit codecomplexity codecoverage _unit _codecomplexity _codecoverage 
+.PHONY: _build browsetest cattest clean _deps depsdev deploy _go.mod _go.mod_err \
+        _isreleased lint _release _release_gitlab _test _test_setup _test_setup_dirs \
+        _test_setup_gitserver _unit _codecomplexity _codecoverage _install tag
 
 #
 # End user targets
 #
-build: deps
-	@VERSION=$(VERSION) $(DOTENV) make _build
+_build:
+	@test -d .cache || go fmt ./...
+ifeq ($(XCOMPILE),true)
+	GOOS=linux GOARCH=amd64 $(MAKE) dist/$(NAME)_linux_amd64/$(NAME)
+	GOOS=darwin GOARCH=amd64 $(MAKE) dist/$(NAME)_darwin_amd64/$(NAME)
+	GOOS=windows GOARCH=amd64 $(MAKE) dist/$(NAME)_windows_amd64/$(NAME).exe
+endif
+ifeq ($(HASCMD),true)
+	@$(MAKE) $(NAME)
+endif
 
-buildauto:
-	fswatch -o cmd/* internal/* --one-per-batch | xargs -n1 -I{} bash -c 'echo "make build # $$(date)"; make build; echo'
-
-install:
-	@VERSION=$(VERSION) $(DOTENV) make _install
-
-installauto:
-	fswatch -o cmd/* internal/* --one-per-batch | xargs -n1 -I{} bash -c 'echo "make install # $$(date)"; make install; echo'
+_install: $(GOPATH)/bin/$(NAME)
 
 clean:
 	-test -f tmp/server.pid && kill -TERM $$(cat tmp/server.pid)
 	rm -rf .cache prjstart dist reports tmp vendor
 
-testsetup:
-	@$(DOTENV) make _test_setup
-
 test:
-	@-$(DOTENV) make _unit
-	@-$(DOTENV) make _codecoverage
-	@-$(DOTENV) make _codecomplexity
+	$(MAKE) unit
+	$(MAKE) codecoverage
+	$(MAKE) codecomplexity
 	@exit $$(cat reports/exitcode.txt)
 
-unit: deps
-	@$(DOTENV) make _unit
+_unit: test_setup
+	@$(MAKE) _test_setup_gitserver
+	### Unit Tests
+	@(go test -timeout 5s -covermode atomic -coverprofile=./reports/coverage.out -v ./...; echo $$? > reports/exitcode.txt) 2>&1 | tee reports/test.txt
+	@cat ./reports/test.txt | go-junit-report > reports/junit.xml
+	@exit $$(cat reports/exitcode.txt)
 
-codecoverage: 
-	@$(DOTENV) make _codecoverage
+_codecoverage: test_setup
+	### Code Coverage
+	@go tool cover -func=./reports/coverage.out | tee ./reports/coverage.txt
+	@go tool cover -html=reports/coverage.out -o reports/html/coverage.html
 
-codecomplexity:
-	@$(DOTENV) make _codecomplexity
+_codecomplexity: test_setup
+	### Cyclomatix Complexity Report
+	@gocyclo -avg $(GODIRS) | grep -v _test.go | tee reports/cyclocomplexity.txt
 
-testauto:
-	fswatch -o cmd/* internal/* test/* --one-per-batch | xargs -n1 -I{} bash -c 'echo "make test # $$(date)"; make test; echo'
+_test_setup:
+	@mkdir -p tmp
+	@mkdir -p reports/html
+	@$(MAKE) _test_setup_dirs 2> /dev/null > /dev/null
+	@sync
+
+_test_setup_dirs:
+	@cp -r test/fixtures/home tmp/
+	@cp -r test/fixtures/checksum tmp/
+	@cp -r test/fixtures/compression tmp/
+	@mkdir -p tmp/metadata
+	@cp -r test/fixtures/metadata/serve tmp/metadata/
+
+_test_setup_gitserver:
+	@mkdir -p tmp/gitserveclient
+	@-kill -0 $$(cat tmp/server.pid) 2>/dev/null >/dev/null || go run test/fixtures/testserver.go
+	@echo "Waiting for git server to launch on 5000..."
+	@bash -c 'while ! nc -z localhost 5000; do sleep 0.1; done'
+	@echo "git server launched"
+	@$(MAKE) _test_setup_gitclient
+	@$(MAKE) _test_setup_metadata
+
+_test_setup_gitclient:
+	@-(find test/fixtures/gitserve -mindepth 1 -maxdepth 1 -type d -exec cp -r {} tmp/gitserveclient \;) 2>&1 > /dev/null
+	@-(for i in $$(pwd)/tmp/gitserveclient/*; do cd $$i; git init; git add .; git commit -m "Initial commit"; git tag 7.7.7; git push --set-upstream http://127.0.0.1:5000/$$(basename $$(pwd)).git master; git push --tags; done) 2> /dev/null > /dev/null
+	@sync
+
+_test_setup_metadata:
+	@-rm -rf tmp/metadata 2> /dev/null > /dev/null
+	@mkdir -p tmp/metadata
+	@-(find test/fixtures/metadata -mindepth 1 -maxdepth 1 -type d -exec cp -r {} tmp/metadata \;) 2>&1 > /dev/null
+	@-(for i in $$(pwd)/tmp/metadata/templates/*; do cd $$i; git init; git add .; git commit -m 'Initial commit';$(MAKE) release; $(MAKE) bumpmajor; $(MAKE) release; git push --set-upstream http://127.0.0.1:5000/$$(basename $$(pwd)).git master; git push --tags; done) 2> /dev/null > /dev/null
+
+_release:
+	@echo "### Releasing v$(VERSION)"
+	@$(MAKE) --no-print-directory _isreleased 2> /dev/null
+	git tag v$(VERSION)
+	git push --tags
 
 lint:
 	golangci-lint run --enable=gocyclo
 
-deploy: build
-	@echo TODO
-
-release:
-	@VERSION=$(VERSION) $(DOTENV) make _release 2> /dev/null
-
-release_publish:
-	@VERSION=$(VERSION) $(DOTENV) goreleaser release
-
-.PHONY: tag
 tag:
 	git fetch --tags
 	git tag v$(VERSION)
 	git push --tags
 
-deps: go.mod
+_deps: go.mod
 ifeq ($(USEGITLAB),true)
 	@mkdir -p $(ROOT)/.cache/{go,gomod}
 endif
-	@$(DOTENV) make _deps
+	$(GOMODOPTS) go mod tidy
+	$(GOMODOPTS) go mod vendor
 
 depsdev:
 ifeq ($(USEGITLAB),true)
@@ -132,21 +164,8 @@ getversion:
 #
 # Helper targets
 #
-_build:
-	@test -d .cache || go fmt ./...
-ifeq ($(HASCMD),true)
-	@make $(NAME)
-endif
-
-.PHONY: _install
-_install: $(GOPATH)/bin/$(NAME)
-
 $(GOPATH)/bin/$(NAME): $(NAME)
 	install -m 755 $(NAME) $(GOPATH)/bin/$(NAME)
-
-_deps:
-	$(GOMODOPTS) go mod tidy
-	$(GOMODOPTS) go mod vendor
 
 GOGETS := github.com/jstemmer/go-junit-report github.com/golangci/golangci-lint/cmd/golangci-lint@v1.25.0 \
 		  github.com/goreleaser/goreleaser github.com/fzipp/gocyclo github.com/joho/godotenv/cmd/godotenv \
@@ -155,67 +174,12 @@ GOGETS := github.com/jstemmer/go-junit-report github.com/golangci/golangci-lint/
 $(GOGETS):
 	cd /tmp; go get $@
 
-_unit: _test_setup
-	@make _test_setup_gitserver
-	### Unit Tests
-	@(go test -timeout 5s -covermode atomic -coverprofile=./reports/coverage.out -v ./...; echo $$? > reports/exitcode.txt) 2>&1 | tee reports/test.txt
-	@cat ./reports/test.txt | go-junit-report > reports/junit.xml
-	@exit $$(cat reports/exitcode.txt)
-
-_codecoverage: _test_setup
-	### Code Coverage
-	@go tool cover -func=./reports/coverage.out | tee ./reports/coverage.txt
-	@go tool cover -html=reports/coverage.out -o reports/html/coverage.html
-
-_codecomplexity: _test_setup
-	### Cyclomatix Complexity Report
-	@gocyclo -avg $(GODIRS) | grep -v _test.go | tee reports/cyclocomplexity.txt
-
-_test_setup:
-	@mkdir -p tmp
-	@mkdir -p reports/html
-	@make _test_setup_dirs 2> /dev/null > /dev/null
-	@sync
-
-_test_setup_dirs:
-	@cp -r test/fixtures/home tmp/
-	@cp -r test/fixtures/checksum tmp/
-	@cp -r test/fixtures/compression tmp/
-	@mkdir -p tmp/metadata
-	@cp -r test/fixtures/metadata/serve tmp/metadata/
-
-_test_setup_gitserver:
-	@mkdir -p tmp/gitserveclient
-	@-kill -0 $$(cat tmp/server.pid) 2>/dev/null >/dev/null || go run test/fixtures/testserver.go
-	@echo "Waiting for git server to launch on 5000..."
-	@bash -c 'while ! nc -z localhost 5000; do sleep 0.1; done'
-	@echo "git server launched"
-	@make _test_setup_gitclient
-	@make _test_setup_metadata
-
-_test_setup_gitclient:
-	@-(find test/fixtures/gitserve -mindepth 1 -maxdepth 1 -type d -exec cp -r {} tmp/gitserveclient \;) 2>&1 > /dev/null
-	@-(for i in $$(pwd)/tmp/gitserveclient/*; do cd $$i; git init; git add .; git commit -m "Initial commit"; git tag 7.7.7; git push --set-upstream http://127.0.0.1:5000/$$(basename $$(pwd)).git master; git push --tags; done) 2> /dev/null > /dev/null
-	@sync
-
-_test_setup_metadata:
-	@-rm -rf tmp/metadata 2> /dev/null > /dev/null
-	@mkdir -p tmp/metadata
-	@-(find test/fixtures/metadata -mindepth 1 -maxdepth 1 -type d -exec cp -r {} tmp/metadata \;) 2>&1 > /dev/null
-	@-(for i in $$(pwd)/tmp/metadata/templates/*; do cd $$i; git init; git add .; git commit -m 'Initial commit';make release; make bumpmajor; make release; git push --set-upstream http://127.0.0.1:5000/$$(basename $$(pwd)).git master; git push --tags; done) 2> /dev/null > /dev/null
-
-_release:
-	@echo "### Releasing v$(VERSION)"
-	@make --no-print-directory _isreleased 2> /dev/null
-	git tag v$(VERSION)
-	git push --tags
-
 REPORTS = reports/html/coverage.html
 .PHONY: $(REPORTS)
 $(REPORTS):
-ifeq ($(OS),darwin)
+ifeq ($(GOOS),darwin)
 	@test -f $@ && open $@
-else ifeq ($(OS),linux)
+else ifeq ($(GOOS),linux)
 	@test -f $@ && xdg-open $@
 endif
 
@@ -230,17 +194,17 @@ endif
 #
 # File targets
 #
-$(NAME): dist/$(NAME)_$(OS)_$(ARCH)/$(NAME)
-	install -m 755 dist/$(NAME)_$(OS)_$(ARCH)/$(NAME) $(NAME)
+$(NAME): dist/$(NAME)_$(GOOS)_$(GOARCH)/$(NAME)
+	install -m 755 $< $@
 
-dist/$(NAME)_$(OS)_$(ARCH)/$(NAME): $(GOFILES) internal/version.go
-	@mkdir -p dist
-	goreleaser --snapshot --skip-publish --rm-dist
+dist/$(NAME)_$(GOOS)_$(GOARCH)/$(NAME) dist/$(NAME)_$(GOOS)_$(GOARCH)/$(NAME).exe: $(GOFILES) internal/version.go
+	@mkdir -p $$(dirname $@)
+	go build -o $@ ./cmd/prjstart
 
 cmd/$(NAME)/version.go: VERSION
-	@test -d cmd/$(NAME) && \
+	@test -d $$(dirname $@) && \
 	echo -e '// DO NOT EDIT THIS FILE. Generated from Makefile\npackage main\n\nvar Version = "$(VERSION)"' \
-		> cmd/$(NAME)/version.go || exit 0
+		> $@ || exit 0
 
 go.mod:
 	@$(DOTENV) make _go.mod
@@ -258,3 +222,10 @@ _go.mod_err:
 	@echo 'Please run "go mod init server.com/group/project"'
 	@echo 'Alternatively set "GOSERVER=$$YOURSERVER" and "GOGROUP=$$YOURGROUP" in ~/.env or $(ROOT)/.env file'
 	@exit 1
+
+#
+# make wrapper - Execute any target target prefixed with a underscore.
+# EG 'make vmcreate' will result in the execution of 'make _vmcreate' 
+#
+%:
+	@egrep -q '^_$@:' Makefile && godotenv -f $(HOME)/.env,.env $(MAKE) _$@

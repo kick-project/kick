@@ -1,14 +1,33 @@
 package gitclient
 
 import (
-	"fmt"
 	"os"
 
-	"github.com/crosseyed/prjstart/internal/utils"
+	"github.com/crosseyed/prjstart/internal/gitclient/getter"
 	"github.com/crosseyed/prjstart/internal/utils/errutils"
-	"gopkg.in/src-d/go-git.v4"
-	"gopkg.in/src-d/go-git.v4/plumbing"
+	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/plumbing"
 )
+
+// Get Downloads using the data provider by getter
+func Get(url string, g *getter.Getter) (path string, err error) {
+	err = g.Handler(url)
+	if err != nil {
+		return "", err
+	}
+	if g.Method == getter.NOOP {
+		return g.Path, nil
+	}
+	if g.Method == getter.SYNC {
+		c := Gitclient{
+			URL:   g.URL,
+			Local: g.Path,
+			Ref:   g.Branch,
+		}
+		c.Sync()
+	}
+	return g.Path, err
+}
 
 // Gitclient gitclient
 type Gitclient struct {
@@ -22,26 +41,7 @@ type Gitclient struct {
 func (d *Gitclient) Sync() {
 	d.Clone()
 	d.Pull()
-	d.Checkout("")
-}
-
-func (d *Gitclient) EachTag(fn func(tag string) (stop bool)) {
-	wd, err := os.Getwd()
-	errutils.Epanicf("Can not get working directory: %v", err)
-	err = os.Chdir(wd)
-	errutils.Epanicf("Can not change directory to %s: %v", wd, err)
-
-	defer os.Chdir(wd)
-
-	err = os.Chdir(d.Local)
-	errutils.Epanicf("Can not change directory to %s: %v", wd, err)
-	for _, t := range d.Tags() {
-		d.Checkout(t)
-		stop := fn(t)
-		if stop {
-			break
-		}
-	}
+	d.Checkout(d.Ref)
 }
 
 // SetRef sets the default reference. See Checkout
@@ -60,10 +60,7 @@ func (d *Gitclient) Clone() {
 			URL:      d.URL,
 			Progress: os.Stdout,
 		})
-		if err != nil {
-			fmt.Printf("Can not clone %s: %s\n", d.URL, err.Error())
-			utils.Exit(-1)
-		}
+		errutils.Efatalf("Can not clone %s: %v", d.URL, err)
 	}
 }
 
@@ -114,20 +111,20 @@ func (d *Gitclient) Checkout(ref string) {
 		return
 	}
 	r, err := git.PlainOpen(d.Local)
-	errutils.Elogf("Error opening path '%s': %+v", d.Local, err)
+	errutils.Epanicf("Error opening path '%s': %+v", d.Local, err)
 
 	refObj, err := r.Reference(plumbing.ReferenceName(d.Ref), true)
-	errutils.Elogf("Error reading reference for path '%s': %+v", d.Local, err)
+	errutils.Epanicf("Error reading reference '%s' for path '%s': %+v", d.Ref, d.Local, err)
 
 	chkops := &git.CheckoutOptions{
 		Hash: refObj.Hash(),
 	}
 
 	w, err := r.Worktree()
-	errutils.Elogf("Error reading path '%s': %+v", d.Local, err)
+	errutils.Epanicf("Error reading path '%s': %+v", d.Local, err)
 
 	err = w.Checkout(chkops)
-	errutils.Elogf("Error checkout out: %+v", err)
+	errutils.Epanicf("Error checkout out: %+v", err)
 }
 
 func (d *Gitclient) plainopen() *git.Repository {

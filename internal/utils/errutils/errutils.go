@@ -26,13 +26,12 @@ func logErr(format string, v ...interface{}) bool {
 }
 
 // Epanicf will log an error and panic if any argument passed to format is an error
-func Epanicf(format string, v ...interface{}) bool {
+func Epanicf(format string, v ...interface{}) {
 	hasErr := logErr(format, v...)
 	if !hasErr {
-		return false
+		return
 	}
 	panic(fmt.Errorf(format, v...))
-	return true
 }
 
 // Elogf will log an error if any argument passed to format is an error
@@ -41,11 +40,10 @@ func Elogf(format string, v ...interface{}) bool { // nolint
 }
 
 // Efatalf will log an error and exit if any argument passed to fatal is an error
-func Efatalf(format string, v ...interface{}) bool { // nolint
+func Efatalf(format string, v ...interface{}) { // nolint
 	hasErr := logErr(format, v...)
 	if !hasErr {
-		return hasErr
+		return
 	}
 	utils.Exit(255)
-	return hasErr
 }

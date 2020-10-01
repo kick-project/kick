@@ -13,6 +13,10 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/crosseyed/prjstart/internal/config"
+	"github.com/crosseyed/prjstart/internal/fflags"
+	"github.com/crosseyed/prjstart/internal/gitclient"
+	"github.com/crosseyed/prjstart/internal/gitclient/getter"
 	"github.com/crosseyed/prjstart/internal/gitclient/tclient"
 	"github.com/crosseyed/prjstart/internal/globals"
 	"github.com/crosseyed/prjstart/internal/template"
@@ -41,6 +45,10 @@ func (s *Build) buildDir(id string) {
 
 // SetSrc sets the source template and localpath
 func (s *Build) SetSrc(src string) {
+	if fflags.GitClone() {
+		s.setSrc(src)
+		return
+	}
 	s.buildDir(src)
 	dwnldr := tclient.TClient{
 		Config: globals.Config,
@@ -58,6 +66,31 @@ func (s *Build) SetSrc(src string) {
 	}
 	if !stat.IsDir() {
 		fmt.Fprintf(os.Stdout, `%s is not a directory`, localpath)
+		utils.Exit(-1)
+	}
+
+	s.src = src
+	s.localpath = localpath
+}
+
+func (s *Build) setSrc(src string) {
+	s.buildDir(src)
+	var tmpl config.TemplateStub
+	for _, t := range globals.Config.Templates {
+		if t.Name == src {
+			tmpl = t
+			break
+		}
+	}
+	g := getter.New(filepath.Join(globals.Config.Home, ".prjstart", "project"))
+	localpath, err := gitclient.Get(tmpl.URL, g)
+	errutils.Efatalf(`template "%s" not found: %v`, src, err)
+
+	stat, err := os.Stat(localpath)
+	errutils.Efatalf(`error: %w`, err)
+
+	if !stat.IsDir() {
+		fmt.Fprintf(os.Stderr, `%s is not a directory`, localpath)
 		utils.Exit(-1)
 	}
 
@@ -156,11 +189,11 @@ func (s *filePair) route() error {
 func (s *filePair) skipFile() bool {
 	rvalue := false
 	switch {
+	case strings.HasSuffix(s.srcPath, ".prjglobal.yml"):
+		rvalue = true
 	case strings.HasSuffix(s.srcPath, ".prjmaster.yml"):
 		rvalue = true
-	case strings.HasSuffix(s.srcPath, ".prjorg.yml"):
-		rvalue = true
-	case strings.HasSuffix(s.srcPath, ".prjmod.yml"):
+	case strings.HasSuffix(s.srcPath, ".prjtemplate.yml"):
 		rvalue = true
 	}
 	return rvalue
@@ -260,6 +293,7 @@ func (s *filePair) hasModeLine() (action int, lnum uint8) {
 
 	defer source.Close()
 	scner := bufio.NewScanner(source)
+LOOP:
 	for scner.Scan() {
 		lnum++
 		line := scner.Bytes()
@@ -267,7 +301,7 @@ func (s *filePair) hasModeLine() (action int, lnum uint8) {
 			hasMatch := mlaction.Regex.Match(line)
 			if hasMatch {
 				action = mlaction.Action
-				break
+				break LOOP
 			}
 		}
 		if lnum > len {

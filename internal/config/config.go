@@ -16,6 +16,7 @@ var USERCONFIGDIR string = ".prjstart"
 
 type Config struct {
 	Home       string
+	GlobalURLs []string       `yaml:"globals"`
 	MasterURLs []string       `yaml:"masters"`
 	Templates  []TemplateStub `yaml:"templates"`
 }
@@ -57,7 +58,6 @@ var GLOBALCONFIG string = "prjglobal.yml"
 type Global struct {
 	Name        string   `yaml:"name"`
 	URL         string   `yaml:"url"`
-	Short       string   `yaml:"short"`
 	Description string   `yaml:"description"`
 	Masters     []string `yaml:"masters"`
 }
@@ -83,7 +83,6 @@ var MASTERCONFIG string = "prjmaster.yml"
 type Master struct {
 	Name        string   `yaml:"name"`
 	URL         string   `yaml:"url"`
-	Short       string   `yaml:"short"`
 	Description string   `yaml:"description"`
 	Templates   []string `yaml:"templates"`
 }

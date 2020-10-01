@@ -1,0 +1,4 @@
+name: master2
+description: master2 list
+templates:
+  - http://127.0.0.1:5000/tmpl.git

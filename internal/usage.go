@@ -1,8 +1,7 @@
 package internal
 
 import (
-	"os"
-
+	"github.com/crosseyed/prjstart/internal/fflags"
 	"github.com/crosseyed/prjstart/internal/utils/errutils"
 	"github.com/docopt/docopt-go"
 )
@@ -114,9 +113,8 @@ type OptMain struct {
 
 func GetOptMain(args []string) *OptMain {
 	var (
-		opts     docopt.Opts
-		err      error
-		FFREMOTE string = os.Getenv("FFREMOTE")
+		opts docopt.Opts
+		err  error
 	)
 	filterArgs := []string{}
 	i := 0
@@ -128,7 +126,7 @@ func GetOptMain(args []string) *OptMain {
 		filterArgs = append(filterArgs, arg)
 		break
 	}
-	if FFREMOTE == "true" {
+	if fflags.Remote() {
 		opts, err = docopt.ParseArgs(UsageMainFFREMOTE, filterArgs, Version)
 	} else {
 		opts, err = docopt.ParseArgs(UsageMain, filterArgs, Version)

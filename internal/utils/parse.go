@@ -1,60 +1,85 @@
 package utils
 
 import (
+	"fmt"
 	"os/user"
 	"path/filepath"
 	"regexp"
 	"strings"
 )
 
-// Parse URL string
-type parseFunc = func(uri string) (server string, path string, project string, match bool)
+// URLx take a URI or Something Specific to this project and break it into parts
+type URLx struct {
+	URL     string
+	Scheme  string
+	Project string
+	Host    string
+	Path    string
+}
 
-func ParseGitRemote(uri string) (server, path, project string) {
+// Parse parses a URL or the link sets its internal attributes.
+func (ux *URLx) Parse(url string) error {
 	for _, parseF := range []parseFunc{httpParse, gitParse, sshParse, fileParse} {
 		var match bool
-		server, path, project, match = parseF(uri)
+		scheme, host, path, project, match := parseF(url)
 		if match {
-			return server, path, project
+			ux.URL = url
+			ux.Scheme = scheme
+			ux.Project = project
+			ux.Host = host
+			ux.Path = path
+			return nil
 		}
 	}
-	return "", "", ""
+	err := fmt.Errorf("Could not parse url %s", url)
+	return err
 }
 
-func httpParse(uri string) (server string, path string, project string, match bool) {
-	r := regexp.MustCompile(`^https?://([^(?:/|:)]+)(?:/|:\d+)(.*?)([^/]+?)(?:\.git)?$`)
+// Parse URL string
+type parseFunc = func(uri string) (scheme, host, path, project string, match bool)
+
+// Parse parses a URL or the like and returns a URLx pointer or nil if
+// the parser failed to match a string.
+func Parse(uri string) *URLx {
+	u := &URLx{}
+	u.Parse(uri)
+	return u
+}
+
+func httpParse(uri string) (scheme, host, path, project string, match bool) {
+	r := regexp.MustCompile(`^(https?)://([^(?:/|:)]+)(?:/|:\d+)(.*?)([^/]+?)(?:\.git)?$`)
 	m := r.FindStringSubmatch(uri)
 	if len(m) > 3 {
-		return m[1], filepath.Clean(filepath.Join(m[1], m[2])), m[3], true
+		return m[1], m[2], filepath.Clean(filepath.Join(m[2], m[3])), m[4], true
 	}
-	return "", "", "", false
+	return "", "", "", "", false
 }
 
-func gitParse(uri string) (server, path, project string, match bool) {
-	r := regexp.MustCompile(`^git@([^(?:/|:)]+)(?:/|:)(.*?)([^/]+?)(?:\.git)?$`)
+func gitParse(uri string) (scheme, host, path, project string, match bool) {
+	r := regexp.MustCompile(`^(git)@([^(?:/|:)]+)(?:/|:)(.*?)([^/]+?)(?:\.git)?$`)
 	m := r.FindStringSubmatch(uri)
 	if len(m) > 3 {
-		return m[1], filepath.Clean(filepath.Join(m[1], m[2])), m[3], true
+		return m[1], m[2], filepath.Clean(filepath.Join(m[2], m[3])), m[4], true
 	}
-	return "", "", "", false
+	return "", "", "", "", false
 }
 
-func sshParse(uri string) (server, path, project string, match bool) {
-	r := regexp.MustCompile(`^ssh://([^(?:/|:)]+)(?:/|:\d+)(.*?)([^/]+?)(?:\.git)?$`)
+func sshParse(uri string) (scheme, host, path, project string, match bool) {
+	r := regexp.MustCompile(`^(ssh)://([^(?:/|:)]+)(?:/|:\d+)(.*?)([^/]+?)(?:\.git)?$`)
 	m := r.FindStringSubmatch(uri)
 	if len(m) > 3 {
-		return m[1], filepath.Clean(filepath.Join(m[1], m[2])), m[3], true
+		return m[1], m[2], filepath.Clean(filepath.Join(m[2], m[3])), m[4], true
 	}
-	return "", "", "", false
+	return "", "", "", "", false
 }
 
-func fileParse(uri string) (server, path, project string, match bool) {
-	r := regexp.MustCompile(`^(?:file://)?(/.*?)([^/]+?)/?$`)
+func fileParse(uri string) (scheme, host, path, project string, match bool) {
+	r := regexp.MustCompile(`^(file)://(/.*?)([^/]+?)/?$`)
 	m := r.FindStringSubmatch(uri)
 	if len(m) > 1 {
-		return "::local::", filepath.Clean(filepath.Join(m[1], m[2])), m[2], true
+		return m[1], "", filepath.Clean(filepath.Join(m[2], m[3])), m[3], true
 	}
-	return "", "", "", false
+	return "", "", "", "", false
 }
 
 func expandPath(path string) string {

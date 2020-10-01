@@ -49,9 +49,7 @@ func TestInit(t *testing.T) {
 	)
 	for rows.Next() {
 		err := rows.Scan(&count, &template, &master, &global)
-		if errutils.Efatalf("Can not scan row: %v", err) {
-			break
-		}
+		errutils.Efatalf("Can not scan row: %v", err)
 	}
 
 	if count != 1 || template != "URLTEMPLATE" || master != "URLMASTER" || global != "URLGLOBAL" {

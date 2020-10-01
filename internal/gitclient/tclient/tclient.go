@@ -43,8 +43,8 @@ func (c *TClient) Get(tmpl string) string {
 
 // localOnly determines that the url is a local path
 func localOnly(url string) bool {
-	server, _, _ := utils.ParseGitRemote(url)
-	if server == "::local::" {
+	u := utils.Parse(url)
+	if u.Scheme == "file" {
 		return true
 	}
 	return false
@@ -52,14 +52,14 @@ func localOnly(url string) bool {
 
 // localPath determines local path to template
 func (c *TClient) localPath(url string) string {
-	server, srvPath, dir := utils.ParseGitRemote(url)
-	if server == "::local::" {
-		return srvPath
+	u := utils.Parse(url)
+	if u.Scheme == "file" {
+		return u.Path
 	}
-	if srvPath == "" || dir == "" {
+	if u.Path == "" && u.Project == "" {
 		return ""
 	}
 	base := utils.BaseProjectPath(c.Config.Home)
-	p := filepath.Join(base, srvPath, dir)
+	p := filepath.Join(base, u.Path, u.Project)
 	return p
 }

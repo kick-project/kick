@@ -9,7 +9,8 @@
             "type": "go",
             "request": "launch",
             "mode": "debug",
-            "program": "${file}"
+            "program": "${file}",
+            "envFile": "${workspaceFolder}/.env"
         },
         {
             "name": "prjstart --help",
@@ -17,10 +18,8 @@
             "request": "launch",
             "mode": "auto",
             "program": "${workspaceFolder}/cmd/prjstart",
-            "env": {
-                "FFREMOTE": "true"
-            },
-            "args": ["--help"]
+            "args": ["--help"],
+            "envFile": "${workspaceFolder}/.env"
         },
         {
             "name": "prjstart search",
@@ -28,11 +27,16 @@
             "request": "launch",
             "mode": "auto",
             "program": "${workspaceFolder}/cmd/prjstart",
-            "env": {
-                "FFREMOTE": "true",
-                "FF_MOCK_DB": "true"
-            },
-            "args": ["search", "-l", "template1"]
+            "args": ["search", "-l", "template1"],
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "name": "prjstart start go /tmp/fooo",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/cmd/prjstart",
+            "args": ["start", "go", "/tmp/foo"]
         },
     ]
 }

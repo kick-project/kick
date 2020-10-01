@@ -2,10 +2,12 @@ package db
 
 import (
 	"database/sql"
+	"errors"
 	"log"
 	"sync"
 
 	"github.com/crosseyed/prjstart/internal/utils/dfaults"
+	"github.com/crosseyed/prjstart/internal/utils/errutils"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -18,8 +20,13 @@ type DB struct {
 	db      *sql.DB
 }
 
+// New Creates a *DB instance. Driver defaults to "sqlite3" if driver is an empty string.
 func New(driver, datasource string) *DB {
 	driver = dfaults.String("sqlite3", driver)
+	if datasource == "" {
+		errutils.Epanicf("ERROR: %w", errors.New("Datasource is empty"))
+	}
+
 	return &DB{
 		Driver:  driver,
 		DataSrc: datasource,

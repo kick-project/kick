@@ -2,10 +2,10 @@ package search
 
 import (
 	"io/ioutil"
-	"os"
 
 	"github.com/crosseyed/prjstart/internal/db/dbinit"
 	"github.com/crosseyed/prjstart/internal/db/queries"
+	"github.com/crosseyed/prjstart/internal/fflags"
 	"github.com/crosseyed/prjstart/internal/utils/errutils"
 )
 
@@ -23,7 +23,7 @@ func (s *Search) update() {
 	}
 
 	// TODO: Remove MOCK Feature Flag
-	if os.Getenv("FF_MOCK_DB") != "true" {
+	if fflags.DB() {
 		return
 	}
 	dbfile, err := ioutil.TempFile("", "prjstart-*.db")
