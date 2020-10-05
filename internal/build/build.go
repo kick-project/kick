@@ -16,7 +16,7 @@ import (
 	"github.com/crosseyed/prjstart/internal/config"
 	"github.com/crosseyed/prjstart/internal/fflags"
 	"github.com/crosseyed/prjstart/internal/gitclient"
-	"github.com/crosseyed/prjstart/internal/gitclient/getter"
+	plumb "github.com/crosseyed/prjstart/internal/gitclient/plumbing"
 	"github.com/crosseyed/prjstart/internal/gitclient/tclient"
 	"github.com/crosseyed/prjstart/internal/globals"
 	"github.com/crosseyed/prjstart/internal/template"
@@ -25,9 +25,12 @@ import (
 )
 
 const (
+	// MLnone file does not have a mode line.
 	MLnone = iota
+	// MLrender file mode line instruction to render.
 	MLrender
-	MLignore
+	// MLnorender file mode line instruction not to render.
+	MLnorender
 )
 
 type Build struct {
@@ -82,7 +85,7 @@ func (s *Build) setSrc(src string) {
 			break
 		}
 	}
-	g := getter.New(filepath.Join(globals.Config.Home, ".prjstart", "project"))
+	g := plumb.New(filepath.Join(globals.Config.Home, ".prjstart", "project"))
 	localpath, err := gitclient.Get(tmpl.URL, g)
 	errutils.Efatalf(`template "%s" not found: %v`, src, err)
 
@@ -106,7 +109,7 @@ func (s *Build) Run() int {
 	path := s.localpath
 	base := s.localpath
 	skipRegex, err := regexp.Compile(fmt.Sprintf(`^%s/.git(?:/|$)`, base))
-	errutils.Epanicf("Build Error: %v", err)
+	errutils.Epanicf("build error: %v", err)
 	s.checkDstExists()
 	errWalk := filepath.Walk(path, func(srcPath string, info os.FileInfo, err error) error {
 		if skipRegex.MatchString(srcPath) {
@@ -173,7 +176,7 @@ func (s *filePair) route() error {
 		return nil
 	case lnum > 0 && action == MLrender:
 		s.render(lnum)
-	case lnum > 0 && action == MLignore:
+	case lnum > 0 && action == MLnorender:
 		return nil
 	case s.srcInfo.Mode().IsRegular():
 		return s.copy()
@@ -203,7 +206,7 @@ func (s *filePair) mkdir() error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if _, err := os.Stat(s.dstPath); os.IsNotExist(err) {
-		err = os.Mkdir(s.dstPath, 0777)
+		err = os.Mkdir(s.dstPath, 0755)
 		errutils.Epanicf("Build Error: %v", err)
 	}
 	return nil
@@ -316,7 +319,7 @@ type hasML []hasMLAction
 
 func (ml hasML) Init() hasML {
 	ml = append(ml, regexCompile(`prj:render\W?`, MLrender))
-	ml = append(ml, regexCompile(`prj:ignore\W?`, MLignore))
+	ml = append(ml, regexCompile(`prj:ignore\W?`, MLnorender))
 	return ml
 }
 

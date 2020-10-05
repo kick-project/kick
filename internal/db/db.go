@@ -11,8 +11,9 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-// lock is used to lock access to the sqlite file
-var mutex = &sync.Mutex{}
+// mu Mutex used to co-ordinate all writes to a sequential process
+// instead of parallel as per Sqlite3 documentation.
+var mu = &sync.Mutex{}
 
 type DB struct {
 	Driver  string
@@ -34,11 +35,19 @@ func New(driver, datasource string) *DB {
 }
 
 func (s *DB) Lock() {
-	mutex.Lock()
+	Lock()
+}
+
+func Lock() {
+	mu.Lock()
 }
 
 func (s *DB) Unlock() {
-	mutex.Unlock()
+	Unlock()
+}
+
+func Unlock() {
+	mu.Unlock()
 }
 
 func (s *DB) Open() *sql.DB {
@@ -61,8 +70,9 @@ func (s *DB) Close() {
 	}
 }
 
-func (s *DB) Exec(query string, args ...interface{}) (sql.Result, error) {
-	result, err := s.db.Exec(query, args...)
+func (s *DB) Exec(query string, args ...interface{}) (result sql.Result, err error) {
+	result, err = s.db.Exec(query, args...)
+
 	if err != nil {
 		log.Printf("Query error %s %s: %v", query, args, err)
 		return nil, err

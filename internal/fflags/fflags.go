@@ -3,8 +3,8 @@ package fflags
 import "os"
 
 // enabled toggle to determine if feature flags have been turned on.
-// This is needed so if anyone accidently sets one variable the feature will still
-// not be turned on. It also makes it easier to test with and without feature flags.
+// This is needed so if anyone accidentally sets one variable the feature will still
+// not be turned on. It also makes it easier to toggle all feature flags.
 func enabled() bool {
 	return os.Getenv("FF_ENABLED") == "true"
 }

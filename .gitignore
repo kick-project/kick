@@ -30,3 +30,4 @@
 /vendor/
 /prjstart
 /.cache
+/nfpm.yaml

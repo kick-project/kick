@@ -33,11 +33,11 @@ jobs:
         name: Dependencies
         run: |
           export PATH=$(go env GOPATH)/bin:$PATH
-          make depsdev
+          make depsdev deps
           git checkout go.mod go.sum
 
       -
-        name: Run GoReleaser
+        name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |

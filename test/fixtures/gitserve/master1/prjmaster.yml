@@ -1,5 +1,0 @@
-name: master1
-description: master1 list
-templates:
-  - http://127.0.0.1:5000/tmpl1.git
-  - http://127.0.0.1:5000/tmpl2.git

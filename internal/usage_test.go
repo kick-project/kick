@@ -33,7 +33,7 @@ func TestGetOptMainInstall(t *testing.T) {
 }
 
 func TestOptStart(t *testing.T) {
-	t.Skip("Expected fail: Error in docopts?")
+	t.Skip("Expected fail: Seems to be an issue with docopts")
 	args := []string{"prjstart", "start", "template", "project"}
 	o := GetOptStart(args)
 	assert.True(t, o.Start)

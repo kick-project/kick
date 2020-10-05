@@ -60,17 +60,10 @@ type SQL struct {
 }
 
 func New(driver, datasource string) *SQL {
+	// TODO: Dependency Injection
 	return &SQL{
 		DB: db.New(driver, datasource),
 	}
-}
-
-func (s *SQL) InsertGlobal(url, name, desc string) (sql.Result, error) {
-	s.DB.Lock()
-	s.DB.Open()
-	defer s.DB.Unlock()
-	defer s.DB.Close()
-	return s.DB.Exec(INSERTGLOBAL, url, name, desc)
 }
 
 func (s *SQL) InsertMasterByURL(globalurl, url, name, desc string) (sql.Result, error) {

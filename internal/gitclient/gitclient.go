@@ -3,30 +3,30 @@ package gitclient
 import (
 	"os"
 
-	"github.com/crosseyed/prjstart/internal/gitclient/getter"
+	plumb "github.com/crosseyed/prjstart/internal/gitclient/plumbing"
 	"github.com/crosseyed/prjstart/internal/utils/errutils"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 )
 
 // Get Downloads using the data provider by getter
-func Get(url string, g *getter.Getter) (path string, err error) {
+func Get(url string, g *plumb.Plumbing) (path string, err error) {
 	err = g.Handler(url)
 	if err != nil {
 		return "", err
 	}
-	if g.Method == getter.NOOP {
-		return g.Path, nil
+	if g.Method() == plumb.NOOP {
+		return g.Path(), nil
 	}
-	if g.Method == getter.SYNC {
+	if g.Method() == plumb.SYNC {
 		c := Gitclient{
-			URL:   g.URL,
-			Local: g.Path,
-			Ref:   g.Branch,
+			URL:   g.URL(),
+			Local: g.Path(),
+			Ref:   g.Branch(),
 		}
 		c.Sync()
 	}
-	return g.Path, err
+	return g.Path(), err
 }
 
 // Gitclient gitclient

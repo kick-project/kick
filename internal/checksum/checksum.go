@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -37,9 +36,8 @@ func Sha256SumFile(srcFile string, sumfile string) (sum string, err error) {
 
 func Sha256Sum(rdr io.Reader) (bytesum []byte, err error) {
 	hash := sha256.New()
-	if _, err := io.Copy(hash, rdr); err != nil {
-		log.Fatal(err)
-	}
+	_, err = io.Copy(hash, rdr)
+	errutils.Efatalf("Error copy bytes: %w", err)
 	bytesum = hash.Sum(nil)
 	return bytesum, nil
 }
@@ -53,15 +51,12 @@ func VerifySha256sum(srcFile, sumfile string) (pass bool, sum string, err error)
 
 	// Get original checksum
 	file, err := os.Open(sumfile)
-	if err != nil {
-		log.Fatal(err)
-	}
+	errutils.Efatalf("Error opening file %s: %w", sumfile, err)
 	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
-	if err := scanner.Err(); err != nil {
-		log.Fatal(err)
-	}
+	err = scanner.Err()
+	errutils.Efatalf("Error scanning file: %w", err)
 
 	var origsum string
 	for scanner.Scan() {
