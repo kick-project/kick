@@ -7,53 +7,61 @@ import (
 	"text/tabwriter"
 
 	"github.com/crosseyed/prjstart/internal"
-	"github.com/crosseyed/prjstart/internal/config"
 	"github.com/crosseyed/prjstart/internal/globals"
+	"github.com/crosseyed/prjstart/internal/resources/config"
+	"github.com/crosseyed/prjstart/internal/settings"
 	terminal "github.com/wayneashleyberry/terminal-dimensions"
 )
 
+type listCmd struct {
+	conf *config.File
+}
+
 // List starts the list sub command
-func List(args []string) int {
+func List(args []string, s *settings.Settings) int {
 	opts := internal.GetOptList(args)
+	lc := listCmd{
+		conf: s.ConfigFile(),
+	}
 	switch {
 	case opts.Vars:
-		return VariablesLongOutput()
+		return lc.VariablesLongOutput()
 	case opts.Remote:
-		return ListRemote()
+		return lc.ListRemote()
 	case opts.All:
-		ret1 := ListLocal(opts)
-		ret2 := ListRemote()
+		ret1 := lc.ListLocal(opts)
+		ret2 := lc.ListRemote()
 		if ret1 > ret2 {
 			return ret1
 		}
 		return ret2
 	}
-	return ListLocal(opts)
+	return lc.ListLocal(opts)
 }
 
 // ListLocal lists local templates
-func ListLocal(opts *internal.OptList) int {
+func (lc *listCmd) ListLocal(opts *internal.OptList) int {
 	switch {
 	case opts.Url:
-		VerboseOutput()
+		lc.VerboseOutput()
 	default:
-		ShortOutput()
+		lc.ShortOutput()
 	}
 	return 0
 }
 
-func ShortOutput() {
-	templates := globals.Config.Templates
+func (lc *listCmd) ShortOutput() {
+	templates := lc.conf.TemplateURLs
 	sort.Sort(config.SortByName(templates))
 	data := []string{}
 	for _, t := range templates {
 		name := t.Name
 		data = append(data, name)
 	}
-	shortOutput(data)
+	lc.shortOutput(data)
 }
 
-func shortOutput(data []string) {
+func (lc *listCmd) shortOutput(data []string) {
 	termwidth, _ := terminal.Width()
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.TabIndent)
 	outstring := ""
@@ -62,7 +70,7 @@ func shortOutput(data []string) {
 		if len(outstring) != 0 {
 			l = uint(len(outstring))
 			l += uint(len(name))
-			l += 1
+			l++
 		}
 		switch {
 		case l == 0:
@@ -78,9 +86,9 @@ func shortOutput(data []string) {
 	w.Flush()
 }
 
-func VerboseOutput() {
+func (lc *listCmd) VerboseOutput() {
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.TabIndent)
-	templates := globals.Config.Templates
+	templates := globals.Config.TemplateURLs
 	sort.Sort(config.SortByName(templates))
 	for _, stub := range templates {
 		fmt.Fprintf(w, "%s\t%s\n", stub.Name, stub.URL)
@@ -88,7 +96,7 @@ func VerboseOutput() {
 	w.Flush()
 }
 
-func VariablesLongOutput() int {
+func (lc *listCmd) VariablesLongOutput() int {
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.TabIndent)
 	prjvars := internal.SetVars(&internal.OptStart{})
 	for _, item := range prjvars.GetDescriptions() {
@@ -99,12 +107,12 @@ func VariablesLongOutput() int {
 }
 
 // ListRemote lists remote templates
-func ListRemote() int {
+func (lc *listCmd) ListRemote() int {
 	// TODO
 	return 0
 }
 
 // ListAll Lists local and remote templates
-func ListAll() int {
+func (lc *listCmd) ListAll() int {
 	return 0
 }

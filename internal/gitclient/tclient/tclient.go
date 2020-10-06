@@ -5,8 +5,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/crosseyed/prjstart/internal/config"
 	"github.com/crosseyed/prjstart/internal/gitclient"
+	"github.com/crosseyed/prjstart/internal/resources/config"
 	"github.com/crosseyed/prjstart/internal/utils"
 )
 
@@ -15,12 +15,12 @@ type parseFunc = func(uri string) (server string, path string, project string, m
 
 // TClient is the template client
 type TClient struct {
-	Config *config.Config
+	Config *config.File
 }
 
 // Get fetches the template using git and returns the local path or returns path if a local one
 func (c *TClient) Get(tmpl string) string {
-	for _, t := range c.Config.Templates {
+	for _, t := range c.Config.TemplateURLs {
 		if t.Name == tmpl {
 			url := utils.ExpandPath(t.URL)
 			if strings.HasPrefix(url, "/") {

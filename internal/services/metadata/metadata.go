@@ -2,7 +2,6 @@ package metadata
 
 import (
 	"database/sql"
-	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -10,39 +9,49 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/crosseyed/prjstart/internal/config"
-	"github.com/crosseyed/prjstart/internal/db"
-	"github.com/crosseyed/prjstart/internal/db/schema"
 	"github.com/crosseyed/prjstart/internal/gitclient"
 	"github.com/crosseyed/prjstart/internal/gitclient/plumbing"
-	"github.com/crosseyed/prjstart/internal/globals"
-	"github.com/crosseyed/prjstart/internal/marshal"
-	"github.com/crosseyed/prjstart/internal/utils/dfaults"
+	"github.com/crosseyed/prjstart/internal/resources/config"
+	"github.com/crosseyed/prjstart/internal/resources/db"
 	"github.com/crosseyed/prjstart/internal/utils/errutils"
+	"github.com/crosseyed/prjstart/internal/utils/marshal"
 	_ "github.com/mattn/go-sqlite3" // Required by 'database/sql'
 )
 
-// Build metadata. Conf defaults to globals.Config if Conf is nil.
-func Build(conf *config.Config) error {
-	// TODO: Inject dependency
-	v := dfaults.Interface(&globals.Config, conf)
-	conf, ok := v.(*config.Config)
-	if !ok {
-		return errors.New("error: can not build. config is an unknown data type")
-	}
+// Metadata build metadata
+type Metadata struct {
+	conf         *config.File
+	metadatapath string
+	db           *sql.DB
+}
 
-	// TODO: Inject dependency
-	path := filepath.Join(conf.Home, ".prjstart", "metadata", "metadata.db")
-	dirname := filepath.Dir(path)
-	err := os.MkdirAll(dirname, 0755)
-	errutils.Efatalf("error: %w", err)
-	_, err = os.Stat(path)
-	if os.IsNotExist(err) {
-		s := schema.New("sqlite3", path)
-		s.Create()
-	} else {
-		errutils.Efatalf("error: %w", err)
+// Options options to New
+type Options struct {
+	ConfigFile   *config.File // Contents of the main config file in code
+	MetadataPath string
+	DB           *sql.DB
+}
+
+// New create an instance of Metadata.
+// Panics if opts.ConfigFile is nil or DBPath is an empty string.
+func New(opts Options) *Metadata {
+	if opts.ConfigFile == nil {
+		panic("opts.ConfigFile can not be nil")
 	}
+	if opts.MetadataPath == "" {
+		panic("opts.MetadataPath can not be an empty string")
+	}
+	m := &Metadata{
+		conf:         opts.ConfigFile,
+		metadatapath: opts.MetadataPath,
+		db:           opts.DB,
+	}
+	return m
+}
+
+// Build metadata. Conf defaults to globals.Config if Conf is nil.
+func (m *Metadata) Build() error {
+	conf := m.conf
 
 	c := workers{
 		wait: &sync.WaitGroup{},
@@ -50,10 +59,9 @@ func Build(conf *config.Config) error {
 
 	churl := make(chan string, 64)
 	chtemplates := make(chan *Template, 64)
-	metadatadir := filepath.Join(conf.Home, ".prjstart", "metadata")
-	p := plumbing.New(metadatadir)
-	c.runClones(6, p, churl, chtemplates)
-	c.runInserts(fmt.Sprintf("file:%s?_foreign_keys=on", path), chtemplates)
+	p := plumbing.New(m.metadatapath)
+	c.concurClones(6, p, churl, chtemplates)
+	c.concurInserts(m.db, chtemplates)
 
 	for _, url := range conf.MasterURLs {
 		c.wait.Add(1)
@@ -70,9 +78,9 @@ type workers struct {
 	wait *sync.WaitGroup
 }
 
-// runClones concurrent cloning of git repositories.
+// concurClones concurrent cloning of git repositories.
 // where num is the number of concurrent downloads, churl is a string url and tchan is a channel of resulting templates.
-func (c *workers) runClones(num int, p *plumbing.Plumbing, churl <-chan string, tchan chan<- *Template) {
+func (c *workers) concurClones(num int, p *plumbing.Plumbing, churl <-chan string, tchan chan<- *Template) {
 	for i := 0; i < num; i++ {
 		go func() {
 			for {
@@ -81,7 +89,7 @@ func (c *workers) runClones(num int, p *plumbing.Plumbing, churl <-chan string, 
 				case !ok:
 					return
 				default:
-					c.processUrl(url, p, tchan)
+					c.processURL(url, p, tchan)
 					c.wait.Done()
 				}
 			}
@@ -89,7 +97,7 @@ func (c *workers) runClones(num int, p *plumbing.Plumbing, churl <-chan string, 
 	}
 }
 
-func (c *workers) processUrl(url string, p *plumbing.Plumbing, chtemplate chan<- *Template) {
+func (c *workers) processURL(url string, p *plumbing.Plumbing, chtemplate chan<- *Template) {
 	localpath, err := gitclient.Get(url, p)
 	if errutils.Elogf("error: cloning repository: %w: skipping %s", err, url) {
 		return
@@ -125,13 +133,10 @@ func (c *workers) processUrl(url string, p *plumbing.Plumbing, chtemplate chan<-
 	}
 }
 
-// runInserts populates the database
+// concurInserts populates the database
 // where num is the number of concurrent routines
 // and ch is the channel to read templates from.
-func (c *workers) runInserts(dsn string, ch <-chan *Template) {
-	// TODO: I hate my UGGGGLLLLLY code. Needs dependency injection
-	dbconn, err := sql.Open("sqlite3", dsn)
-	errutils.Epanicf("error: could not connect to the metadata database: %w", err)
+func (c *workers) concurInserts(dbconn *sql.DB, ch <-chan *Template) {
 	go func() {
 		for {
 			t, ok := <-ch

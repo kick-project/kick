@@ -6,8 +6,7 @@ import (
 	"path"
 
 	"github.com/crosseyed/prjstart/internal"
-	"github.com/crosseyed/prjstart/internal/config"
-	"github.com/crosseyed/prjstart/internal/globals"
+	"github.com/crosseyed/prjstart/internal/settings"
 	"github.com/crosseyed/prjstart/internal/subcmds"
 	"github.com/crosseyed/prjstart/internal/utils"
 	"github.com/joho/godotenv"
@@ -15,19 +14,17 @@ import (
 
 func main() {
 	loadDotenv()
+	s := settings.GetSettings("")
 
-	globals.Config = config.Load("", "")
 	args := os.Args
 	o := internal.GetOptMain(args)
 	switch {
 	case o.Start:
-		utils.Exit(subcmds.Start(args[1:]))
+		utils.Exit(subcmds.Start(args[1:], s))
 	case o.List:
-		utils.Exit(subcmds.List(args[1:]))
-	case o.Search:
-		utils.Exit(subcmds.Search(args[1:]))
+		utils.Exit(subcmds.List(args[1:], s))
 	case o.Install:
-		utils.Exit(subcmds.Install(args[1:]))
+		utils.Exit(subcmds.Install(args[1:], s))
 	}
 	utils.Exit(255)
 }

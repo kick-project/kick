@@ -1,19 +1,27 @@
 package subcmds
 
 import (
+	"path/filepath"
+
 	"github.com/crosseyed/prjstart/internal"
-	"github.com/crosseyed/prjstart/internal/build"
-	"github.com/crosseyed/prjstart/internal/globals"
+	"github.com/crosseyed/prjstart/internal/services/template"
+	"github.com/crosseyed/prjstart/internal/settings"
 )
 
-func Start(args []string) int {
+// Start start cli option
+func Start(args []string, s *settings.Settings) int {
 	opts := internal.GetOptStart(args)
-	vars := internal.SetVars(opts)
-	globals.Vars = vars.GetVars()
+	varsGen := internal.SetVars(opts)
+	vars := varsGen.GetVars()
+	_ = vars
 
-	g := build.Build{}
-	g.SetSrc(opts.Tmpl)
-	g.SetDest(opts.Project)
-	ret := g.Run()
+	tOpts := *s.Template()
+
+	// Set project name
+	name := filepath.Base(opts.Project)
+	tOpts.Variables.SetProjectVar("NAME", name)
+	t := template.New(tOpts)
+	t.SetSrcDest(opts.Tmpl, opts.Project)
+	ret := t.Run()
 	return ret
 }

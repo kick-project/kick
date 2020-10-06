@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"sync"
 
-	"github.com/crosseyed/prjstart/internal/config"
+	"github.com/crosseyed/prjstart/internal/resources/config"
 	"github.com/sevlyar/go-daemon"
 	"github.com/sosedoff/gitkit"
 )
@@ -42,7 +42,7 @@ func main() {
 
 type TestServerStruct struct {
 	server *http.Server
-	config *config.Config
+	config *config.File
 	home   string
 }
 

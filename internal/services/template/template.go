@@ -1,4 +1,4 @@
-package build
+package template
 
 import (
 	"bufio"
@@ -13,13 +13,9 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/crosseyed/prjstart/internal/config"
-	"github.com/crosseyed/prjstart/internal/fflags"
 	"github.com/crosseyed/prjstart/internal/gitclient"
 	plumb "github.com/crosseyed/prjstart/internal/gitclient/plumbing"
-	"github.com/crosseyed/prjstart/internal/gitclient/tclient"
-	"github.com/crosseyed/prjstart/internal/globals"
-	"github.com/crosseyed/prjstart/internal/template"
+	"github.com/crosseyed/prjstart/internal/resources/config"
 	"github.com/crosseyed/prjstart/internal/utils"
 	"github.com/crosseyed/prjstart/internal/utils/errutils"
 )
@@ -33,61 +29,87 @@ const (
 	MLnorender
 )
 
-type Build struct {
-	localpath string
-	src       string
-	dest      string
-	builddir  string
+type (
+	// Template the template itself
+	Template struct {
+		localpath   string
+		src         string
+		dest        string
+		builddir    string
+		config      *config.File
+		variables   *Variables
+		templateDir string
+		mllen       uint8
+	}
+
+	// Options options to template
+	Options struct {
+		Config    *config.File
+		Variables *Variables
+
+		// TemplateDir is the directory to store the downloaded templates.
+		TemplateDir string
+
+		// ModeLineLen is the number of lines to scan in a document to fetch the modeline.
+		// If set to 0 then modeline defaults to 20 lines.
+		ModeLineLen uint8
+	}
+)
+
+// New constructs a Template. New will panic if any options are missing.
+func New(opts Options) *Template {
+	if opts.Config == nil {
+		panic("opts.Config can not be nil")
+	}
+	if opts.TemplateDir == "" {
+		panic("opts.TemplateDir can not be an empty string")
+	}
+	var mllen = uint8(20)
+	if opts.ModeLineLen > 0 {
+		mllen = opts.ModeLineLen
+	}
+	t := &Template{
+		config:      opts.Config,
+		templateDir: opts.TemplateDir,
+		variables:   opts.Variables,
+		mllen:       mllen,
+	}
+	return t
 }
 
-func (s *Build) buildDir(id string) {
+func (t *Template) buildDir(id string) {
 	d, err := ioutil.TempDir(os.Getenv("TEMP"), fmt.Sprintf("prjstart-%s-", id))
 	errutils.Epanicf("Build Error: %v", err)
-	s.builddir = d
+	t.builddir = d
 }
 
-// SetSrc sets the source template and localpath
-func (s *Build) SetSrc(src string) {
-	if fflags.GitClone() {
-		s.setSrc(src)
-		return
-	}
-	s.buildDir(src)
-	dwnldr := tclient.TClient{
-		Config: globals.Config,
-	}
-	localpath := dwnldr.Get(src)
-	if localpath == "" {
-		fmt.Fprintf(os.Stderr, `template "%s" not found`, src) // nolint
-		utils.Exit(-1)
-	}
+// SetVariables
+func (t *Template) SetVariables() {
 
-	stat, err := os.Stat(localpath)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, `error: %s`, err.Error())
-		utils.Exit(-1)
-	}
-	if !stat.IsDir() {
-		fmt.Fprintf(os.Stdout, `%s is not a directory`, localpath)
-		utils.Exit(-1)
-	}
-
-	s.src = src
-	s.localpath = localpath
 }
 
-func (s *Build) setSrc(src string) {
-	s.buildDir(src)
+// SetSrcDest sets the source template and destination path where the project structure
+// will reside.
+func (t *Template) SetSrcDest(src, dest string) {
+	t.SetSrc(src)
+	t.SetDest(dest)
+}
+
+// SetSrc sets the source template "name". "name" is defined
+// in *config.Config.TemplateURLs. *config.Config is provided as an Option to New.
+func (t *Template) SetSrc(name string) {
+	t.buildDir(name)
 	var tmpl config.TemplateStub
-	for _, t := range globals.Config.Templates {
-		if t.Name == src {
-			tmpl = t
+	for _, tconf := range t.config.TemplateURLs {
+		if tconf.Name == name {
+			tmpl = tconf
 			break
 		}
 	}
-	g := plumb.New(filepath.Join(globals.Config.Home, ".prjstart", "project"))
+	g := plumb.New(t.templateDir)
+	// TODO: DI
 	localpath, err := gitclient.Get(tmpl.URL, g)
-	errutils.Efatalf(`template "%s" not found: %v`, src, err)
+	errutils.Efatalf(`template "%s" not found: %v`, name, err)
 
 	stat, err := os.Stat(localpath)
 	errutils.Efatalf(`error: %w`, err)
@@ -97,27 +119,29 @@ func (s *Build) setSrc(src string) {
 		utils.Exit(-1)
 	}
 
-	s.src = src
-	s.localpath = localpath
+	t.src = name
+	t.localpath = localpath
 }
 
-func (s *Build) SetDest(dest string) {
-	s.dest = dest
+// SetDest sets the destnation path
+func (t *Template) SetDest(dest string) {
+	t.dest = dest
 }
 
-func (s *Build) Run() int {
-	path := s.localpath
-	base := s.localpath
+// Run generates the target directory structure
+func (t *Template) Run() int {
+	path := t.localpath
+	base := t.localpath
 	skipRegex, err := regexp.Compile(fmt.Sprintf(`^%s/.git(?:/|$)`, base))
 	errutils.Epanicf("build error: %v", err)
-	s.checkDstExists()
+	t.checkDstExists()
 	errWalk := filepath.Walk(path, func(srcPath string, info os.FileInfo, err error) error {
 		if skipRegex.MatchString(srcPath) {
 			return nil
 		}
 		relative := strings.Replace(srcPath, base, "", 1)
-		relative = renderDir(relative, globals.Vars)
-		dstPath := filepath.Join(s.builddir, relative)
+		relative = renderDir(relative, t.variables)
+		dstPath := filepath.Join(t.builddir, relative)
 
 		if err != nil {
 			_, _ = fmt.Fprintf(os.Stderr, "Warning: skipping file %s: %s", srcPath, err.Error())
@@ -125,10 +149,11 @@ func (s *Build) Run() int {
 		}
 
 		pair := filePair{
-			srcInfo: info,
-			srcPath: srcPath,
-			dstPath: dstPath,
-			mlen:    20, // TODO - Hardcoded modeline
+			srcInfo:   info,
+			srcPath:   srcPath,
+			dstPath:   dstPath,
+			variables: t.variables,
+			mlen:      t.mllen,
 		}
 		err = pair.route()
 		errutils.Epanicf("Build Error: %v", err)
@@ -140,18 +165,18 @@ func (s *Build) Run() int {
 		return 255
 	}
 
-	err = os.Rename(s.builddir, s.dest)
+	err = os.Rename(t.builddir, t.dest)
 	errutils.Epanicf("Build Error: %v", err)
 	return 0
 }
 
-func (s *Build) checkDstExists() {
-	stat, err := os.Stat(s.dest)
+func (t *Template) checkDstExists() {
+	stat, err := os.Stat(t.dest)
 	if !os.IsNotExist(err) {
 		errutils.Epanicf("Build Error: %v", err)
 	}
 	if stat != nil {
-		fmt.Printf("Path '%s' exists. Aborting.", s.dest) // nolint
+		fmt.Printf("Path '%s' exists. Aborting.", t.dest) // nolint
 		utils.Exit(255)
 	}
 }
@@ -160,28 +185,29 @@ func (s *Build) checkDstExists() {
 // Source Destination pair
 //
 type filePair struct {
-	srcInfo os.FileInfo
-	srcPath string // Source path
-	dstPath string // Destination path
-	mlen    uint8  // Mode line length
-	mu      sync.Mutex
+	srcInfo   os.FileInfo
+	srcPath   string // Source path
+	dstPath   string // Destination path
+	mlen      uint8  // Mode line length
+	variables *Variables
+	mu        sync.Mutex
 }
 
-func (s *filePair) route() error {
-	action, lnum := s.hasModeLine()
+func (fp *filePair) route() error {
+	action, lnum := fp.hasModeLine()
 	switch {
-	case s.srcInfo.IsDir():
-		return s.mkdir()
-	case s.skipFile():
+	case fp.srcInfo.IsDir():
+		return fp.mkdir()
+	case fp.skipFile():
 		return nil
 	case lnum > 0 && action == MLrender:
-		s.render(lnum)
+		fp.render(lnum)
 	case lnum > 0 && action == MLnorender:
 		return nil
-	case s.srcInfo.Mode().IsRegular():
-		return s.copy()
+	case fp.srcInfo.Mode().IsRegular():
+		return fp.copy()
 	default:
-		msg := fmt.Sprintf("error FILENOTREGULAR: %s\n", s.dstPath)
+		msg := fmt.Sprintf("error FILENOTREGULAR: %s\n", fp.dstPath)
 		fmt.Println(msg)
 		return errors.New(msg)
 	}
@@ -189,48 +215,48 @@ func (s *filePair) route() error {
 }
 
 // skipFile determines known files to skip
-func (s *filePair) skipFile() bool {
+func (fp *filePair) skipFile() bool {
 	rvalue := false
 	switch {
-	case strings.HasSuffix(s.srcPath, ".prjglobal.yml"):
+	case strings.HasSuffix(fp.srcPath, ".prjglobal.yml"):
 		rvalue = true
-	case strings.HasSuffix(s.srcPath, ".prjmaster.yml"):
+	case strings.HasSuffix(fp.srcPath, ".prjmaster.yml"):
 		rvalue = true
-	case strings.HasSuffix(s.srcPath, ".prjtemplate.yml"):
+	case strings.HasSuffix(fp.srcPath, ".prjtemplate.yml"):
 		rvalue = true
 	}
 	return rvalue
 }
 
-func (s *filePair) mkdir() error {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	if _, err := os.Stat(s.dstPath); os.IsNotExist(err) {
-		err = os.Mkdir(s.dstPath, 0755)
+func (fp *filePair) mkdir() error {
+	fp.mu.Lock()
+	defer fp.mu.Unlock()
+	if _, err := os.Stat(fp.dstPath); os.IsNotExist(err) {
+		err = os.Mkdir(fp.dstPath, 0755)
 		errutils.Epanicf("Build Error: %v", err)
 	}
 	return nil
 }
 
-func (s *filePair) copy() error {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	sourceFileStat, err := os.Stat(s.srcPath)
+func (fp *filePair) copy() error {
+	fp.mu.Lock()
+	defer fp.mu.Unlock()
+	sourceFileStat, err := os.Stat(fp.srcPath)
 	if err != nil {
 		return err
 	}
 
 	if !sourceFileStat.Mode().IsRegular() {
-		return fmt.Errorf("%s is not a regular file", s.srcPath)
+		return fmt.Errorf("%s is not a regular file", fp.srcPath)
 	}
 
-	source, err := os.Open(s.srcPath)
+	source, err := os.Open(fp.srcPath)
 	if err != nil {
 		return err
 	}
 	defer source.Close() // nolint
 
-	destination, err := os.Create(s.dstPath)
+	destination, err := os.Create(fp.dstPath)
 	if err != nil {
 		return err
 	}
@@ -239,10 +265,10 @@ func (s *filePair) copy() error {
 	return err
 }
 
-func (s *filePair) stripModeline(lnum uint8) string {
-	inF, err := os.Open(s.srcPath)
-	errutils.Epanicf("Can not open '%s': %s", s.srcPath, err) // nolint
-	defer inF.Close()                                         // nolint
+func (fp *filePair) stripModeline(lnum uint8) string {
+	inF, err := os.Open(fp.srcPath)
+	errutils.Epanicf("Can not open '%s': %s", fp.srcPath, err) // nolint
+	defer inF.Close()                                          // nolint
 
 	tmpdir := os.Getenv("TMPDIR")
 	outF, err := ioutil.TempFile(tmpdir, "prjstart-")
@@ -268,31 +294,28 @@ func (s *filePair) stripModeline(lnum uint8) string {
 	return outF.Name()
 }
 
-func (s *filePair) render(mline uint8) error {
-	s.mu.Lock()
-	defer s.mu.Unlock()
+func (fp *filePair) render(mline uint8) error {
+	fp.mu.Lock()
+	defer fp.mu.Unlock()
 
 	// Remove modeline
-	tempPath := s.stripModeline(mline)
+	tempPath := fp.stripModeline(mline)
 	defer func() {
 		os.Remove(tempPath)
 	}()
 
-	template.File2File(tempPath, s.dstPath, globals.Vars)
+	File2File(tempPath, fp.dstPath, fp.variables)
 	return nil
 }
 
 // hasModeLine scans the first mlen lines for a modeline
 // returns MLnone, MLrender depending on defined action
-func (s *filePair) hasModeLine() (action int, lnum uint8) {
+func (fp *filePair) hasModeLine() (action int, lnum uint8) {
 	action = MLnone
-	len := s.mlen
-	if len == 0 {
-		len = 5
-	}
+	len := fp.mlen
 	mlactions := hasML{}.Init()
-	source, err := os.Open(s.srcPath)
-	errutils.Efatalf("Can not open file %s: %v", s.srcPath, err)
+	source, err := os.Open(fp.srcPath)
+	errutils.Efatalf("Can not open file %s: %v", fp.srcPath, err)
 
 	defer source.Close()
 	scner := bufio.NewScanner(source)
@@ -362,11 +385,43 @@ func scanLines(data []byte, atEOF bool) (advance int, token []byte, err error) {
 }
 
 // renderDir scans directory names for template markers and renders the directory path as a template
-func renderDir(path string, prjvars *template.TmplVars) string {
+func renderDir(path string, prjvars *Variables) string {
 	regex := regexp.MustCompile(`{{[^}}]+}}`)
 	if !regex.MatchString(path) {
 		return path
 	}
-	path = template.Txt2String(path, prjvars)
+	path = Txt2String(path, prjvars)
 	return path
+}
+
+// Variables consists of the variables that are to be passed to the template
+type Variables struct {
+	projectDesc map[string]string // Parallel project map holding descriptions
+	Env         map[string]string // Environment variables
+	Project     map[string]string // Project variables
+}
+
+// NewTmplVars sets up environment and project variables to be passed through to the text template
+func NewTmplVars() *Variables {
+	tv := Variables{}
+	tv.genVarsEnv()
+	tv.Project = map[string]string{}
+	return &tv
+}
+
+// SetProjectVar sets a project variable
+func (v *Variables) SetProjectVar(name, value string) {
+	v.Project[name] = value
+}
+
+func (v *Variables) genVarsEnv() map[string]string {
+	envMap := make(map[string]string)
+
+	for _, v := range os.Environ() {
+		splitVars := strings.Split(v, "=")
+		envMap[splitVars[0]] = splitVars[1]
+	}
+	v.Env = envMap
+
+	return envMap
 }

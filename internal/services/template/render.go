@@ -3,26 +3,26 @@ package template
 import (
 	"io/ioutil"
 	"os"
-	"text/template"
+	tt "text/template"
 
 	"github.com/crosseyed/prjstart/internal/utils/errutils"
 )
 
 // File2File takes a src file populates a dst file with the results
 // of the template populated with variables
-func File2File(src, dst string, vars *TmplVars) {
+func File2File(src, dst string, vars *Variables) {
 	b, err := ioutil.ReadFile(src)
 	errutils.Elogf("Can not open template file %s for reading: %v", src, err)
 	Txt2File(string(b), dst, vars)
 }
 
 // Txt2File takes template text tmpltxt and outputs to dst file
-func Txt2File(tmpltxt, dst string, vars *TmplVars) {
+func Txt2File(tmpltxt, dst string, vars *Variables) {
 	td := os.Getenv("TEMP")
 	f, err := ioutil.TempFile(td, "prjstart-*")
 	errutils.Epanicf("Error creating tempfile %v", err)
 
-	t := template.Must(template.New("tmpltxt").Parse(tmpltxt))
+	t := tt.Must(tt.New("tmpltxt").Parse(tmpltxt))
 
 	errutils.Epanicf("Error parsing variables: %v", err)
 	err = t.Execute(f, vars)
@@ -34,7 +34,7 @@ func Txt2File(tmpltxt, dst string, vars *TmplVars) {
 }
 
 // Txt2String takes a tmpltxt string and generates a string output
-func Txt2String(tmpltxt string, vars *TmplVars) string {
+func Txt2String(tmpltxt string, vars *Variables) string {
 	td := os.Getenv("TEMP")
 	f, err := ioutil.TempFile(td, "prjstart-*")
 	errutils.Epanicf("Error creating tempfile %v", err)
