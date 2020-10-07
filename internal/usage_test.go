@@ -31,12 +31,3 @@ func TestGetOptMainInstall(t *testing.T) {
 	assert.False(t, o.Start)
 	assert.False(t, o.List)
 }
-
-func TestOptStart(t *testing.T) {
-	t.Skip("Expected fail: Seems to be an issue with docopts")
-	args := []string{"prjstart", "start", "template", "project"}
-	o := GetOptStart(args)
-	assert.True(t, o.Start)
-	assert.Equal(t, "mytemplate", o.Tmpl)
-	assert.Equal(t, "myproject", o.Project)
-}

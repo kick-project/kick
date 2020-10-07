@@ -1,4 +1,4 @@
-package subcmds
+package listcmd
 
 import (
 	"fmt"
@@ -6,11 +6,43 @@ import (
 	"sort"
 	"text/tabwriter"
 
-	"github.com/crosseyed/prjstart/internal"
 	"github.com/crosseyed/prjstart/internal/resources/config"
 	"github.com/crosseyed/prjstart/internal/settings"
+	"github.com/crosseyed/prjstart/internal/utils/errutils"
+	"github.com/docopt/docopt-go"
 	terminal "github.com/wayneashleyberry/terminal-dimensions"
 )
+
+var usageDoc = `List templates
+
+Usage:
+    prjstart list [--url]
+    prjstart list [--vars]
+
+Options:
+    -h --help     Print help.
+    -u --url      Print URL.
+    -v --vars     Show Variables.
+`
+
+type OptList struct {
+	List   bool `docopt:"list"`
+	Local  bool `docopt:"--local"`
+	Remote bool `docopt:"--remote"`
+	All    bool `docopt:"--all"`
+	URL    bool `docopt:"--url"`
+	Vars   bool `docopt:"--vars"`
+}
+
+// GetOptStart parse start options from document text
+func GetOptList(args []string) *OptList {
+	opts, err := docopt.ParseArgs(usageDoc, args, "")
+	errutils.Epanicf("Can not parse usage doc: %s", err) // nolint
+	o := new(OptList)
+	err = opts.Bind(o)
+	errutils.Epanicf("Can not bind to structure: %s", err) // nolint
+	return o
+}
 
 type listCmd struct {
 	conf *config.File
@@ -18,7 +50,7 @@ type listCmd struct {
 
 // List starts the list sub command
 func List(args []string, s *settings.Settings) int {
-	opts := internal.GetOptList(args)
+	opts := GetOptList(args)
 	lc := listCmd{
 		conf: s.ConfigFile(),
 	}
@@ -39,9 +71,9 @@ func List(args []string, s *settings.Settings) int {
 }
 
 // ListLocal lists local templates
-func (lc *listCmd) ListLocal(opts *internal.OptList) int {
+func (lc *listCmd) ListLocal(opts *OptList) int {
 	switch {
-	case opts.Url:
+	case opts.URL:
 		lc.VerboseOutput()
 	default:
 		lc.ShortOutput()
@@ -96,12 +128,12 @@ func (lc *listCmd) VerboseOutput() {
 }
 
 func (lc *listCmd) VariablesLongOutput() int {
-	w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.TabIndent)
-	prjvars := internal.SetVars(&internal.OptStart{})
-	for _, item := range prjvars.GetDescriptions() {
-		fmt.Fprintf(w, ".Project.%s\t'%s'\n", item[0], item[1])
-		w.Flush()
-	}
+	// w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.TabIndent)
+	// prjvars := internal.SetVars(&start.OptStart{})
+	// for _, item := range prjvars.GetDescriptions() {
+	// 	fmt.Fprintf(w, ".Project.%s\t'%s'\n", item[0], item[1])
+	// 	w.Flush()
+	// }
 	return 0
 }
 

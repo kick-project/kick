@@ -1,4 +1,4 @@
-package subcmds
+package listcmd
 
 import (
 	"path/filepath"

@@ -7,7 +7,8 @@ import (
 
 	"github.com/crosseyed/prjstart/internal"
 	"github.com/crosseyed/prjstart/internal/settings"
-	"github.com/crosseyed/prjstart/internal/subcmds"
+	"github.com/crosseyed/prjstart/internal/subcmds/listcmd"
+	"github.com/crosseyed/prjstart/internal/subcmds/start"
 	"github.com/crosseyed/prjstart/internal/utils"
 	"github.com/joho/godotenv"
 )
@@ -20,11 +21,9 @@ func main() {
 	o := internal.GetOptMain(args)
 	switch {
 	case o.Start:
-		utils.Exit(subcmds.Start(args[1:], s))
+		utils.Exit(start.Start(args[1:], s))
 	case o.List:
-		utils.Exit(subcmds.List(args[1:], s))
-	case o.Install:
-		utils.Exit(subcmds.Install(args[1:], s))
+		utils.Exit(listcmd.List(args[1:], s))
 	}
 	utils.Exit(255)
 }

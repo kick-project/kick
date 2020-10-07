@@ -39,29 +39,6 @@ Options:
     install       Install a template.
 `
 
-var UsageStart = `Generate project scaffolding
-
-Usage:
-    prjstart start <template> <project>
-
-Options:
-    -h --help     Print help.
-    <template>    Template name.
-    <project>     Project name.
-`
-
-var UsageList = `List templates
-
-Usage:
-    prjstart list [--url]
-    prjstart list [--vars]
-
-Options:
-    -h --help     Print help.
-    -u --url      Print URL.
-    -v --vars     Show Variables.
-`
-
 var UsageSearch = `Search for templates
 
 Usage:
@@ -133,39 +110,6 @@ func GetOptMain(args []string) *OptMain {
 	}
 	errutils.Epanicf("Can not parse usage doc: %s", err) // nolint
 	o := new(OptMain)
-	err = opts.Bind(o)
-	errutils.Epanicf("Can not bind to structure: %s", err) // nolint
-	return o
-}
-
-type OptStart struct {
-	Start   bool   `docopt:"start"`
-	Tmpl    string `docopt:"<template>"`
-	Project string `docopt:"<project>"`
-}
-
-func GetOptStart(args []string) *OptStart {
-	opts, err := docopt.ParseArgs(UsageStart, args, "")
-	errutils.Epanicf("Can not parse usage doc: %s", err) // nolint
-	o := new(OptStart)
-	err = opts.Bind(o)
-	errutils.Epanicf("Can not bind to structure: %s", err) // nolint
-	return o
-}
-
-type OptList struct {
-	List   bool `docopt:"list"`
-	Local  bool `docopt:"--local"`
-	Remote bool `docopt:"--remote"`
-	All    bool `docopt:"--all"`
-	Url    bool `docopt:"--url"`
-	Vars   bool `docopt:"--vars"`
-}
-
-func GetOptList(args []string) *OptList {
-	opts, err := docopt.ParseArgs(UsageList, args, "")
-	errutils.Epanicf("Can not parse usage doc: %s", err) // nolint
-	o := new(OptList)
 	err = opts.Bind(o)
 	errutils.Epanicf("Can not bind to structure: %s", err) // nolint
 	return o

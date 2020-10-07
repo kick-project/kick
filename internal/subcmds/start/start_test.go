@@ -1,4 +1,4 @@
-package subcmds
+package start
 
 import (
 	"io/ioutil"
@@ -7,6 +7,7 @@ import (
 
 	"github.com/crosseyed/prjstart/internal/settings"
 	"github.com/crosseyed/prjstart/internal/utils"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestStart(t *testing.T) {
@@ -17,4 +18,13 @@ func TestStart(t *testing.T) {
 	args := []string{"start", "tmpl", path}
 	s := settings.GetSettings(home)
 	Start(args, s)
+}
+
+func TestGetOptStart(t *testing.T) {
+	t.Skip("Expected fail: Seems to be an issue with docopts")
+	args := []string{"prjstart", "start", "template", "project"}
+	o := GetOptStart(args)
+	assert.True(t, o.Start)
+	assert.Equal(t, "mytemplate", o.Tmpl)
+	assert.Equal(t, "myproject", o.Project)
 }

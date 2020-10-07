@@ -4,11 +4,12 @@ import (
 	"path/filepath"
 
 	"github.com/crosseyed/prjstart/internal/services/template/variables"
+	"github.com/crosseyed/prjstart/internal/subcmds/start"
 )
 
 type PrjVars [][]string
 
-func SetVars(opts *OptStart) PrjVars {
+func SetVars(opts *start.OptStart) PrjVars {
 	data := [][]string{
 		{"NAME", filepath.Base(opts.Project), "Project Name derived from target directory"},
 	}
