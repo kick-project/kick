@@ -1,3 +1,9 @@
+// Package settings is a package that implements Dependency Injection through
+// methods that create the options needed for structs to be created. See
+// GetSettings for more information.
+//
+// This package uses anonymous structs as the injection options, this is to
+// avoid issues with import loops when importing settings into *_test.go files.
 package settings
 
 import (
@@ -18,8 +24,7 @@ import (
 
 // Settings provides settings for resources & services.
 type Settings struct {
-	DBConfig        *DBConfig
-	File            *config.File
+	confFile        *config.File
 	db              *sql.DB
 	dbdriver        string
 	dbdsn           string
@@ -30,7 +35,21 @@ type Settings struct {
 	pathUserConf    string
 }
 
-// GetSettings get settings
+// GetSettings get settings using the supplied "home" directory option. Any
+// Dependency Injection (DI) configuration created by settings is then
+// contextualised by the home environment variable. for instance when home is
+// set the paths '{{home}}/prjstart.yml",
+// "{{home}}/prjstart/metadata/metadata.db", "{{home}}.prjstart/templates" (etc)
+// are then factored in when creating dependency injections.
+//
+// If inialisation is required then the initialize package can be used. For example
+//
+//   set := GetSettings("/tmp/tmp_home"); init := initialize.New(set.Initialize())
+//
+// will create the structures under "/tmp/tmp_home"
+//
+// If home is an empty string then GetSettings defaults to the $HOME environment
+// variable. This is also known as production mode.
 func GetSettings(home string) *Settings {
 	home = dfaults.String(os.Getenv("HOME"), home)
 	dbdriver := "sqlite3"
@@ -53,16 +72,16 @@ func GetSettings(home string) *Settings {
 
 // ConfigFile load settings from configuration file
 func (s *Settings) ConfigFile() *config.File {
-	if s.File != nil {
-		return s.File
+	if s.confFile != nil {
+		return s.confFile
 	}
 	conf := config.New(config.Options{
 		Home: s.home,
 		Path: s.pathUserConf,
 	})
 	conf.Load()
-	s.File = conf
-	return s.File
+	s.confFile = conf
+	return s.confFile
 }
 
 // Template creates settings for template.New
@@ -105,6 +124,18 @@ func (s *Settings) Metadata() (opts struct {
 	MetadataDir string
 	DB          *sql.DB
 }) {
+	db := s.getDB()
+	opts.ConfigPath = s.ConfigFile()
+	opts.MetadataDir = s.pathMetadataDir
+	opts.DB = db
+	return opts
+}
+
+//
+// Misc
+//
+
+func (s *Settings) getDB() *sql.DB {
 	if s.db == nil {
 		db, err := sql.Open(s.dbdriver, s.dbdsn)
 		if err != nil {
@@ -112,33 +143,5 @@ func (s *Settings) Metadata() (opts struct {
 		}
 		s.db = db
 	}
-	opts.ConfigPath = s.ConfigFile()
-	opts.MetadataDir = s.pathMetadataDir
-	opts.DB = s.db
-	return opts
-}
-
-//
-// Database configuration
-//
-
-// DBConfig Database configuration
-type DBConfig struct {
-	SQLitePath string // Path to db file
-	Driver     string
-	DSN        string
-	db         *sql.DB
-}
-
-// DB returns the *sql.DB database object
-func (s DBConfig) DB() *sql.DB {
-	if s.db != nil {
-		return s.db
-	}
-	db, err := sql.Open(s.Driver, s.DSN)
-	if err != nil {
-		panic(err)
-	}
-	s.db = db
-	return db
+	return s.db
 }

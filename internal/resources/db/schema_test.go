@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/crosseyed/prjstart/internal/utils"
+	_ "github.com/mattn/go-sqlite3" // Required by 'database/sql'
 	"github.com/stretchr/testify/assert"
 )
 
