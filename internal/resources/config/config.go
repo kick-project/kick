@@ -1,19 +1,12 @@
 package config
 
 import (
-	"io/ioutil"
-	"os"
-	"path/filepath"
 	"strings"
 
-	"github.com/crosseyed/prjstart/internal/utils/dfaults"
-	"github.com/crosseyed/prjstart/internal/utils/errutils"
 	"github.com/crosseyed/prjstart/internal/utils/marshal"
-	"gopkg.in/yaml.v2"
 )
 
 var userconfig string = ".prjstart.yml"
-var userconfigdir string = ".prjstart"
 
 // File configuration as loaded from the configuration file
 type File struct {
@@ -58,24 +51,4 @@ type TemplateStub struct {
 // Load loads configuration file from disk
 func (f *File) Load() {
 	marshal.UnmarshalFile(f, f.Path)
-}
-
-// Load loads configuration from disk
-func Load(homedir, prjstart string) *File {
-	homedir = dfaults.String(os.Getenv("HOME"), homedir)
-	prjstart = dfaults.String(userconfig, prjstart)
-	conffile := filepath.Join(homedir, prjstart)
-	if _, err := os.Stat(conffile); os.IsNotExist(err) {
-		return nil
-	}
-
-	f, err := ioutil.ReadFile(conffile)
-	errutils.Efatalf("Can not read file %s: %v", conffile, err)
-	conf := File{
-		Home: homedir,
-	}
-
-	err = yaml.Unmarshal([]byte(f), &conf)
-	errutils.Efatalf("Can not unmarshal file %s: %v", conffile, err)
-	return &conf
 }

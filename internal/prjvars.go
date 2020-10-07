@@ -3,7 +3,7 @@ package internal
 import (
 	"path/filepath"
 
-	"github.com/crosseyed/prjstart/internal/services/template"
+	"github.com/crosseyed/prjstart/internal/services/template/variables"
 )
 
 type PrjVars [][]string
@@ -15,8 +15,8 @@ func SetVars(opts *OptStart) PrjVars {
 	return data
 }
 
-func (prjvars PrjVars) GetVars() *template.Variables {
-	vars := template.NewTmplVars()
+func (prjvars PrjVars) GetVars() *variables.Variables {
+	vars := variables.NewTmplVars()
 	for _, v := range prjvars {
 		vars.SetProjectVar(v[0], v[1])
 	}

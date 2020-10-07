@@ -25,25 +25,25 @@ type Metadata struct {
 	db           *sql.DB
 }
 
-// Options options to New
+// Options options for metadata.New
 type Options struct {
-	ConfigFile   *config.File // Contents of the main config file in code
-	MetadataPath string
-	DB           *sql.DB
+	ConfigPath  *config.File // Contents of the main config file in code
+	MetadataDir string
+	DB          *sql.DB
 }
 
 // New create an instance of Metadata.
 // Panics if opts.ConfigFile is nil or DBPath is an empty string.
 func New(opts Options) *Metadata {
-	if opts.ConfigFile == nil {
+	if opts.ConfigPath == nil {
 		panic("opts.ConfigFile can not be nil")
 	}
-	if opts.MetadataPath == "" {
+	if opts.MetadataDir == "" {
 		panic("opts.MetadataPath can not be an empty string")
 	}
 	m := &Metadata{
-		conf:         opts.ConfigFile,
-		metadatapath: opts.MetadataPath,
+		conf:         opts.ConfigPath,
+		metadatapath: opts.MetadataDir,
 		db:           opts.DB,
 	}
 	return m

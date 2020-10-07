@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/crosseyed/prjstart/internal/file"
+	"github.com/crosseyed/prjstart/internal/utils/file"
 	"gopkg.in/yaml.v2"
 )
 

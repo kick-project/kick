@@ -1,54 +1,30 @@
 package metadata
 
 import (
-	"database/sql"
 	"fmt"
 	"io/ioutil"
 	"os"
 	fp "path/filepath"
 	"testing"
 
-	"github.com/crosseyed/prjstart/internal/resources/config"
 	"github.com/crosseyed/prjstart/internal/services/initialize"
+	"github.com/crosseyed/prjstart/internal/settings"
 	"github.com/crosseyed/prjstart/internal/utils"
-	"github.com/crosseyed/prjstart/internal/utils/errutils"
 	"syreclabs.com/go/faker"
 )
 
 func TestBuild(t *testing.T) {
-	initIt()
-	conf := &config.File{
-		Home: fp.Join(utils.TempDir(), "home"),
-		MasterURLs: []string{
-			"http://127.0.0.1:5000/master1.git",
-		},
-	}
-	dbfile := fp.Clean(fmt.Sprintf("%s/home/.prjstart/metadata/metadata.db", utils.TempDir()))
-	dsn := fmt.Sprintf("file:%s?_foreign_keys=on", dbfile)
-	dbconn, err := sql.Open("sqlite3", dsn)
-	errutils.Efatalf("%w", err)
-	m := New(Options{
-		ConfigFile:   conf,
-		MetadataPath: fp.Clean(fmt.Sprintf("%s/home/.prjstart/metadata", utils.TempDir())),
-		DB:           dbconn,
-	})
+	home := fp.Join(utils.TempDir(), "home")
+	s := settings.GetSettings(home)
+	initIt(s)
+	opts := s.Metadata()
+	m := New(opts)
 	m.Build()
 }
 
-func initIt() {
-	tmpdir := utils.TempDir()
-	confpath := fp.Clean(fmt.Sprintf("%s/home/.prjstart.yml", tmpdir))
-	templatedir := fp.Clean(fmt.Sprintf("%s/home/.prjstart/project", tmpdir))
-	metadatadir := fp.Clean(fmt.Sprintf("%s/home/.prjstart/metadata", tmpdir))
-	metadatadb := fp.Clean(fmt.Sprintf("%s/home/.prjstart/metadata/metadata.db", tmpdir))
-	i := initialize.New(initialize.Options{
-		ConfigPath:  confpath,
-		TemplateDir: templatedir,
-		MetadataDir: metadatadir,
-		SQLiteFile:  metadatadb,
-		DBDriver:    "sqlite3",
-		DSN:         fmt.Sprintf("file:%s?_foreign_key=on", metadatadb),
-	})
+func initIt(s *settings.Settings) {
+	opts := s.Initialize()
+	i := initialize.New(initialize.Options(opts))
 	i.Init()
 }
 

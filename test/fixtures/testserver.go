@@ -109,7 +109,13 @@ func (s *TestServerStruct) gitServer(dir string) *http.Server {
 }
 
 func (s *TestServerStruct) loadConfig() {
-	s.config = config.Load(s.home, "")
+	conf := config.New(config.Options{
+		Home: s.home,
+		Path: filepath.Join(s.home, ".prjstart.yml"),
+	})
+	conf.Load()
+
+	s.config = conf
 }
 
 func StartTestServer(home string, servpath string) {

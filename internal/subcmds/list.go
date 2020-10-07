@@ -7,7 +7,6 @@ import (
 	"text/tabwriter"
 
 	"github.com/crosseyed/prjstart/internal"
-	"github.com/crosseyed/prjstart/internal/globals"
 	"github.com/crosseyed/prjstart/internal/resources/config"
 	"github.com/crosseyed/prjstart/internal/settings"
 	terminal "github.com/wayneashleyberry/terminal-dimensions"
@@ -88,7 +87,7 @@ func (lc *listCmd) shortOutput(data []string) {
 
 func (lc *listCmd) VerboseOutput() {
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.TabIndent)
-	templates := globals.Config.TemplateURLs
+	templates := lc.conf.TemplateURLs
 	sort.Sort(config.SortByName(templates))
 	for _, stub := range templates {
 		fmt.Fprintf(w, "%s\t%s\n", stub.Name, stub.URL)

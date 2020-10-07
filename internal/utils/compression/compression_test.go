@@ -4,8 +4,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/crosseyed/prjstart/internal/checksum"
 	"github.com/crosseyed/prjstart/internal/utils"
+	"github.com/crosseyed/prjstart/internal/utils/checksum"
 )
 
 func TestCompress(t *testing.T) {

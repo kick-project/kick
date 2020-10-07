@@ -3,6 +3,7 @@ module github.com/crosseyed/prjstart
 go 1.14
 
 require (
+	github.com/aws/aws-sdk-go v1.35.4
 	github.com/docopt/docopt-go v0.0.0-20180111231733-ee0de3bc6815
 	github.com/go-git/go-git/v5 v5.1.0
 	github.com/joho/godotenv v1.3.0

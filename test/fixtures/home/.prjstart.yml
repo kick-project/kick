@@ -1,5 +1,5 @@
 masters:
-  - http://127.0.0.1:5000/set1.git
+  - http://127.0.0.1:5000/master1.git
 
 templates:
   - name: tmpl

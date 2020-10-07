@@ -16,6 +16,7 @@ import (
 	"github.com/crosseyed/prjstart/internal/gitclient"
 	plumb "github.com/crosseyed/prjstart/internal/gitclient/plumbing"
 	"github.com/crosseyed/prjstart/internal/resources/config"
+	"github.com/crosseyed/prjstart/internal/services/template/variables"
 	"github.com/crosseyed/prjstart/internal/utils"
 	"github.com/crosseyed/prjstart/internal/utils/errutils"
 )
@@ -37,7 +38,7 @@ type (
 		dest        string
 		builddir    string
 		config      *config.File
-		variables   *Variables
+		variables   *variables.Variables
 		templateDir string
 		mllen       uint8
 	}
@@ -45,7 +46,7 @@ type (
 	// Options options to template
 	Options struct {
 		Config    *config.File
-		Variables *Variables
+		Variables *variables.Variables
 
 		// TemplateDir is the directory to store the downloaded templates.
 		TemplateDir string
@@ -81,11 +82,6 @@ func (t *Template) buildDir(id string) {
 	d, err := ioutil.TempDir(os.Getenv("TEMP"), fmt.Sprintf("prjstart-%s-", id))
 	errutils.Epanicf("Build Error: %v", err)
 	t.builddir = d
-}
-
-// SetVariables
-func (t *Template) SetVariables() {
-
 }
 
 // SetSrcDest sets the source template and destination path where the project structure
@@ -189,7 +185,7 @@ type filePair struct {
 	srcPath   string // Source path
 	dstPath   string // Destination path
 	mlen      uint8  // Mode line length
-	variables *Variables
+	variables *variables.Variables
 	mu        sync.Mutex
 }
 
@@ -385,43 +381,11 @@ func scanLines(data []byte, atEOF bool) (advance int, token []byte, err error) {
 }
 
 // renderDir scans directory names for template markers and renders the directory path as a template
-func renderDir(path string, prjvars *Variables) string {
+func renderDir(path string, prjvars *variables.Variables) string {
 	regex := regexp.MustCompile(`{{[^}}]+}}`)
 	if !regex.MatchString(path) {
 		return path
 	}
 	path = Txt2String(path, prjvars)
 	return path
-}
-
-// Variables consists of the variables that are to be passed to the template
-type Variables struct {
-	projectDesc map[string]string // Parallel project map holding descriptions
-	Env         map[string]string // Environment variables
-	Project     map[string]string // Project variables
-}
-
-// NewTmplVars sets up environment and project variables to be passed through to the text template
-func NewTmplVars() *Variables {
-	tv := Variables{}
-	tv.genVarsEnv()
-	tv.Project = map[string]string{}
-	return &tv
-}
-
-// SetProjectVar sets a project variable
-func (v *Variables) SetProjectVar(name, value string) {
-	v.Project[name] = value
-}
-
-func (v *Variables) genVarsEnv() map[string]string {
-	envMap := make(map[string]string)
-
-	for _, v := range os.Environ() {
-		splitVars := strings.Split(v, "=")
-		envMap[splitVars[0]] = splitVars[1]
-	}
-	v.Env = envMap
-
-	return envMap
 }

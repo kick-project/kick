@@ -5,19 +5,20 @@ import (
 	"os"
 	tt "text/template"
 
+	"github.com/crosseyed/prjstart/internal/services/template/variables"
 	"github.com/crosseyed/prjstart/internal/utils/errutils"
 )
 
 // File2File takes a src file populates a dst file with the results
 // of the template populated with variables
-func File2File(src, dst string, vars *Variables) {
+func File2File(src, dst string, vars *variables.Variables) {
 	b, err := ioutil.ReadFile(src)
 	errutils.Elogf("Can not open template file %s for reading: %v", src, err)
 	Txt2File(string(b), dst, vars)
 }
 
 // Txt2File takes template text tmpltxt and outputs to dst file
-func Txt2File(tmpltxt, dst string, vars *Variables) {
+func Txt2File(tmpltxt, dst string, vars *variables.Variables) {
 	td := os.Getenv("TEMP")
 	f, err := ioutil.TempFile(td, "prjstart-*")
 	errutils.Epanicf("Error creating tempfile %v", err)
@@ -34,7 +35,7 @@ func Txt2File(tmpltxt, dst string, vars *Variables) {
 }
 
 // Txt2String takes a tmpltxt string and generates a string output
-func Txt2String(tmpltxt string, vars *Variables) string {
+func Txt2String(tmpltxt string, vars *variables.Variables) string {
 	td := os.Getenv("TEMP")
 	f, err := ioutil.TempFile(td, "prjstart-*")
 	errutils.Epanicf("Error creating tempfile %v", err)
