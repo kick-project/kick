@@ -10,8 +10,8 @@ var userconfig string = ".prjstart.yml"
 
 // File configuration as loaded from the configuration file
 type File struct {
-	Path         string         // Path to configuration file
-	Home         string         // Home directory
+	Path         string         `yaml:"-"`         // Path to configuration file
+	Home         string         `yaml:"-"`         // Home directory
 	MasterURLs   []string       `yaml:"masters"`   // URLs to master git repos
 	TemplateURLs []TemplateStub `yaml:"templates"` // URLs to template git repos
 }
@@ -51,4 +51,9 @@ type TemplateStub struct {
 // Load loads configuration file from disk
 func (f *File) Load() {
 	marshal.UnmarshalFile(f, f.Path)
+}
+
+// Save saves configuration file to disk
+func (f *File) Save() {
+	marshal.MarshalFile(f, f.Path)
 }

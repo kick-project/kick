@@ -15,18 +15,21 @@ var UsageMain = `Generate project scaffolding from a predefined set of templates
 Usage:
     prjstart start
     prjstart list
+    prjstart init
 
 Options:
     -h --help     Print help.
     -v --version  Print version.
     start         Start a project.
     list          List projects/variables.
+    init          Initialize configuration.
 `
 var UsageMainFFREMOTE = `Generate project scaffolding from a predefined set of templates
 
 Usage:
     prjstart start
     prjstart list
+    prjstart init
     prjstart search
     prjstart install
 
@@ -35,6 +38,7 @@ Options:
     -v --version  Print version.
     start         Start a project.
     list          List available project options.
+    init          Initialize configuration.
     search        Search for available templates.
     install       Install a template.
 `
@@ -42,11 +46,11 @@ Options:
 var UsageSearch = `Search for templates
 
 Usage:
-	prjstart search [--long] <template>
+    prjstart search [--long] <template>
 
 Options:
-	-h --help     Print help.
-	-l --long     Long output.
+    -h --help     Print help.
+    -l --long     Long output.
 `
 
 var UsageListRemoteFeature = `List templates
@@ -84,6 +88,7 @@ Options:
 type OptMain struct {
 	Start   bool `docopt:"start"`
 	List    bool `docopt:"list"`
+	Init    bool `docopt:"init"`
 	Search  bool `docopt:"search"`
 	Install bool `docopt:"install"`
 }

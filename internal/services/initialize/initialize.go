@@ -5,63 +5,98 @@ import (
 	"os"
 	fp "path/filepath"
 
+	"github.com/crosseyed/prjstart/internal/resources/config"
 	"github.com/crosseyed/prjstart/internal/resources/db"
 	"github.com/crosseyed/prjstart/internal/utils/errutils"
 )
 
-// Init is responsibile for initializing all disk paths
-type Init struct {
+// Initialize is responsibile for initializing all disk paths
+type Initialize struct {
+	configfile  *config.File
 	confpath    string
-	templatedir string
-	metadatadir string
-	sqlitefile  string
 	driver      string
 	dsn         string
+	homedir     string
+	metadatadir string
+	sqlitefile  string
+	templatedir string
 }
 
 // Options options to New
 type Options struct {
-	ConfigPath  string // Path to configuration file
-	DBDriver    string // SQL Driver to use
-	DSN         string // SQL DSN
-	MetadataDir string // Path to metadata directory
-	SQLiteFile  string // Path to DB file
-	TemplateDir string // Path to template directory
+	ConfigFile  *config.File // Initialized config file
+	ConfigPath  string       // Path to configuration file
+	DBDriver    string       // SQL Driver to use
+	DSN         string       // SQL DSN
+	HomeDir     string       // Path to home directory
+	MetadataDir string       // Path to metadata directory
+	SQLiteFile  string       // Path to DB file
+	TemplateDir string       // Path to template directory
 }
 
 // New creates a new *Init object which is responsibile for initializing all directory structures
-func New(opts Options) *Init {
-	i := &Init{
+func New(opts Options) *Initialize {
+	init := &Initialize{
+		configfile:  opts.ConfigFile,
 		confpath:    opts.ConfigPath,
 		templatedir: opts.TemplateDir,
+		homedir:     opts.HomeDir,
 		metadatadir: opts.MetadataDir,
 		sqlitefile:  opts.SQLiteFile,
 		driver:      opts.DBDriver,
 		dsn:         opts.DSN,
 	}
-	return i
+	return init
 }
 
 // Init initialize everything.
-func (i *Init) Init() {
+func (i *Initialize) Init() {
 	i.InitPaths()
 	i.InitMetadata()
+	i.InitConfig()
 }
 
 // InitPaths initialize paths.
-func (i *Init) InitPaths() {
+func (i *Initialize) InitPaths() {
 	confdir := fp.Dir(i.confpath)
 	dbdir := fp.Dir(i.sqlitefile)
 	mkDirs([]string{confdir, dbdir, i.templatedir, i.metadatadir})
 }
 
 // InitMetadata initialize metadata.
-func (i *Init) InitMetadata() {
+func (i *Initialize) InitMetadata() {
 	dbdir := fp.Dir(i.sqlitefile)
 	mkDirs(dbdir)
 	dbconn, err := sql.Open(i.driver, i.dsn)
 	errutils.Epanicf("can not connect to database: %w", err)
 	db.CreateSchema(dbconn)
+}
+
+// InitConfig initialize configuration file.
+func (i *Initialize) InitConfig() {
+	_, err := os.Stat(i.confpath)
+	if os.IsNotExist(err) {
+		f, err := os.Create(i.confpath)
+		errutils.Elogf("error: %w", err)
+		defer f.Close()
+		_, err = f.WriteString(`---
+## Example setup for template paths
+# templates:
+#     - name: pypi
+#       url: ~/path/to/your/template
+#     - name: go
+#       url: git@github.com:user/yourtemplate.git
+`)
+
+	} else if err != nil {
+		errutils.Epanicf("can not save configuration file: %w", err)
+	}
+	// TODO: Marshal with welcome content
+	//if _, err := os.Stat(i.confpath); os.IsNotExist(err) {
+	//	i.configfile.Save()
+	//} else if err != nil {
+	//	errutils.Epanicf("can not save configuration file: %w", err)
+	//}
 }
 
 func mkDirs(i interface{}) {

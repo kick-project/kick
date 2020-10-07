@@ -7,6 +7,7 @@ import (
 
 	"github.com/crosseyed/prjstart/internal"
 	"github.com/crosseyed/prjstart/internal/settings"
+	"github.com/crosseyed/prjstart/internal/subcmds/initcmd"
 	"github.com/crosseyed/prjstart/internal/subcmds/listcmd"
 	"github.com/crosseyed/prjstart/internal/subcmds/start"
 	"github.com/crosseyed/prjstart/internal/utils"
@@ -24,6 +25,8 @@ func main() {
 		utils.Exit(start.Start(args[1:], s))
 	case o.List:
 		utils.Exit(listcmd.List(args[1:], s))
+	case o.Init:
+		utils.Exit(initcmd.InitCmd(args[1:], s))
 	}
 	utils.Exit(255)
 }

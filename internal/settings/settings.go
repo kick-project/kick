@@ -102,16 +102,24 @@ func (s *Settings) Template() (opts struct {
 
 // Initialize creates settings for initialize.New
 func (s *Settings) Initialize() (opts struct {
-	ConfigPath  string // Path to configuration file
-	DBDriver    string // SQL Driver to use
-	DSN         string // SQL DSN
-	MetadataDir string // Path to metadata directory
-	SQLiteFile  string // Path to DB file
-	TemplateDir string // Path to template directory
+	ConfigFile  *config.File // Initialized config file
+	ConfigPath  string       // Path to configuration file
+	DBDriver    string       // SQL Driver to use
+	DSN         string       // SQL DSN
+	HomeDir     string       // Path to home directory
+	MetadataDir string       // Path to metadata directory
+	SQLiteFile  string       // Path to DB file
+	TemplateDir string       // Path to template directory
 }) {
+	conf := config.New(config.Options{
+		Home: s.home,
+		Path: s.pathUserConf,
+	})
+	opts.ConfigFile = conf
 	opts.ConfigPath = s.pathUserConf
 	opts.DBDriver = s.dbdriver
 	opts.DSN = s.dbdsn
+	opts.HomeDir = s.home
 	opts.MetadataDir = s.pathMetadataDir
 	opts.SQLiteFile = s.sqlitedb
 	opts.TemplateDir = s.pathTemplateDir
