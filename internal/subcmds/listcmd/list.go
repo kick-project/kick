@@ -8,8 +8,7 @@ import (
 
 	"github.com/crosseyed/prjstart/internal/resources/config"
 	"github.com/crosseyed/prjstart/internal/settings"
-	"github.com/crosseyed/prjstart/internal/utils/errutils"
-	"github.com/docopt/docopt-go"
+	"github.com/crosseyed/prjstart/internal/utils/options"
 	terminal "github.com/wayneashleyberry/terminal-dimensions"
 )
 
@@ -34,23 +33,14 @@ type OptList struct {
 	Vars   bool `docopt:"--vars"`
 }
 
-// GetOptStart parse start options from document text
-func GetOptList(args []string) *OptList {
-	opts, err := docopt.ParseArgs(usageDoc, args, "")
-	errutils.Epanicf("Can not parse usage doc: %s", err) // nolint
-	o := new(OptList)
-	err = opts.Bind(o)
-	errutils.Epanicf("Can not bind to structure: %s", err) // nolint
-	return o
-}
-
 type listCmd struct {
 	conf *config.File
 }
 
 // List starts the list sub command
 func List(args []string, s *settings.Settings) int {
-	opts := GetOptList(args)
+	opts := &OptList{}
+	options.Bind(usageDoc, args, opts)
 	lc := listCmd{
 		conf: s.ConfigFile(),
 	}

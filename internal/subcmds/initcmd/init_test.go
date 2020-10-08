@@ -43,8 +43,3 @@ func TestInit(t *testing.T) {
 	}
 	assert.Equal(t, 1, count)
 }
-
-func TestGetOptInit(t *testing.T) {
-	o := GetOptInit([]string{"init"})
-	assert.True(t, o.Init)
-}
