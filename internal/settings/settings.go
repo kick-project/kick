@@ -84,21 +84,9 @@ func (s *Settings) ConfigFile() *config.File {
 	return s.confFile
 }
 
-// Template creates settings for template.New
-func (s *Settings) Template() (opts struct {
-	Config      *config.File
-	Variables   *variables.Variables
-	TemplateDir string
-	ModeLineLen uint8
-}) {
-	configFile := s.ConfigFile()
-	vars := variables.NewTmplVars()
-	opts.Config = configFile
-	opts.TemplateDir = s.pathTemplateDir
-	opts.Variables = vars
-
-	return opts
-}
+//
+// Injectors
+//
 
 // Initialize creates settings for initialize.New
 func (s *Settings) Initialize() (opts struct {
@@ -136,6 +124,22 @@ func (s *Settings) Metadata() (opts struct {
 	opts.ConfigPath = s.ConfigFile()
 	opts.MetadataDir = s.pathMetadataDir
 	opts.DB = db
+	return opts
+}
+
+// Template creates settings for template.New
+func (s *Settings) Template() (opts struct {
+	Config      *config.File
+	Variables   *variables.Variables
+	TemplateDir string
+	ModeLineLen uint8
+}) {
+	configFile := s.ConfigFile()
+	vars := variables.NewTmplVars()
+	opts.Config = configFile
+	opts.TemplateDir = s.pathTemplateDir
+	opts.Variables = vars
+
 	return opts
 }
 
