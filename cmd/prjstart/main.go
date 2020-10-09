@@ -11,6 +11,7 @@ import (
 	"github.com/crosseyed/prjstart/internal/subcmds/listcmd"
 	"github.com/crosseyed/prjstart/internal/subcmds/searchcmd"
 	"github.com/crosseyed/prjstart/internal/subcmds/start"
+	"github.com/crosseyed/prjstart/internal/subcmds/updatecmd"
 	"github.com/crosseyed/prjstart/internal/utils"
 	"github.com/crosseyed/prjstart/internal/utils/errutils"
 	"github.com/joho/godotenv"
@@ -33,6 +34,8 @@ func main() {
 		utils.Exit(searchcmd.Search(args[1:], s))
 	case o.Init:
 		utils.Exit(initcmd.InitCmd(args[1:], s))
+	case o.Update:
+		utils.Exit(updatecmd.Update(args[1:], s))
 	}
 	utils.Exit(255)
 }

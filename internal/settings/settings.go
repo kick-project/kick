@@ -120,19 +120,6 @@ func (s *Settings) Initialize() (opts struct {
 	return opts
 }
 
-// Metadata creates settings for metadata.New
-func (s *Settings) Metadata() (opts struct {
-	ConfigFile  *config.File
-	MetadataDir string
-	DB          *sql.DB
-}) {
-	db := s.GetDB()
-	opts.ConfigFile = s.ConfigFile()
-	opts.MetadataDir = s.PathMetadataDir
-	opts.DB = db
-	return opts
-}
-
 // Template creates settings for template.New
 func (s *Settings) Template() (opts struct {
 	Config      *config.File

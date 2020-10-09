@@ -30,7 +30,7 @@ CREATE INDEX IF NOT EXISTS idx_templates_name ON templates (name);
 CREATE UNIQUE INDEX IF NOT EXISTS idx_templates_masterid_url ON templates(masterid, url);
 `
 
-var tblVerions = `
+var tblVersions = `
 CREATE TABLE IF NOT EXISTS versions (
 	id integer not null primary key autoincrement,
 	version text,
@@ -44,7 +44,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_versions_templateid_version ON versions (t
 func CreateSchema(dbconn *sql.DB) {
 	Lock()
 	defer Unlock()
-	for _, query := range []string{tblMaster, tblTemplate, tblVerions} {
+	for _, query := range []string{tblMaster, tblTemplate, tblVersions} {
 		_, err := dbconn.Exec(query)
 		if err != nil {
 			log.Fatalf("error creating database scheme: %v", err)

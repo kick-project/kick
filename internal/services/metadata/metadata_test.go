@@ -9,6 +9,7 @@ import (
 
 	"github.com/crosseyed/prjstart/internal/services/initialize"
 	"github.com/crosseyed/prjstart/internal/settings"
+	"github.com/crosseyed/prjstart/internal/settings/imetadata"
 	"github.com/crosseyed/prjstart/internal/utils"
 	"syreclabs.com/go/faker"
 )
@@ -17,8 +18,7 @@ func TestBuild(t *testing.T) {
 	home := fp.Join(utils.TempDir(), "home")
 	s := settings.GetSettings(home)
 	initIt(s)
-	opts := s.Metadata()
-	m := New(opts)
+	m := New(imetadata.Inject(s))
 	m.Build()
 }
 
