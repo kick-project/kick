@@ -9,14 +9,18 @@ import (
 	"github.com/crosseyed/prjstart/internal/settings"
 	"github.com/crosseyed/prjstart/internal/subcmds/initcmd"
 	"github.com/crosseyed/prjstart/internal/subcmds/listcmd"
+	"github.com/crosseyed/prjstart/internal/subcmds/searchcmd"
 	"github.com/crosseyed/prjstart/internal/subcmds/start"
 	"github.com/crosseyed/prjstart/internal/utils"
+	"github.com/crosseyed/prjstart/internal/utils/errutils"
 	"github.com/joho/godotenv"
 )
 
 func main() {
 	loadDotenv()
-	s := settings.GetSettings("")
+	home, err := os.UserHomeDir()
+	errutils.Efatalf("error: %w", err)
+	s := settings.GetSettings(home)
 
 	args := os.Args
 	o := internal.GetOptMain(args)
@@ -25,6 +29,8 @@ func main() {
 		utils.Exit(start.Start(args[1:], s))
 	case o.List:
 		utils.Exit(listcmd.List(args[1:], s))
+	case o.Search:
+		utils.Exit(searchcmd.Search(args[1:], s))
 	case o.Init:
 		utils.Exit(initcmd.InitCmd(args[1:], s))
 	}
