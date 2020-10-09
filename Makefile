@@ -20,6 +20,9 @@ ISRELEASED := $(shell git show-ref v$$(cat VERSION) 2>&1 > /dev/null && echo "tr
 # Any variables already set will override the values in this file(s).
 DOTENV := godotenv -f $(HOME)/.env,.env
 
+# Python
+PYTHON ?= $(shell command -v python3 python|head -n1)
+
 # Variables
 ROOT = $(shell pwd)
 
@@ -29,14 +32,42 @@ GOGETOPTS = GO111MODULE=off
 GOFILES := $(shell find cmd pkg internal src -name '*.go' 2> /dev/null)
 GODIRS = $(shell find . -maxdepth 1 -mindepth 1 -type d | egrep 'cmd|internal|pkg|api')
 
-.PHONY: _build browsereports cattest clean _deps depsdev _go.mod _go.mod_err \
+.PHONY: _build browsereports cattest clean _deps depsdev _go.mod _go.mod_err help \
         _isreleased lint _package _release _release_gitlab test _test _test_setup _test_setup_dirs \
-        _test_setup_gitserver _unit _cc _codecomplexity _codecoverage _install tag
+        _test_setup_gitserver _unit _cc _cx _install tag
+
+#
+# Help Script
+#
+define PRINT_HELP_PYSCRIPT
+import re, sys
+
+print("Usage: make <target>\n")
+cmds = []
+for line in sys.stdin:
+	match = re.match(r'^_?([a-zA-Z_-]+):.*?## (.*)$$', line)
+	if match:
+	  target, help = match.groups()
+	  cmds.append([target, help])
+for cmd, help in cmds:
+		print("  %s%s%s - %s" % ("\x1b[0001m", cmd, "\x1b[0000m", help))
+print("")
+endef
+export PRINT_HELP_PYSCRIPT
 
 #
 # End user targets
 #
-_build:
+ifneq (, ${PYTHON})
+help: ## Print Help
+	@$(PYTHON) -c "$$PRINT_HELP_PYSCRIPT" < $(MAKEFILE_LIST)
+else
+help:
+	$(error python required for 'make help', executable not found)
+endif
+
+
+_build: ## Build binary
 	@test -d .cache || go fmt ./...
 ifeq ($(XCOMPILE),true)
 	GOOS=linux GOARCH=amd64 $(MAKE) dist/$(NAME)_linux_amd64/$(NAME)
@@ -47,33 +78,31 @@ ifeq ($(HASCMD),true)
 	@$(MAKE) $(NAME)
 endif
 
-_install: $(GOPATH)/bin/$(NAME)
+_install: $(GOPATH)/bin/$(NAME) ## Install to $(GOPATH)/bin
 
-clean:
+clean: ## Reset project to original state
 	-test -f tmp/server.pid && kill -TERM $$(cat tmp/server.pid)
 	rm -rf .cache prjstart dist reports tmp vendor
 
-test:
+test: ## Test
 	$(MAKE) unit
 	@exit $$(cat reports/exitcode.txt)
 
-_unit: test_setup
+_unit: test_setup ## Unit testing
 	@$(MAKE) _test_setup_gitserver
 	### Unit Tests
 	gotestsum --junitfile reports/junit.xml -- -timeout 5s -covermode atomic -coverprofile=./reports/coverage.out -v ./...; echo $$? > reports/exitcode.txt
 
-_cc: codecoverage
-
-_codecoverage: test_setup
+_cc: _unit ## Code coverage
 	### Code Coverage
 	@go tool cover -func=./reports/coverage.out | tee ./reports/coverage.txt
 	@go tool cover -html=reports/coverage.out -o reports/html/coverage.html
 
-_codecomplexity: test_setup
+_cx: test_setup ## Code complexity test
 	### Cyclomatix Complexity Report
 	@gocyclo -avg $(GODIRS) | grep -v _test.go | tee reports/cyclocomplexity.txt
 
-_package:
+_package: ## Create an RPM & DEB
 	@VERSION=$(VERSION) envsubst < nfpm.yaml.in > nfpm.yaml
 	make dist/$(NAME)-$(VERSION).$(ARCH).rpm
 	make dist/$(NAME)_$(VERSION)_$(GOARCH).deb
@@ -111,13 +140,13 @@ _test_setup_metadata:
 	@-(find test/fixtures/metadata -mindepth 1 -maxdepth 1 -type d -exec cp -r {} tmp/metadata \;) 2>&1 > /dev/null
 	@-(for i in $$(pwd)/tmp/metadata/templates/*; do cd $$i; git init; git add .; git commit -m 'Initial commit';make release; make bumpmajor; make release; git push --set-upstream http://127.0.0.1:5000/$$(basename $$(pwd)).git master; git push --tags; done) 2> /dev/null > /dev/null
 
-_release:
+_release: ## Release 
 	@echo "### Releasing v$(VERSION)"
 	@$(MAKE) --no-print-directory _isreleased 2> /dev/null
 	git tag v$(VERSION)
 	git push --tags
 
-lint:
+lint: ## Lint tests
 	golangci-lint run --enable=gocyclo
 
 tag:
@@ -125,35 +154,35 @@ tag:
 	git tag v$(VERSION)
 	git push --tags
 
-_deps: go.mod
+_deps: go.mod ## Install build dependencies
 ifeq ($(USEGITLAB),true)
 	@mkdir -p $(ROOT)/.cache/{go,gomod}
 endif
 	$(GOMODOPTS) go mod tidy
 	$(GOMODOPTS) go mod vendor
 
-depsdev:
+depsdev: ## Install development dependencies
 ifeq ($(USEGITLAB),true)
 	@mkdir -p $(ROOT)/.cache/{go,gomod}
 endif
 	@GO111MODULE=on $(MAKE) $(GOGETS)
 
-bumpmajor:
+bumpmajor: ## Version - major bump
 	git fetch --tags
 	versionbump --checktags major VERSION
 
-bumpminor:
+bumpminor: ## Version - minor bump
 	git fetch --tags
 	versionbump --checktags minor VERSION
 
-bumppatch:
+bumppatch: ## Version - patch bump
 	git fetch --tags
 	versionbump --checktags patch VERSION
 
-browsereports:
+browsereports: _cc ## Open reports in a browser
 	@$(MAKE) $(REPORTS)
 
-cattest:
+cattest: ## Print the output of the last set of tests
 	### Unit Tests
 	@cat reports/test.txt
 	### Code Coverage
