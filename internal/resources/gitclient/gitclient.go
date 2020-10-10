@@ -3,7 +3,7 @@ package gitclient
 import (
 	"os"
 
-	plumb "github.com/crosseyed/prjstart/internal/gitclient/plumbing"
+	plumb "github.com/crosseyed/prjstart/internal/resources/gitclient/plumbing"
 	"github.com/crosseyed/prjstart/internal/utils/errutils"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"

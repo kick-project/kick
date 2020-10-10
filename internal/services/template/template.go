@@ -13,9 +13,9 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/crosseyed/prjstart/internal/gitclient"
-	plumb "github.com/crosseyed/prjstart/internal/gitclient/plumbing"
 	"github.com/crosseyed/prjstart/internal/resources/config"
+	"github.com/crosseyed/prjstart/internal/resources/gitclient"
+	plumb "github.com/crosseyed/prjstart/internal/resources/gitclient/plumbing"
 	"github.com/crosseyed/prjstart/internal/services/template/variables"
 	"github.com/crosseyed/prjstart/internal/utils"
 	"github.com/crosseyed/prjstart/internal/utils/errutils"

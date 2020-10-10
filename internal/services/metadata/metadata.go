@@ -9,10 +9,10 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/crosseyed/prjstart/internal/gitclient"
-	"github.com/crosseyed/prjstart/internal/gitclient/plumbing"
 	"github.com/crosseyed/prjstart/internal/resources/config"
 	"github.com/crosseyed/prjstart/internal/resources/db"
+	"github.com/crosseyed/prjstart/internal/resources/gitclient"
+	"github.com/crosseyed/prjstart/internal/resources/gitclient/plumbing"
 	"github.com/crosseyed/prjstart/internal/utils/errutils"
 	"github.com/crosseyed/prjstart/internal/utils/marshal"
 	_ "github.com/mattn/go-sqlite3" // Required by 'database/sql'
