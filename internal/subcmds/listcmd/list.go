@@ -78,7 +78,7 @@ func (lc *listCmd) ListLocal(opts *OptList) int {
 }
 
 func (lc *listCmd) ShortOutput() {
-	templates := lc.conf.TemplateURLs
+	templates := lc.conf.Templates
 	sort.Sort(config.SortByName(templates))
 	data := []string{}
 	for _, t := range templates {
@@ -115,7 +115,7 @@ func (lc *listCmd) shortOutput(data []string) {
 
 func (lc *listCmd) VerboseOutput() {
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.TabIndent)
-	templates := lc.conf.TemplateURLs
+	templates := lc.conf.Templates
 	sort.Sort(config.SortByName(templates))
 	for _, stub := range templates {
 		fmt.Fprintf(w, "%s\t%s\n", stub.Name, stub.URL)

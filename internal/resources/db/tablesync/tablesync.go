@@ -85,7 +85,7 @@ func (s *TableSync) SyncInstalled() {
 	ts := t.Format("2006-01-02T15:04:05")
 	db.Lock()
 	defer db.Unlock()
-	for _, item := range s.conf.TemplateURLs {
+	for _, item := range s.conf.Templates {
 		_, err := s.db.Exec(insertReplaceInstalled, item.Name, item.URL, ts)
 		errutils.Epanicf("%w", err)
 	}

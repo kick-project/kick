@@ -10,10 +10,10 @@ var userconfig string = ".prjstart.yml"
 
 // File configuration as loaded from the configuration file
 type File struct {
-	Path         string         `yaml:"-"`         // Path to configuration file
-	Home         string         `yaml:"-"`         // Home directory
-	MasterURLs   []string       `yaml:"masters"`   // URLs to master git repos
-	TemplateURLs []TemplateStub `yaml:"templates"` // URLs to template git repos
+	Path       string     `yaml:"-"`         // Path to configuration file
+	Home       string     `yaml:"-"`         // Home directory
+	MasterURLs []string   `yaml:"masters"`   // URLs to master git repositories
+	Templates  []Template `yaml:"templates"` // Template definitions
 }
 
 // Options options to New
@@ -35,14 +35,14 @@ func New(opts Options) *File {
 }
 
 // SortByName sort template alphabetically by name
-type SortByName []TemplateStub
+type SortByName []Template
 
 func (a SortByName) Len() int           { return len(a) }
 func (a SortByName) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 func (a SortByName) Less(i, j int) bool { return strings.Compare(a[j].Name, a[i].Name) > 0 }
 
-// TemplateStub template configuration in main configuration file
-type TemplateStub struct {
+// Template template configuration in main configuration file
+type Template struct {
 	Name string `yaml:"name"`
 	URL  string `yaml:"url"`
 	Desc string `yaml:"desc"`

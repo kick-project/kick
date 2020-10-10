@@ -95,8 +95,8 @@ func (t *Template) SetSrcDest(src, dest string) {
 // in *config.Config.TemplateURLs. *config.Config is provided as an Option to New.
 func (t *Template) SetSrc(name string) {
 	t.buildDir(name)
-	var tmpl config.TemplateStub
-	for _, tconf := range t.config.TemplateURLs {
+	var tmpl config.Template
+	for _, tconf := range t.config.Templates {
 		if tconf.Name == name {
 			tmpl = tconf
 			break
