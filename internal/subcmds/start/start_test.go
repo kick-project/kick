@@ -25,6 +25,6 @@ func TestGetOptStart(t *testing.T) {
 	args := []string{"prjstart", "start", "template", "project"}
 	o := GetOptStart(args)
 	assert.True(t, o.Start)
-	assert.Equal(t, "mytemplate", o.Tmpl)
-	assert.Equal(t, "myproject", o.Project)
+	assert.Equal(t, "mytemplate", o.Template)
+	assert.Equal(t, "myproject", o.ProjectPath)
 }

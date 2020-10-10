@@ -24,9 +24,10 @@ Options:
 `
 
 type OptStart struct {
-	Start   bool   `docopt:"start"`
-	Tmpl    string `docopt:"<template>"`
-	Project string `docopt:"<project>"`
+	Start       bool   `docopt:"start"`
+	Template    string `docopt:"<template>"`
+	ProjectPath string `docopt:"<project>"`
+	ProjectName string
 }
 
 // GetOptStart parse start options from document text
@@ -36,6 +37,7 @@ func GetOptStart(args []string) *OptStart {
 	o := new(OptStart)
 	err = opts.Bind(o)
 	errutils.Epanicf("Can not bind to structure: %s", err) // nolint
+	o.ProjectName = filepath.Base(o.ProjectPath)
 	return o
 }
 
@@ -47,13 +49,10 @@ func Start(args []string, s *settings.Settings) int {
 	sync := tablesync.New(itablesync.Inject(s))
 	sync.SyncInstalled()
 
-	templateOptions := itemplate.Inject(s)
-
 	// Set project name
-	name := filepath.Base(opts.Project)
-	templateOptions.Variables.SetProjectVar("NAME", name)
-	t := template.New(templateOptions)
-	t.SetSrcDest(opts.Tmpl, opts.Project)
+	s.ProjectName = opts.ProjectName
+	t := template.New(itemplate.Inject(s))
+	t.SetSrcDest(opts.Template, opts.ProjectPath)
 	ret := t.Run()
 	return ret
 }

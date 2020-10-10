@@ -23,18 +23,21 @@ import (
 
 // Settings provides settings for resources & services.
 type Settings struct {
-	NoColour        bool
-	confFile        *config.File
-	db              *sql.DB
-	DBDriver        string
-	DBDsn           string
-	Home            string
+	DBDriver string
+	DBDsn    string
+	Home     string
+	// No Colour output when running commands.
+	NoColour bool
+	// Project name, normally supplied by the start sub command.
+	ProjectName     string
 	PathMetadataDir string
 	PathTemplateDir string
 	PathUserConf    string
 	SqliteDB        string
 	Stderr          io.Writer
 	Stdout          io.Writer
+	confFile        *config.File
+	db              *sql.DB
 }
 
 // GetSettings get settings using the supplied "home" directory option. Any

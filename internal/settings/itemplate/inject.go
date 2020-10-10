@@ -14,7 +14,8 @@ func Inject(s *settings.Settings) (opts struct {
 	ModeLineLen uint8
 }) {
 	configFile := s.ConfigFile()
-	vars := variables.NewTmplVars()
+	vars := variables.New()
+	vars.ProjectVariable("name", s.ProjectName)
 	opts.Config = configFile
 	opts.TemplateDir = s.PathTemplateDir
 	opts.Variables = vars

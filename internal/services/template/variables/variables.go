@@ -12,16 +12,16 @@ type Variables struct {
 	Project     map[string]string // Project variables
 }
 
-// NewTmplVars sets up environment and project variables to be passed through to the text template
-func NewTmplVars() *Variables {
+// New sets up environment and project variables to be passed through to the text template
+func New() *Variables {
 	tv := Variables{}
 	tv.genVarsEnv()
 	tv.Project = map[string]string{}
 	return &tv
 }
 
-// SetProjectVar sets a project variable
-func (v *Variables) SetProjectVar(name, value string) {
+// ProjectVariable sets a project variable
+func (v *Variables) ProjectVariable(name, value string) {
 	v.Project[name] = value
 }
 
