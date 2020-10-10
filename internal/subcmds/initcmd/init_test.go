@@ -8,6 +8,7 @@ import (
 
 	"github.com/crosseyed/prjstart/internal/services/initialize"
 	"github.com/crosseyed/prjstart/internal/settings"
+	"github.com/crosseyed/prjstart/internal/settings/iinitialize"
 	"github.com/crosseyed/prjstart/internal/utils"
 	_ "github.com/mattn/go-sqlite3" // Required by 'database/sql'
 	"github.com/stretchr/testify/assert"
@@ -16,8 +17,7 @@ import (
 func TestInit(t *testing.T) {
 	home := fp.Join(utils.TempDir(), "init")
 	set := settings.GetSettings(home)
-	opts := set.Initialize()
-	i := initialize.New(opts)
+	i := initialize.New(iinitialize.Inject(set))
 	i.Init()
 	dbfile := fp.Clean(fmt.Sprintf("%s/.prjstart/metadata/metadata.db", home))
 	assert.DirExists(t, fp.Clean(fmt.Sprintf("%s/.prjstart", home)))

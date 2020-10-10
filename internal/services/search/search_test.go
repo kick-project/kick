@@ -10,6 +10,7 @@ import (
 	"github.com/crosseyed/prjstart/internal/resources/db"
 	"github.com/crosseyed/prjstart/internal/services/initialize"
 	"github.com/crosseyed/prjstart/internal/settings"
+	"github.com/crosseyed/prjstart/internal/settings/iinitialize"
 	"github.com/crosseyed/prjstart/internal/settings/isearch"
 	"github.com/crosseyed/prjstart/internal/utils"
 	"github.com/stretchr/testify/assert"
@@ -28,7 +29,7 @@ func TestSearch(t *testing.T) {
 	// Initialize database
 	home := filepath.Join(utils.TempDir(), "TestSearch")
 	s := settings.GetSettings(home)
-	i := initialize.New(s.Initialize())
+	i := initialize.New(iinitialize.Inject(s))
 	i.Init()
 	dbconn := s.GetDB()
 	buildSearchData(t, dbconn)

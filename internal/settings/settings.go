@@ -14,7 +14,6 @@ import (
 	fp "path/filepath"
 
 	"github.com/crosseyed/prjstart/internal/resources/config"
-	"github.com/crosseyed/prjstart/internal/services/template/variables"
 	_ "github.com/mattn/go-sqlite3" // Driver for database/sql
 )
 
@@ -27,13 +26,13 @@ type Settings struct {
 	NoColour        bool
 	confFile        *config.File
 	db              *sql.DB
-	dbdriver        string
-	dbdsn           string
+	DBDriver        string
+	DBDsn           string
 	Home            string
 	PathMetadataDir string
 	PathTemplateDir string
 	PathUserConf    string
-	sqlitedb        string
+	SqliteDB        string
 	Stderr          io.Writer
 	Stdout          io.Writer
 }
@@ -45,9 +44,12 @@ type Settings struct {
 // "{{home}}/prjstart/metadata/metadata.db", "{{home}}.prjstart/templates" (etc)
 // are then factored in when creating dependency injections.
 //
-// If when initialization is needed then the initialize package can be used. For example
+// If initialization is needed for testing then the initialize package can be
+// used. For example
 //
-//   set := GetSettings("/tmp/tmp_home"); init := initialize.New(set.Initialize()); init.Init()
+//   set := GetSettings("/tmp/tmp_home");
+//   init := initialize.New(iinitialize.Inject(s));
+//   init.Init()
 //
 // will create the structures under "/tmp/tmp_home"
 //
@@ -63,9 +65,9 @@ func GetSettings(home string) *Settings {
 	pathTemplateDir := fp.Clean(fmt.Sprintf("%s/.prjstart/templates", home))
 	pathMetadataDir := fp.Clean(fmt.Sprintf("%s/.prjstart/metadata", home))
 	s := &Settings{
-		dbdriver:        dbdriver,
-		dbdsn:           dbdsn,
-		sqlitedb:        sqlitedb,
+		DBDriver:        dbdriver,
+		DBDsn:           dbdsn,
+		SqliteDB:        sqlitedb,
 		Home:            home,
 		PathMetadataDir: pathMetadataDir,
 		PathTemplateDir: pathTemplateDir,
@@ -75,6 +77,11 @@ func GetSettings(home string) *Settings {
 	}
 	return s
 }
+
+//
+// Tools - The tools in this section should only be used in an injector or for
+// testing purposes.
+//
 
 // ConfigFile load settings from configuration file
 func (s *Settings) ConfigFile() *config.File {
@@ -90,61 +97,10 @@ func (s *Settings) ConfigFile() *config.File {
 	return s.confFile
 }
 
-//
-// Injectors
-//
-
-// Initialize creates settings for initialize.New
-func (s *Settings) Initialize() (opts struct {
-	ConfigFile  *config.File // Initialized config file
-	ConfigPath  string       // Path to configuration file
-	DBDriver    string       // SQL Driver to use
-	DSN         string       // SQL DSN
-	HomeDir     string       // Path to home directory
-	MetadataDir string       // Path to metadata directory
-	SQLiteFile  string       // Path to DB file
-	TemplateDir string       // Path to template directory
-}) {
-	conf := config.New(config.Options{
-		Home: s.Home,
-		Path: s.PathUserConf,
-	})
-	opts.ConfigFile = conf
-	opts.ConfigPath = s.PathUserConf
-	opts.DBDriver = s.dbdriver
-	opts.DSN = s.dbdsn
-	opts.HomeDir = s.Home
-	opts.MetadataDir = s.PathMetadataDir
-	opts.SQLiteFile = s.sqlitedb
-	opts.TemplateDir = s.PathTemplateDir
-	return opts
-}
-
-// Template creates settings for template.New
-func (s *Settings) Template() (opts struct {
-	Config      *config.File
-	Variables   *variables.Variables
-	TemplateDir string
-	ModeLineLen uint8
-}) {
-	configFile := s.ConfigFile()
-	vars := variables.NewTmplVars()
-	opts.Config = configFile
-	opts.TemplateDir = s.PathTemplateDir
-	opts.Variables = vars
-
-	return opts
-}
-
-//
-// Misc
-//
-
-// GetDB return DB object. This should only be used for testing, all other calls to
-// the DB object should be performed through an Injector.
+// GetDB return DB object.
 func (s *Settings) GetDB() *sql.DB {
 	if s.db == nil {
-		db, err := sql.Open(s.dbdriver, s.dbdsn)
+		db, err := sql.Open(s.DBDriver, s.DBDsn)
 		if err != nil {
 			panic(err)
 		}

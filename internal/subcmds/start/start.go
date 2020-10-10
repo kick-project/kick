@@ -5,6 +5,7 @@ import (
 
 	"github.com/crosseyed/prjstart/internal/services/template"
 	"github.com/crosseyed/prjstart/internal/settings"
+	"github.com/crosseyed/prjstart/internal/settings/itemplate"
 	"github.com/crosseyed/prjstart/internal/utils/errutils"
 	"github.com/docopt/docopt-go"
 )
@@ -40,7 +41,7 @@ func GetOptStart(args []string) *OptStart {
 func Start(args []string, s *settings.Settings) int {
 	opts := GetOptStart(args)
 
-	templateOptions := s.Template()
+	templateOptions := itemplate.Inject(s)
 
 	// Set project name
 	name := filepath.Base(opts.Project)

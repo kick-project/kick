@@ -9,6 +9,7 @@ import (
 
 	"github.com/crosseyed/prjstart/internal/services/initialize"
 	"github.com/crosseyed/prjstart/internal/settings"
+	"github.com/crosseyed/prjstart/internal/settings/iinitialize"
 	"github.com/crosseyed/prjstart/internal/settings/imetadata"
 	"github.com/crosseyed/prjstart/internal/utils"
 	"syreclabs.com/go/faker"
@@ -23,8 +24,7 @@ func TestBuild(t *testing.T) {
 }
 
 func initIt(s *settings.Settings) {
-	opts := s.Initialize()
-	i := initialize.New(initialize.Options(opts))
+	i := initialize.New(iinitialize.Inject(s))
 	i.Init()
 }
 
