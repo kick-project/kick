@@ -2,7 +2,8 @@ package db
 
 import (
 	"database/sql"
-	"log"
+
+	"github.com/crosseyed/prjstart/internal/utils/errutils"
 )
 
 var tblMaster = `
@@ -30,6 +31,26 @@ CREATE INDEX IF NOT EXISTS idx_templates_name ON templates (name);
 CREATE UNIQUE INDEX IF NOT EXISTS idx_templates_masterid_url ON templates(masterid, url);
 `
 
+var tblInstalled = `
+CREATE TABLE IF NOT EXISTS installed (
+	id integer not null primary key autoincrement,
+	name text,
+	url text,
+	time text
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_installed_name ON installed(name);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_installed_name_url ON installed(name, url);
+`
+
+var tblSync = `	
+CREATE TABLE IF NOT EXISTS sync (
+	key text,
+	lastupdate text /* datetime as text */
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_sync_key ON sync(key);
+CREATE INDEX IF NOT EXISTS idx_sync_lastupdate ON sync(lastupdate);
+`
+
 var tblVersions = `
 CREATE TABLE IF NOT EXISTS versions (
 	id integer not null primary key autoincrement,
@@ -44,10 +65,10 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_versions_templateid_version ON versions (t
 func CreateSchema(dbconn *sql.DB) {
 	Lock()
 	defer Unlock()
-	for _, query := range []string{tblMaster, tblTemplate, tblVersions} {
+	for _, query := range []string{tblMaster, tblTemplate, tblSync, tblInstalled, tblVersions} {
 		_, err := dbconn.Exec(query)
 		if err != nil {
-			log.Fatalf("error creating database scheme: %v", err)
+			errutils.Efatalf("error creating database scheme: %v", err)
 		}
 	}
 	return

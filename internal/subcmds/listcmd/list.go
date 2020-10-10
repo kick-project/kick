@@ -7,7 +7,9 @@ import (
 	"text/tabwriter"
 
 	"github.com/crosseyed/prjstart/internal/resources/config"
+	"github.com/crosseyed/prjstart/internal/resources/db/tablesync"
 	"github.com/crosseyed/prjstart/internal/settings"
+	"github.com/crosseyed/prjstart/internal/settings/itablesync"
 	"github.com/crosseyed/prjstart/internal/utils/options"
 	terminal "github.com/wayneashleyberry/terminal-dimensions"
 )
@@ -44,6 +46,10 @@ func List(args []string, s *settings.Settings) int {
 	lc := listCmd{
 		conf: s.ConfigFile(),
 	}
+
+	// Sync DB table "installed" with configuration file
+	sync := tablesync.New(itablesync.Inject(s))
+	sync.SyncInstalled()
 	switch {
 	case opts.Vars:
 		return lc.VariablesLongOutput()
