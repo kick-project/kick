@@ -32,16 +32,16 @@ var deleteMissing = `DELETE FROM installed WHERE time < ?`
 
 // TableSync synchronize database tables
 type TableSync struct {
-	db         *sql.DB
-	conf       *config.File
-	configPath string
+	db                 *sql.DB
+	conf               *config.File
+	configTemplatePath string
 }
 
 // Options options to New
 type Options struct {
-	DB         *sql.DB
-	Config     *config.File
-	ConfigPath string
+	DB                 *sql.DB
+	Config             *config.File
+	ConfigTemplatePath string
 }
 
 // New returns a *TableSync object
@@ -53,8 +53,9 @@ func New(opts Options) *TableSync {
 		panic("opts.Config is nil")
 	}
 	s := &TableSync{
-		db:   opts.DB,
-		conf: opts.Config,
+		db:                 opts.DB,
+		conf:               opts.Config,
+		configTemplatePath: opts.ConfigTemplatePath,
 	}
 	return s
 }
@@ -78,7 +79,7 @@ func (s *TableSync) Check(key, file string) bool {
 // SyncInstalled syncs database/configuration file for installed components.
 func (s *TableSync) SyncInstalled() {
 	key := "installed"
-	if !s.Check("installed", s.configPath) {
+	if !s.Check("installed", s.configTemplatePath) {
 		return
 	}
 	t := time.Now()

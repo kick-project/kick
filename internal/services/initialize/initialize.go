@@ -5,46 +5,45 @@ import (
 	"os"
 	fp "path/filepath"
 
-	"github.com/crosseyed/prjstart/internal/resources/config"
 	"github.com/crosseyed/prjstart/internal/resources/db"
 	"github.com/crosseyed/prjstart/internal/utils/errutils"
 )
 
 // Initialize is responsibile for initializing all disk paths
 type Initialize struct {
-	configfile  *config.File
-	confpath    string
-	driver      string
-	dsn         string
-	homedir     string
-	metadatadir string
-	sqlitefile  string
-	templatedir string
+	confpath         string
+	conftemplatepath string
+	driver           string
+	dsn              string
+	homedir          string
+	metadatadir      string
+	sqlitefile       string
+	templatedir      string
 }
 
 // Options options to New
 type Options struct {
-	ConfigFile  *config.File // Initialized config file
-	ConfigPath  string       // Path to configuration file
-	DBDriver    string       // SQL Driver to use
-	DSN         string       // SQL DSN
-	HomeDir     string       // Path to home directory
-	MetadataDir string       // Path to metadata directory
-	SQLiteFile  string       // Path to DB file
-	TemplateDir string       // Path to template directory
+	ConfigPath         string // Path to configuration file
+	ConfigTemplatePath string // Path to template configuration
+	DBDriver           string // SQL Driver to use
+	DSN                string // SQL DSN
+	HomeDir            string // Path to home directory
+	MetadataDir        string // Path to metadata directory
+	SQLiteFile         string // Path to DB file
+	TemplateDir        string // Path to template directory
 }
 
 // New creates a new *Init object which is responsibile for initializing all directory structures
 func New(opts Options) *Initialize {
 	init := &Initialize{
-		configfile:  opts.ConfigFile,
-		confpath:    opts.ConfigPath,
-		templatedir: opts.TemplateDir,
-		homedir:     opts.HomeDir,
-		metadatadir: opts.MetadataDir,
-		sqlitefile:  opts.SQLiteFile,
-		driver:      opts.DBDriver,
-		dsn:         opts.DSN,
+		confpath:         opts.ConfigPath,
+		conftemplatepath: opts.ConfigTemplatePath,
+		templatedir:      opts.TemplateDir,
+		homedir:          opts.HomeDir,
+		metadatadir:      opts.MetadataDir,
+		sqlitefile:       opts.SQLiteFile,
+		driver:           opts.DBDriver,
+		dsn:              opts.DSN,
 	}
 	return init
 }
@@ -80,14 +79,17 @@ func (i *Initialize) InitConfig() {
 		errutils.Elogf("error: %w", err)
 		defer f.Close()
 		_, err = f.WriteString(`---
-## Example setup for template paths
-# templates:
-#     - name: pypi
-#       url: ~/path/to/your/template
-#     - name: go
-#       url: git@github.com:user/yourtemplate.git
 `)
-
+	} else if err != nil {
+		errutils.Epanicf("can not save configuration file: %w", err)
+	}
+	_, err = os.Stat(i.conftemplatepath)
+	if os.IsNotExist(err) {
+		f, err := os.Create(i.conftemplatepath)
+		errutils.Elogf("error: %w", err)
+		defer f.Close()
+		_, err = f.WriteString(`---
+`)
 	} else if err != nil {
 		errutils.Epanicf("can not save configuration file: %w", err)
 	}

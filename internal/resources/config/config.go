@@ -3,14 +3,16 @@ package config
 import (
 	"strings"
 
+	"github.com/crosseyed/prjstart/internal/utils/errutils"
 	"github.com/crosseyed/prjstart/internal/utils/marshal"
 )
 
 // File configuration as loaded from the configuration file
 type File struct {
-	Path       string     `yaml:"-"`                 // Path to configuration file
-	MasterURLs []string   `yaml:"masters,omitempty"` // URLs to master git repositories
-	Templates  []Template `yaml:"templates,flow"`    // Template definitions
+	pathUserConf     string     `yaml:"-"` // Path to configuration file
+	pathTemplateConf string     `yaml:"-"`
+	MasterURLs       []string   `yaml:"masters,omitempty"` // URLs to master git repositories
+	Templates        []Template `yaml:"-"`                 // Template definitions
 }
 
 // Options options to New
@@ -22,10 +24,14 @@ type Options struct {
 // New Config constructor
 func New(opts Options) *File {
 	if opts.PathUserConf == "" {
-		panic("opts.ConfigFile can not be an empty string")
+		panic("opts.PathUserConf can not be an empty string")
+	}
+	if opts.PathTemplateConf == "" {
+		panic("opts.PathTemplateConf can not be an empty string")
 	}
 	c := &File{
-		Path: opts.PathUserConf,
+		pathUserConf:     opts.PathUserConf,
+		pathTemplateConf: opts.PathTemplateConf,
 	}
 	return c
 }
@@ -46,10 +52,13 @@ type Template struct {
 
 // Load loads configuration file from disk
 func (f *File) Load() {
-	marshal.UnmarshalFile(f, f.Path)
+	err := marshal.UnmarshalFile(f, f.pathUserConf)
+	errutils.Epanicf("%w", err)
+	err = marshal.UnmarshalFile(&f.Templates, f.pathTemplateConf)
+	errutils.Epanicf("%w", err)
 }
 
 // Save saves configuration file to disk
 func (f *File) Save() {
-	marshal.MarshalFile(f, f.Path)
+	marshal.MarshalFile(f.Templates, f.pathTemplateConf)
 }
