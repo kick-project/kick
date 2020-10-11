@@ -1,15 +1,12 @@
-package start
+package startcmd
 
 import (
-	"path/filepath"
-
 	"github.com/crosseyed/prjstart/internal/resources/db/tablesync"
 	"github.com/crosseyed/prjstart/internal/services/template"
 	"github.com/crosseyed/prjstart/internal/settings"
 	"github.com/crosseyed/prjstart/internal/settings/itablesync"
 	"github.com/crosseyed/prjstart/internal/settings/itemplate"
-	"github.com/crosseyed/prjstart/internal/utils/errutils"
-	"github.com/docopt/docopt-go"
+	"github.com/crosseyed/prjstart/internal/utils/options"
 )
 
 var usageDoc = `Generate project scaffolding
@@ -30,20 +27,10 @@ type OptStart struct {
 	ProjectName string
 }
 
-// GetOptStart parse start options from document text
-func GetOptStart(args []string) *OptStart {
-	opts, err := docopt.ParseArgs(usageDoc, args, "")
-	errutils.Epanicf("Can not parse usage doc: %s", err) // nolint
-	o := new(OptStart)
-	err = opts.Bind(o)
-	errutils.Epanicf("Can not bind to structure: %s", err) // nolint
-	o.ProjectName = filepath.Base(o.ProjectPath)
-	return o
-}
-
 // Start start cli option
 func Start(args []string, s *settings.Settings) int {
-	opts := GetOptStart(args)
+	opts := &OptStart{}
+	options.Bind(usageDoc, args, opts)
 
 	// Sync DB table "installed" with configuration file
 	sync := tablesync.New(itablesync.Inject(s))

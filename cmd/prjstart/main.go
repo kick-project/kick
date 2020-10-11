@@ -10,7 +10,7 @@ import (
 	"github.com/crosseyed/prjstart/internal/subcmds/initcmd"
 	"github.com/crosseyed/prjstart/internal/subcmds/listcmd"
 	"github.com/crosseyed/prjstart/internal/subcmds/searchcmd"
-	"github.com/crosseyed/prjstart/internal/subcmds/start"
+	"github.com/crosseyed/prjstart/internal/subcmds/startcmd"
 	"github.com/crosseyed/prjstart/internal/subcmds/updatecmd"
 	"github.com/crosseyed/prjstart/internal/utils"
 	"github.com/crosseyed/prjstart/internal/utils/errutils"
@@ -27,7 +27,7 @@ func main() {
 	o := internal.GetOptMain(args)
 	switch {
 	case o.Start:
-		utils.Exit(start.Start(args[1:], s))
+		utils.Exit(startcmd.Start(args[1:], s))
 	case o.List:
 		utils.Exit(listcmd.List(args[1:], s))
 	case o.Search:
