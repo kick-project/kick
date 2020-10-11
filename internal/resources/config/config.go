@@ -10,15 +10,13 @@ var userconfig string = ".prjstart.yml"
 
 // File configuration as loaded from the configuration file
 type File struct {
-	Path       string     `yaml:"-"`         // Path to configuration file
-	Home       string     `yaml:"-"`         // Home directory
-	MasterURLs []string   `yaml:"masters"`   // URLs to master git repositories
-	Templates  []Template `yaml:"templates"` // Template definitions
+	Path       string     `yaml:"-"`                 // Path to configuration file
+	MasterURLs []string   `yaml:"masters,omitempty"` // URLs to master git repositories
+	Templates  []Template `yaml:"templates,flow"`    // Template definitions
 }
 
 // Options options to New
 type Options struct {
-	Home string // Home directory
 	Path string // Path to configuration file
 }
 
@@ -28,7 +26,6 @@ func New(opts Options) *File {
 		panic("opts.ConfigFile can not be an empty string")
 	}
 	c := &File{
-		Home: opts.Home,
 		Path: opts.Path,
 	}
 	return c

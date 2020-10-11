@@ -16,10 +16,7 @@ func Inject(s *settings.Settings) (opts struct {
 	SQLiteFile  string       // Path to DB file
 	TemplateDir string       // Path to template directory
 }) {
-	conf := config.New(config.Options{
-		Home: s.Home,
-		Path: s.PathUserConf,
-	})
+	conf := s.ConfigFile()
 	opts.ConfigFile = conf
 	opts.ConfigPath = s.PathUserConf
 	opts.DBDriver = s.DBDriver

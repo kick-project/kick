@@ -92,7 +92,6 @@ func (s *Settings) ConfigFile() *config.File {
 		return s.confFile
 	}
 	conf := config.New(config.Options{
-		Home: s.Home,
 		Path: s.PathUserConf,
 	})
 	conf.Load()
