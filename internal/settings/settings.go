@@ -29,22 +29,29 @@ type Settings struct {
 	// No Colour output when running commands.
 	NoColour bool
 	// Project name, normally supplied by the start sub command.
-	ProjectName     string
-	PathMetadataDir string
-	PathTemplateDir string
-	PathUserConf    string
-	SqliteDB        string
-	Stderr          io.Writer
-	Stdout          io.Writer
-	confFile        *config.File
-	db              *sql.DB
+	ProjectName      string
+	PathMetadataDir  string
+	PathTemplateConf string
+	PathTemplateDir  string
+	PathUserConf     string
+	SqliteDB         string
+	Stderr           io.Writer
+	Stdout           io.Writer
+	confFile         *config.File
+	db               *sql.DB
 }
 
 // GetSettings get settings using the supplied "home" directory option. Any
 // Dependency Injection (DI) configuration created by settings is then
 // contextualized by the home variable. For instance when home is
-// set the paths '{{home}}/prjstart.yml",
-// "{{home}}/prjstart/metadata/metadata.db", "{{home}}.prjstart/templates" (etc)
+// set the paths...
+//
+//     {{home}}/.prjstart/config.yml
+//     {{home}}/.prjstart/templates.yml
+//     {{home}}/.prjstart/metadata/metadata.db
+//     {{home}}/.prjstart/templates
+//     etc..
+//
 // are then factored in when creating dependency injections.
 //
 // If initialization is needed for testing then the initialize package can be
@@ -64,19 +71,21 @@ func GetSettings(home string) *Settings {
 	dbdriver := "sqlite3"
 	sqlitedb := fp.Clean(fmt.Sprintf("%s/.prjstart/metadata/metadata.db", home))
 	dbdsn := fmt.Sprintf("file:%s?_foreign_key=on", sqlitedb)
-	pathUserConf := fp.Clean(fmt.Sprintf("%s/.prjstart.yml", home))
+	pathUserConf := fp.Clean(fmt.Sprintf("%s/.prjstart/config.yml", home))
+	pathTemplateConf := fp.Clean(fmt.Sprintf("%s/.prjstart/templates.yml", home))
 	pathTemplateDir := fp.Clean(fmt.Sprintf("%s/.prjstart/templates", home))
 	pathMetadataDir := fp.Clean(fmt.Sprintf("%s/.prjstart/metadata", home))
 	s := &Settings{
-		DBDriver:        dbdriver,
-		DBDsn:           dbdsn,
-		SqliteDB:        sqlitedb,
-		Home:            home,
-		PathMetadataDir: pathMetadataDir,
-		PathTemplateDir: pathTemplateDir,
-		PathUserConf:    pathUserConf,
-		Stderr:          os.Stderr,
-		Stdout:          os.Stdout,
+		DBDriver:         dbdriver,
+		DBDsn:            dbdsn,
+		SqliteDB:         sqlitedb,
+		Home:             home,
+		PathMetadataDir:  pathMetadataDir,
+		PathTemplateConf: pathTemplateConf,
+		PathTemplateDir:  pathTemplateDir,
+		PathUserConf:     pathUserConf,
+		Stderr:           os.Stderr,
+		Stdout:           os.Stdout,
 	}
 	return s
 }
@@ -92,7 +101,8 @@ func (s *Settings) ConfigFile() *config.File {
 		return s.confFile
 	}
 	conf := config.New(config.Options{
-		Path: s.PathUserConf,
+		PathUserConf:     s.PathUserConf,
+		PathTemplateConf: s.PathTemplateConf,
 	})
 	conf.Load()
 	s.confFile = conf

@@ -21,7 +21,7 @@ func TestInit(t *testing.T) {
 	i.Init()
 	dbfile := fp.Clean(fmt.Sprintf("%s/.prjstart/metadata/metadata.db", home))
 	assert.DirExists(t, fp.Clean(fmt.Sprintf("%s/.prjstart", home)))
-	assert.FileExists(t, fp.Clean(fmt.Sprintf("%s/.prjstart.yml", home)))
+	assert.FileExists(t, fp.Clean(fmt.Sprintf("%s/.prjstart/config.yml", home)))
 	assert.DirExists(t, fp.Clean(fmt.Sprintf("%s/.prjstart/metadata", home)))
 	assert.FileExists(t, dbfile)
 	assert.DirExists(t, fp.Clean(fmt.Sprintf("%s/.prjstart/templates", home)))

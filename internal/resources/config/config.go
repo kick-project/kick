@@ -6,8 +6,6 @@ import (
 	"github.com/crosseyed/prjstart/internal/utils/marshal"
 )
 
-var userconfig string = ".prjstart.yml"
-
 // File configuration as loaded from the configuration file
 type File struct {
 	Path       string     `yaml:"-"`                 // Path to configuration file
@@ -17,16 +15,17 @@ type File struct {
 
 // Options options to New
 type Options struct {
-	Path string // Path to configuration file
+	PathUserConf     string // Path to config.yml
+	PathTemplateConf string // Path to configuration file
 }
 
 // New Config constructor
 func New(opts Options) *File {
-	if opts.Path == "" {
+	if opts.PathUserConf == "" {
 		panic("opts.ConfigFile can not be an empty string")
 	}
 	c := &File{
-		Path: opts.Path,
+		Path: opts.PathUserConf,
 	}
 	return c
 }
