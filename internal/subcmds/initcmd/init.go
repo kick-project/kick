@@ -4,10 +4,8 @@ import (
 	"log"
 
 	"github.com/crosseyed/prjstart/internal/services/initialize"
-	"github.com/crosseyed/prjstart/internal/services/metadata"
 	"github.com/crosseyed/prjstart/internal/settings"
 	"github.com/crosseyed/prjstart/internal/settings/iinitialize"
-	"github.com/crosseyed/prjstart/internal/settings/imetadata"
 	"github.com/crosseyed/prjstart/internal/utils/options"
 )
 
@@ -37,9 +35,5 @@ func InitCmd(args []string, s *settings.Settings) int {
 	i := initialize.New(iinitialize.Inject(s))
 	i.Init()
 
-	m := metadata.New(imetadata.Inject(s))
-	m.Build()
-
-	// TODO: Create a real return code.
 	return 0
 }
