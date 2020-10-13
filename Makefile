@@ -154,10 +154,7 @@ tag:
 	git tag v$(VERSION)
 	git push --tags
 
-_deps: go.mod ## Install build dependencies
-ifeq ($(USEGITLAB),true)
-	@mkdir -p $(ROOT)/.cache/{go,gomod}
-endif
+deps: go.mod ## Install build dependencies
 	$(GOMODOPTS) go mod tidy
 	$(GOMODOPTS) go mod vendor
 
