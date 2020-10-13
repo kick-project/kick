@@ -12,6 +12,7 @@ import (
 	"github.com/crosseyed/prjstart/internal/settings/iinitialize"
 	"github.com/crosseyed/prjstart/internal/settings/imetadata"
 	"github.com/crosseyed/prjstart/internal/utils"
+	"github.com/jinzhu/copier"
 	"syreclabs.com/go/faker"
 )
 
@@ -19,12 +20,14 @@ func TestBuild(t *testing.T) {
 	home := fp.Join(utils.TempDir(), "home")
 	s := settings.GetSettings(home)
 	initIt(s)
-	m := New(imetadata.Inject(s))
+	m := &Metadata{}
+	copier.Copy(m, imetadata.Inject(s))
 	m.Build()
 }
 
 func initIt(s *settings.Settings) {
-	i := initialize.New(iinitialize.Inject(s))
+	i := &initialize.Initialize{}
+	copier.Copy(i, iinitialize.Inject(s))
 	i.Init()
 }
 

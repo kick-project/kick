@@ -17,38 +17,14 @@ import (
 
 // Metadata build metadata
 type Metadata struct {
-	conf         *config.File
-	metadatapath string
-	db           *sql.DB
-}
-
-// Options options for metadata.New
-type Options struct {
-	ConfigFile  *config.File // Contents of the main config file in code
+	ConfigFile  *config.File
 	MetadataDir string
 	DB          *sql.DB
 }
 
-// New create an instance of Metadata.
-// Panics if opts.ConfigFile is nil or DBPath is an empty string.
-func New(opts Options) *Metadata {
-	if opts.ConfigFile == nil {
-		panic("opts.ConfigFile can not be nil")
-	}
-	if opts.MetadataDir == "" {
-		panic("opts.MetadataPath can not be an empty string")
-	}
-	m := &Metadata{
-		conf:         opts.ConfigFile,
-		metadatapath: opts.MetadataDir,
-		db:           opts.DB,
-	}
-	return m
-}
-
 // Build metadata. Conf defaults to globals.Config if Conf is nil.
 func (m *Metadata) Build() error {
-	conf := m.conf
+	conf := m.ConfigFile
 
 	c := workers{
 		wait: &sync.WaitGroup{},
@@ -56,9 +32,9 @@ func (m *Metadata) Build() error {
 
 	churl := make(chan string, 64)
 	chtemplates := make(chan *Template, 64)
-	p := plumbing.New(m.metadatapath)
+	p := plumbing.New(m.MetadataDir)
 	c.concurClones(6, p, churl, chtemplates)
-	c.concurInserts(m.db, chtemplates)
+	c.concurInserts(m.DB, chtemplates)
 
 	for _, url := range conf.MasterURLs {
 		c.wait.Add(1)

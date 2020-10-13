@@ -109,9 +109,10 @@ func (s *TestServerStruct) gitServer(dir string) *http.Server {
 }
 
 func (s *TestServerStruct) loadConfig() {
-	conf := config.New(config.Options{
-		PathUserConf: filepath.Join(s.home, ".prjstart.yml"),
-	})
+	conf := &config.File{
+		PathUserConf:     filepath.Join(s.home, ".prjstart", "config.yml"),
+		PathTemplateConf: filepath.Join(s.home, ".prjstart", "templates.yml"),
+	}
 	conf.Load()
 
 	s.config = conf

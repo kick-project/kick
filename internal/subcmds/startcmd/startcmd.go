@@ -40,7 +40,8 @@ func Start(args []string, s *settings.Settings) int {
 
 	// Set project name
 	s.ProjectName = opts.ProjectName
-	t := template.New(itemplate.Inject(s))
+	t := &template.Template{}
+	copier.Copy(t, itemplate.Inject(s))
 	t.SetSrcDest(opts.Template, opts.ProjectPath)
 	ret := t.Run()
 	return ret

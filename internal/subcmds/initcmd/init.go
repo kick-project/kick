@@ -7,6 +7,7 @@ import (
 	"github.com/crosseyed/prjstart/internal/settings"
 	"github.com/crosseyed/prjstart/internal/settings/iinitialize"
 	"github.com/crosseyed/prjstart/internal/utils/options"
+	"github.com/jinzhu/copier"
 )
 
 var usageDoc = `Initialize configuration
@@ -32,7 +33,8 @@ func InitCmd(args []string, s *settings.Settings) int {
 		return 256
 	}
 
-	i := initialize.New(iinitialize.Inject(s))
+	i := &initialize.Initialize{}
+	copier.Copy(i, iinitialize.Inject(s))
 	i.Init()
 
 	return 0

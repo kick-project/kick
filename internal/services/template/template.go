@@ -30,52 +30,16 @@ const (
 	MLnorender
 )
 
-type (
-	// Template the template itself
-	Template struct {
-		localpath   string
-		src         string
-		dest        string
-		builddir    string
-		config      *config.File
-		variables   *variables.Variables
-		templateDir string
-		mllen       uint8
-	}
-
-	// Options options to template
-	Options struct {
-		Config    *config.File
-		Variables *variables.Variables
-
-		// TemplateDir is the directory to store the downloaded templates.
-		TemplateDir string
-
-		// ModeLineLen is the number of lines to scan in a document to fetch the modeline.
-		// If set to 0 then modeline defaults to 20 lines.
-		ModeLineLen uint8
-	}
-)
-
-// New constructs a Template. New will panic if any options are missing.
-func New(opts Options) *Template {
-	if opts.Config == nil {
-		panic("opts.Config can not be nil")
-	}
-	if opts.TemplateDir == "" {
-		panic("opts.TemplateDir can not be an empty string")
-	}
-	var mllen = uint8(20)
-	if opts.ModeLineLen > 0 {
-		mllen = opts.ModeLineLen
-	}
-	t := &Template{
-		config:      opts.Config,
-		templateDir: opts.TemplateDir,
-		variables:   opts.Variables,
-		mllen:       mllen,
-	}
-	return t
+// Template the template itself
+type Template struct {
+	Config      *config.File
+	ModeLineLen uint8
+	TemplateDir string
+	Variables   *variables.Variables
+	builddir    string
+	dest        string
+	localpath   string
+	src         string
 }
 
 func (t *Template) buildDir(id string) {
@@ -96,13 +60,13 @@ func (t *Template) SetSrcDest(src, dest string) {
 func (t *Template) SetSrc(name string) {
 	t.buildDir(name)
 	var tmpl config.Template
-	for _, tconf := range t.config.Templates {
+	for _, tconf := range t.Config.Templates {
 		if tconf.Handle == name {
 			tmpl = tconf
 			break
 		}
 	}
-	g := plumb.New(t.templateDir)
+	g := plumb.New(t.TemplateDir)
 	// TODO: DI
 	localpath, err := gitclient.Get(tmpl.URL, g)
 	errutils.Efatalf(`template "%s" not found: %v`, name, err)
@@ -136,7 +100,7 @@ func (t *Template) Run() int {
 			return nil
 		}
 		relative := strings.Replace(srcPath, base, "", 1)
-		relative = renderDir(relative, t.variables)
+		relative = renderDir(relative, t.Variables)
 		dstPath := filepath.Join(t.builddir, relative)
 
 		if err != nil {
@@ -148,8 +112,8 @@ func (t *Template) Run() int {
 			srcInfo:   info,
 			srcPath:   srcPath,
 			dstPath:   dstPath,
-			variables: t.variables,
-			mlen:      t.mllen,
+			variables: t.Variables,
+			mlen:      t.ModeLineLen,
 		}
 		err = pair.route()
 		errutils.Epanicf("Build Error: %v", err)

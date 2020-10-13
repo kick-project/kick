@@ -112,10 +112,10 @@ func (s *Settings) ConfigFile() *config.File {
 	if s.confFile != nil {
 		return s.confFile
 	}
-	conf := config.New(config.Options{
+	conf := &config.File{
 		PathUserConf:     s.PathUserConf,
 		PathTemplateConf: s.PathTemplateConf,
-	})
+	}
 	conf.Load()
 	s.confFile = conf
 	return s.confFile

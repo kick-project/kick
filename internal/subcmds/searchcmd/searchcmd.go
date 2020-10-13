@@ -36,6 +36,7 @@ func Search(args []string, s *settings.Settings) int {
 	synchro := &sync.Sync{}
 	copier.Copy(synchro, isync.Inject(s))
 	synchro.Templates()
-	srch := search.New(isearch.Inject(s))
+	srch := &search.Search{}
+	copier.Copy(srch, isearch.Inject(s))
 	return srch.Search2Output(opts.Term)
 }

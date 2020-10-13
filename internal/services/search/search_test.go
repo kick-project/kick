@@ -13,6 +13,7 @@ import (
 	"github.com/crosseyed/prjstart/internal/settings/iinitialize"
 	"github.com/crosseyed/prjstart/internal/settings/isearch"
 	"github.com/crosseyed/prjstart/internal/utils"
+	"github.com/jinzhu/copier"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -29,7 +30,8 @@ func TestSearch(t *testing.T) {
 	// Initialize database
 	home := filepath.Join(utils.TempDir(), "TestSearch")
 	s := settings.GetSettings(home)
-	i := initialize.New(iinitialize.Inject(s))
+	i := &initialize.Initialize{}
+	copier.Copy(i, iinitialize.Inject(s))
 	i.Init()
 	dbconn := s.GetDB()
 	buildSearchData(t, dbconn)
@@ -37,7 +39,8 @@ func TestSearch(t *testing.T) {
 	// Target search term
 	searchTerm := "template"
 
-	srch := New(isearch.Inject(s))
+	srch := &Search{}
+	copier.Copy(srch, isearch.Inject(s))
 
 	// Parallel arrays to count regexp
 	matchmaker := map[string]*regexp.Regexp{}

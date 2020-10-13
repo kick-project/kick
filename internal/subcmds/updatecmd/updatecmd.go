@@ -5,6 +5,7 @@ import (
 	"github.com/crosseyed/prjstart/internal/settings"
 	"github.com/crosseyed/prjstart/internal/settings/imetadata"
 	"github.com/crosseyed/prjstart/internal/utils/options"
+	"github.com/jinzhu/copier"
 )
 
 var usageDoc = `Update repository data
@@ -26,9 +27,9 @@ func Update(args []string, s *settings.Settings) int {
 	opts := &OptUpdate{}
 	options.Bind(usageDoc, args, opts)
 
-	m := metadata.New(imetadata.Inject(s))
+	m := &metadata.Metadata{}
+	copier.Copy(m, imetadata.Inject(s))
 	m.Build()
 
-	// TODO: Create a real return code.
 	return 0
 }

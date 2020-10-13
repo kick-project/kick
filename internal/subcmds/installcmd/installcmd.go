@@ -41,7 +41,8 @@ func Install(args []string, s *settings.Settings) int {
 		return 256
 	}
 
-	m := metadata.New(imetadata.Inject(s))
+	m := &metadata.Metadata{}
+	copier.Copy(m, imetadata.Inject(s))
 	m.Build()
 
 	inst := &install.Install{}

@@ -51,32 +51,9 @@ FROM
 
 // Search search for templates
 type Search struct {
-	db     *sql.DB
-	format formatter.Format
-	writer io.Writer
-}
-
-// Options options for New
-type Options struct {
 	DB     *sql.DB
 	Format formatter.Format
 	Writer io.Writer
-}
-
-// New creates a Search
-func New(opts Options) *Search {
-	if opts.DB == nil {
-		panic("opts.DB is nil")
-	}
-	if opts.Writer == nil {
-		panic("opts.Writer is nil")
-	}
-	s := &Search{
-		db:     opts.DB,
-		format: opts.Format,
-		writer: opts.Writer,
-	}
-	return s
 }
 
 // Search searches database for term and returns the results through *Entry channel.
@@ -84,7 +61,7 @@ func (s *Search) Search(term string) <-chan *entry.Entry {
 	ch := make(chan *entry.Entry, 24)
 	go func() {
 		var err error
-		rows, err := s.db.Query(
+		rows, err := s.DB.Query(
 			querySearch,
 			fmt.Sprintf("%s%%", term),
 			fmt.Sprintf("%%%s%%", term),
@@ -111,11 +88,11 @@ func (s *Search) Search(term string) <-chan *entry.Entry {
 // Blocks until all entries are processed.
 func (s *Search) Search2Output(term string) int {
 	ch := s.Search(term)
-	if s.format != nil {
-		s.format.Writer(s.writer, ch)
+	if s.Format != nil {
+		s.Format.Writer(s.Writer, ch)
 	} else {
 		fmtter := formatter.Standard{}
-		fmtter.Writer(s.writer, ch)
+		fmtter.Writer(s.Writer, ch)
 	}
 	return 0
 }

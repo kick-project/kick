@@ -12,33 +12,11 @@ import (
 
 // File configuration as loaded from the configuration file
 type File struct {
-	stderr           io.Writer  `yaml:"-"`
-	pathUserConf     string     `yaml:"-"` // Path to configuration file
-	pathTemplateConf string     `yaml:"-"`
+	PathTemplateConf string     `yaml:"-"`
+	PathUserConf     string     `yaml:"-"` // Path to configuration file
+	Stderr           io.Writer  `yaml:"-"`
 	MasterURLs       []string   `yaml:"masters,omitempty"` // URLs to master git repositories
 	Templates        []Template `yaml:"-"`                 // Template definitions
-}
-
-// Options options to New
-type Options struct {
-	PathUserConf     string // Path to config.yml
-	PathTemplateConf string // Path to configuration file
-}
-
-// New Config constructor
-func New(opts Options) *File {
-	if opts.PathUserConf == "" {
-		panic("opts.PathUserConf can not be an empty string")
-	}
-	if opts.PathTemplateConf == "" {
-		panic("opts.PathTemplateConf can not be an empty string")
-	}
-	c := &File{
-		pathUserConf:     opts.PathUserConf,
-		pathTemplateConf: opts.PathTemplateConf,
-		stderr:           os.Stderr,
-	}
-	return c
 }
 
 // SortByName sort template alphabetically by name
@@ -75,13 +53,13 @@ func (f *File) AppendTemplate(t Template) (stop int) {
 
 // Load loads configuration file from disk
 func (f *File) Load() {
-	err := marshal.UnmarshalFile(f, f.pathUserConf)
+	err := marshal.UnmarshalFile(f, f.PathUserConf)
 	errutils.Epanicf("%w", err)
-	err = marshal.UnmarshalFile(&f.Templates, f.pathTemplateConf)
+	err = marshal.UnmarshalFile(&f.Templates, f.PathTemplateConf)
 	errutils.Epanicf("%w", err)
 }
 
 // SaveTemplates saves template configuration file to disk
 func (f *File) SaveTemplates() {
-	marshal.MarshalFile(f.Templates, f.pathTemplateConf)
+	marshal.MarshalFile(f.Templates, f.PathTemplateConf)
 }
