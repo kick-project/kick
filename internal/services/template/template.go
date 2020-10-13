@@ -97,7 +97,7 @@ func (t *Template) SetSrc(name string) {
 	t.buildDir(name)
 	var tmpl config.Template
 	for _, tconf := range t.config.Templates {
-		if tconf.Name == name {
+		if tconf.Handle == name {
 			tmpl = tconf
 			break
 		}

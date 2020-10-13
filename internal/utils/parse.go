@@ -40,10 +40,10 @@ type parseFunc = func(uri string) (scheme, host, path, project string, match boo
 
 // Parse parses a URL or the like and returns a URLx pointer or nil if
 // the parser failed to match a string.
-func Parse(uri string) *URLx {
+func Parse(uri string) (*URLx, error) {
 	u := &URLx{}
-	u.Parse(uri)
-	return u
+	err := u.Parse(uri)
+	return u, err
 }
 
 func httpParse(uri string) (scheme, host, path, project string, match bool) {

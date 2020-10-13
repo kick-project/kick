@@ -1,13 +1,14 @@
 package main
 
 import (
-	"log"
 	"os"
 	"path"
 
+	"github.com/apex/log"
 	"github.com/crosseyed/prjstart/internal"
 	"github.com/crosseyed/prjstart/internal/settings"
 	"github.com/crosseyed/prjstart/internal/subcmds/initcmd"
+	"github.com/crosseyed/prjstart/internal/subcmds/installcmd"
 	"github.com/crosseyed/prjstart/internal/subcmds/listcmd"
 	"github.com/crosseyed/prjstart/internal/subcmds/searchcmd"
 	"github.com/crosseyed/prjstart/internal/subcmds/startcmd"
@@ -23,6 +24,10 @@ func main() {
 	errutils.Efatalf("error: %w", err)
 	s := settings.GetSettings(home)
 
+	if os.Getenv("PRJSTART_DEBUG") == "true" {
+		s.LogLevel(log.DebugLevel)
+	}
+
 	args := os.Args
 	o := internal.GetOptMain(args)
 	switch {
@@ -36,6 +41,8 @@ func main() {
 		utils.Exit(initcmd.InitCmd(args[1:], s))
 	case o.Update:
 		utils.Exit(updatecmd.Update(args[1:], s))
+	case o.Install:
+		utils.Exit(installcmd.Install(args[1:], s))
 	}
 	utils.Exit(255)
 }

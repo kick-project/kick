@@ -7,32 +7,27 @@ import (
 	"text/tabwriter"
 
 	"github.com/crosseyed/prjstart/internal/resources/config"
-	"github.com/crosseyed/prjstart/internal/resources/db/tablesync"
+	"github.com/crosseyed/prjstart/internal/resources/sync"
 	"github.com/crosseyed/prjstart/internal/settings"
-	"github.com/crosseyed/prjstart/internal/settings/itablesync"
+	"github.com/crosseyed/prjstart/internal/settings/isync"
 	"github.com/crosseyed/prjstart/internal/utils/options"
+	"github.com/jinzhu/copier"
 	terminal "github.com/wayneashleyberry/terminal-dimensions"
 )
 
-var usageDoc = `List templates
+var usageDoc = `List handles/templates
 
 Usage:
-    prjstart list [--url]
-    prjstart list [--vars]
+    prjstart list [-l]
 
 Options:
-    -h --help     Print help.
-    -u --url      Print URL.
-    -v --vars     Show Variables.
+	-h --help     Print help.
+    -l            Print Long output.
 `
 
 type OptList struct {
-	List   bool `docopt:"list"`
-	Local  bool `docopt:"--local"`
-	Remote bool `docopt:"--remote"`
-	All    bool `docopt:"--all"`
-	URL    bool `docopt:"--url"`
-	Vars   bool `docopt:"--vars"`
+	List bool `docopt:"list"`
+	Long bool `docopt:"-l"`
 }
 
 type listCmd struct {
@@ -48,44 +43,25 @@ func List(args []string, s *settings.Settings) int {
 	}
 
 	// Sync DB table "installed" with configuration file
-	sync := tablesync.New(itablesync.Inject(s))
-	sync.SyncInstalled()
-	switch {
-	case opts.Vars:
-		return lc.VariablesLongOutput()
-	case opts.Remote:
-		return lc.ListRemote()
-	case opts.All:
-		ret1 := lc.ListLocal(opts)
-		ret2 := lc.ListRemote()
-		if ret1 > ret2 {
-			return ret1
-		}
-		return ret2
+	synchro := &sync.Sync{}
+	copier.Copy(synchro, isync.Inject(s))
+	synchro.Templates()
+	if opts.Long {
+		return lc.LongOutput()
 	}
-	return lc.ListLocal(opts)
+	return lc.ShortOutput()
 }
 
-// ListLocal lists local templates
-func (lc *listCmd) ListLocal(opts *OptList) int {
-	switch {
-	case opts.URL:
-		lc.VerboseOutput()
-	default:
-		lc.ShortOutput()
-	}
-	return 0
-}
-
-func (lc *listCmd) ShortOutput() {
+func (lc *listCmd) ShortOutput() int {
 	templates := lc.conf.Templates
 	sort.Sort(config.SortByName(templates))
 	data := []string{}
 	for _, t := range templates {
-		name := t.Name
+		name := t.Handle
 		data = append(data, name)
 	}
 	lc.shortOutput(data)
+	return 0
 }
 
 func (lc *listCmd) shortOutput(data []string) {
@@ -113,33 +89,13 @@ func (lc *listCmd) shortOutput(data []string) {
 	w.Flush()
 }
 
-func (lc *listCmd) VerboseOutput() {
+func (lc *listCmd) LongOutput() int {
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.TabIndent)
 	templates := lc.conf.Templates
 	sort.Sort(config.SortByName(templates))
 	for _, stub := range templates {
-		fmt.Fprintf(w, "%s\t%s\n", stub.Name, stub.URL)
+		fmt.Fprintf(w, "%s\t%s\n", stub.Handle, stub.URL)
 	}
 	w.Flush()
-}
-
-func (lc *listCmd) VariablesLongOutput() int {
-	// w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.TabIndent)
-	// prjvars := internal.SetVars(&start.OptStart{})
-	// for _, item := range prjvars.GetDescriptions() {
-	// 	fmt.Fprintf(w, ".Project.%s\t'%s'\n", item[0], item[1])
-	// 	w.Flush()
-	// }
-	return 0
-}
-
-// ListRemote lists remote templates
-func (lc *listCmd) ListRemote() int {
-	// TODO
-	return 0
-}
-
-// ListAll Lists local and remote templates
-func (lc *listCmd) ListAll() int {
 	return 0
 }

@@ -96,7 +96,7 @@ func testParsing(t *testing.T, f parseFunc, url, expectedScheme, expectedServer,
 	assert.Equal(t, expectedServer, host)
 	assert.Equal(t, expectedProject, project)
 	assert.Equal(t, expectedPath, path)
-	u := Parse(url)
+	u, _ := Parse(url)
 	assert.Equal(t, expectedScheme, u.Scheme)
 	assert.Equal(t, expectedServer, u.Host)
 	assert.Equal(t, expectedProject, u.Project)

@@ -34,12 +34,16 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_templates_masterid_url ON templates(master
 var tblInstalled = `
 CREATE TABLE IF NOT EXISTS installed (
 	id integer not null primary key autoincrement,
-	name text,
+	handle text,
+	template text,
+	origin text,
 	url text,
+	vcsref text, 
+	desc text,
 	time text
 );
-CREATE UNIQUE INDEX IF NOT EXISTS idx_installed_name ON installed(name);
-CREATE UNIQUE INDEX IF NOT EXISTS idx_installed_name_url ON installed(name, url);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_installed_handle ON installed(handle);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_installed_handle_origin_url ON installed(handle, origin, url);
 `
 
 var tblSync = `	

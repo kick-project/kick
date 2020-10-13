@@ -3,10 +3,7 @@ package metadata
 import (
 	"database/sql"
 	"fmt"
-	"log"
-	"os"
 	"path/filepath"
-	"strings"
 	"sync"
 
 	"github.com/crosseyed/prjstart/internal/resources/config"
@@ -126,8 +123,6 @@ func (c *workers) processURL(url string, p *plumbing.Plumbing, chtemplate chan<-
 			continue
 		}
 		t.Master = *master
-		fmt.Fprintln(os.Stderr, t)
-		fmt.Fprintln(os.Stderr, master)
 		c.wait.Add(1)
 		chtemplate <- t
 	}
@@ -160,9 +155,6 @@ func (c *workers) insert(dbconn *sql.DB, t *Template) {
 
 	insertTemplate := `INSERT OR IGNORE INTO templates (masterid, name, url, desc) SELECT master.id, ?, ?, ? FROM master WHERE master.url = ?`
 	insertParams := []interface{}{t.Name, t.URL, t.Description, t.Master.URL}
-	// TODO: DI
-	log.Printf(strings.ReplaceAll(insertTemplate, "?", `"%s"`), insertParams...)
-	log.Println()
 	_, err = dbconn.Exec(insertTemplate, insertParams...)
 	errutils.Efatalf("error: inserting template metadata: %w", err)
 }
@@ -170,7 +162,7 @@ func (c *workers) insert(dbconn *sql.DB, t *Template) {
 // Master is the master struct
 type Master struct {
 	Name        string `json:"name" yaml:"name"`
-	URL         string
+	URL         string `json:"url" yaml:"url"`
 	Description string `json:"description" yaml:"description"`
 }
 

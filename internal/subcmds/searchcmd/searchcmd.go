@@ -1,12 +1,13 @@
 package searchcmd
 
 import (
-	"github.com/crosseyed/prjstart/internal/resources/db/tablesync"
+	"github.com/crosseyed/prjstart/internal/resources/sync"
 	"github.com/crosseyed/prjstart/internal/services/search"
 	"github.com/crosseyed/prjstart/internal/settings"
 	"github.com/crosseyed/prjstart/internal/settings/isearch"
-	"github.com/crosseyed/prjstart/internal/settings/itablesync"
+	"github.com/crosseyed/prjstart/internal/settings/isync"
 	"github.com/crosseyed/prjstart/internal/utils/options"
+	"github.com/jinzhu/copier"
 )
 
 var usageDoc = `Search for templates using a keyword
@@ -32,8 +33,9 @@ func Search(args []string, s *settings.Settings) int {
 	options.Bind(usageDoc, args, opts)
 
 	// Sync DB table "installed" with configuration file
-	sync := tablesync.New(itablesync.Inject(s))
-	sync.SyncInstalled()
+	synchro := &sync.Sync{}
+	copier.Copy(synchro, isync.Inject(s))
+	synchro.Templates()
 	srch := search.New(isearch.Inject(s))
 	return srch.Search2Output(opts.Term)
 }

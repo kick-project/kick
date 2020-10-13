@@ -13,6 +13,8 @@ import (
 	"os"
 	fp "path/filepath"
 
+	"github.com/apex/log"
+	"github.com/apex/log/handlers/cli"
 	"github.com/crosseyed/prjstart/internal/resources/config"
 	_ "github.com/mattn/go-sqlite3" // Driver for database/sql
 )
@@ -26,6 +28,9 @@ type Settings struct {
 	DBDriver string
 	DBDsn    string
 	Home     string
+	// See https://pkg.go.dev/github.com/apex/log#InfoLevel for
+	// available levels.
+	logLevel log.Level
 	// No Colour output when running commands.
 	NoColour bool
 	// Project name, normally supplied by the start sub command.
@@ -35,10 +40,10 @@ type Settings struct {
 	PathTemplateDir  string
 	PathUserConf     string
 	SqliteDB         string
+	Stdin            io.Reader
 	Stderr           io.Writer
 	Stdout           io.Writer
 	confFile         *config.File
-	db               *sql.DB
 }
 
 // GetSettings get settings using the supplied "home" directory option. Any
@@ -85,9 +90,16 @@ func GetSettings(home string) *Settings {
 		PathTemplateDir:  pathTemplateDir,
 		PathUserConf:     pathUserConf,
 		Stderr:           os.Stderr,
+		Stdin:            os.Stdin,
 		Stdout:           os.Stdout,
+		logLevel:         log.ErrorLevel,
 	}
 	return s
+}
+
+// LogLevel Sets the log level
+func (s *Settings) LogLevel(lvl log.Level) {
+	s.logLevel = lvl
 }
 
 //
@@ -111,12 +123,18 @@ func (s *Settings) ConfigFile() *config.File {
 
 // GetDB return DB object.
 func (s *Settings) GetDB() *sql.DB {
-	if s.db == nil {
-		db, err := sql.Open(s.DBDriver, s.DBDsn)
-		if err != nil {
-			panic(err)
-		}
-		s.db = db
+	db, err := sql.Open(s.DBDriver, s.DBDsn)
+	if err != nil {
+		panic(err)
 	}
-	return s.db
+	return db
+}
+
+// GetLogger inject logger object.
+func (s *Settings) GetLogger() *log.Logger {
+	logger := &log.Logger{
+		Handler: cli.New(s.Stderr),
+		Level:   s.logLevel,
+	}
+	return logger
 }

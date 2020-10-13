@@ -1,28 +1,29 @@
 package startcmd
 
 import (
-	"github.com/crosseyed/prjstart/internal/resources/db/tablesync"
+	"github.com/crosseyed/prjstart/internal/resources/sync"
 	"github.com/crosseyed/prjstart/internal/services/template"
 	"github.com/crosseyed/prjstart/internal/settings"
-	"github.com/crosseyed/prjstart/internal/settings/itablesync"
+	"github.com/crosseyed/prjstart/internal/settings/isync"
 	"github.com/crosseyed/prjstart/internal/settings/itemplate"
 	"github.com/crosseyed/prjstart/internal/utils/options"
+	"github.com/jinzhu/copier"
 )
 
 var usageDoc = `Generate project scaffolding
 
 Usage:
-    prjstart start <template> <project>
+    prjstart start <handle> <project>
 
 Options:
     -h --help     Print help.
-    <template>    Template name.
-    <project>     Project name.
+    <handle>      Template handle.
+    <project>     Project path.
 `
 
 type OptStart struct {
 	Start       bool   `docopt:"start"`
-	Template    string `docopt:"<template>"`
+	Template    string `docopt:"<handle>"`
 	ProjectPath string `docopt:"<project>"`
 	ProjectName string
 }
@@ -33,8 +34,9 @@ func Start(args []string, s *settings.Settings) int {
 	options.Bind(usageDoc, args, opts)
 
 	// Sync DB table "installed" with configuration file
-	sync := tablesync.New(itablesync.Inject(s))
-	sync.SyncInstalled()
+	synchro := &sync.Sync{}
+	copier.Copy(synchro, isync.Inject(s))
+	synchro.Templates()
 
 	// Set project name
 	s.ProjectName = opts.ProjectName

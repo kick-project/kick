@@ -10,7 +10,7 @@ import (
 	"github.com/crosseyed/prjstart/internal/utils"
 )
 
-func TestList(t *testing.T) {
+func TestSearch(t *testing.T) {
 	args := []string{"search", "keyword"}
 	home := filepath.Join(utils.TempDir(), "home")
 	s := settings.GetSettings(home)

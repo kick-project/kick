@@ -15,6 +15,7 @@ import (
 )
 
 func TestInit(t *testing.T) {
+	// TODO: This test tests the child package not the cmd package.
 	home := fp.Join(utils.TempDir(), "init")
 	set := settings.GetSettings(home)
 	i := initialize.New(iinitialize.Inject(set))

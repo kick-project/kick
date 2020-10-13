@@ -1,3 +1,4 @@
-- name: tmpl
+- handle: tmpl
+  template: tmpl
   url: http://127.0.0.1:5000/tmpl.git
   desc: Test Template

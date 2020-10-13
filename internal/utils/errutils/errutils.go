@@ -7,7 +7,17 @@ import (
 	"github.com/crosseyed/prjstart/internal/utils"
 )
 
-func logErr(format string, v ...interface{}) bool {
+func hasErrPrint(err error) bool {
+	if err == nil {
+		return false
+	}
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
+	log.Output(3, err.Error())
+	log.SetFlags(log.LstdFlags)
+	return true
+}
+
+func hasErrPrintf(format string, v ...interface{}) bool {
 	hasError := false
 	for _, e := range v {
 		if _, ok := e.(error); ok {
@@ -25,9 +35,18 @@ func logErr(format string, v ...interface{}) bool {
 	return true
 }
 
+// Epanic will log an error and panic if err is not nil.
+func Epanic(err error) {
+	has := hasErrPrint(err)
+	if !has {
+		return
+	}
+	panic(err)
+}
+
 // Epanicf will log an error and panic if any argument passed to format is an error
 func Epanicf(format string, v ...interface{}) {
-	hasErr := logErr(format, v...)
+	hasErr := hasErrPrintf(format, v...)
 	if !hasErr {
 		return
 	}
@@ -36,12 +55,21 @@ func Epanicf(format string, v ...interface{}) {
 
 // Elogf will log an error if any argument passed to format is an error
 func Elogf(format string, v ...interface{}) bool { // nolint
-	return logErr(format, v...)
+	return hasErrPrintf(format, v...)
+}
+
+// Efatal will log an error and exit if err is not nil.
+func Efatal(err error) {
+	has := hasErrPrint(err)
+	if !has {
+		return
+	}
+	utils.Exit(255)
 }
 
 // Efatalf will log an error and exit if any argument passed to fatal is an error
 func Efatalf(format string, v ...interface{}) { // nolint
-	hasErr := logErr(format, v...)
+	hasErr := hasErrPrintf(format, v...)
 	if !hasErr {
 		return
 	}

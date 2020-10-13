@@ -16,7 +16,7 @@ const (
 
 // Plumbing Manages downloading of metadata
 type Plumbing struct {
-	base string
+	Base string
 	mb   *plumb
 }
 
@@ -31,8 +31,7 @@ type plumb struct {
 // New create a new plumber. All repositories downloaded will be under the basedir.
 func New(basedir string) *Plumbing {
 	return &Plumbing{
-		base: basedir,
-		mb:   &plumb{},
+		Base: basedir,
 	}
 }
 
@@ -72,26 +71,41 @@ func (plu *Plumbing) Handler(url string) error {
 
 // Scheme URL scheme.
 func (plu *Plumbing) Scheme() string {
+	if plu.mb == nil {
+		return ""
+	}
 	return plu.mb.scheme
 }
 
 // Path local path on disk.
 func (plu *Plumbing) Path() string {
+	if plu.mb == nil {
+		return ""
+	}
 	return plu.mb.path
 }
 
 // Branch branch to checkout.
 func (plu *Plumbing) Branch() string {
+	if plu.mb == nil {
+		return ""
+	}
 	return plu.mb.branch
 }
 
 // URL original URL.
 func (plu *Plumbing) URL() string {
+	if plu.mb == nil {
+		return ""
+	}
 	return plu.mb.uRL
 }
 
 // Method actions to perform.
 func (plu *Plumbing) Method() int {
+	if plu.mb == nil {
+		return 0
+	}
 	return plu.mb.method
 }
 
@@ -100,6 +114,6 @@ func (plu *Plumbing) localPath(u *utils.URLx) string {
 	if u.Scheme == "file" {
 		return u.Path
 	}
-	lPath := filepath.Join(plu.base, u.Path, u.Project)
+	lPath := filepath.Join(plu.Base, u.Path, u.Project)
 	return lPath
 }

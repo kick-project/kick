@@ -1,6 +1,9 @@
 package config
 
 import (
+	"fmt"
+	"io"
+	"os"
 	"strings"
 
 	"github.com/crosseyed/prjstart/internal/utils/errutils"
@@ -9,6 +12,7 @@ import (
 
 // File configuration as loaded from the configuration file
 type File struct {
+	stderr           io.Writer  `yaml:"-"`
 	pathUserConf     string     `yaml:"-"` // Path to configuration file
 	pathTemplateConf string     `yaml:"-"`
 	MasterURLs       []string   `yaml:"masters,omitempty"` // URLs to master git repositories
@@ -32,6 +36,7 @@ func New(opts Options) *File {
 	c := &File{
 		pathUserConf:     opts.PathUserConf,
 		pathTemplateConf: opts.PathTemplateConf,
+		stderr:           os.Stderr,
 	}
 	return c
 }
@@ -41,13 +46,31 @@ type SortByName []Template
 
 func (a SortByName) Len() int           { return len(a) }
 func (a SortByName) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
-func (a SortByName) Less(i, j int) bool { return strings.Compare(a[j].Name, a[i].Name) > 0 }
+func (a SortByName) Less(i, j int) bool { return strings.Compare(a[j].Handle, a[i].Handle) > 0 }
 
 // Template template configuration in main configuration file
 type Template struct {
-	Name string `yaml:"name"`
-	URL  string `yaml:"url"`
-	Desc string `yaml:"desc"`
+	Handle   string `yaml:"handle"`
+	Template string `yaml:"template"`
+	Origin   string `yaml:"origin"`
+	URL      string `yaml:"url"`
+	Desc     string `yaml:"desc"`
+}
+
+// AppendTemplate appends a template to list of templates.
+// If stop is non zero, the calling function should exit the program with the
+// value contained in stop.
+func (f *File) AppendTemplate(t Template) (stop int) {
+	// Check if template is installed
+	for _, cur := range f.Templates {
+		if t.Handle == cur.Handle {
+			fmt.Fprintf(os.Stderr, "template handle %s already in use\n", t.Handle)
+			return 255
+		}
+	}
+
+	f.Templates = append(f.Templates, t)
+	return 0
 }
 
 // Load loads configuration file from disk
@@ -58,7 +81,7 @@ func (f *File) Load() {
 	errutils.Epanicf("%w", err)
 }
 
-// Save saves configuration file to disk
-func (f *File) Save() {
+// SaveTemplates saves template configuration file to disk
+func (f *File) SaveTemplates() {
 	marshal.MarshalFile(f.Templates, f.pathTemplateConf)
 }
