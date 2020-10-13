@@ -1,3 +1,6 @@
+// Package fflags enables featureflags using environment variables. Feature
+// flags can be globally disabled/enabled using the FF_ENABLED environment
+// variable (true enables any other value disables).
 package fflags
 
 import "os"
@@ -12,11 +15,6 @@ func enabled() bool {
 // Remote enables remote operations
 func Remote() bool {
 	return enabled() && os.Getenv("FF_PRJSTART_REMOTE") == "true"
-}
-
-// DB mocks the database
-func DB() bool {
-	return enabled() && os.Getenv("FF_PRJSTART_MOCK_DB") == "true"
 }
 
 // GitClone refactor the way git repositories are cloned

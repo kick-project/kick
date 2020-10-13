@@ -3,15 +3,11 @@ package internal
 import (
 	"testing"
 
-	"github.com/crosseyed/prjstart/internal/fflags"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestUsageDoc(t *testing.T) {
-	assert.NotRegexp(t, "\t", UsageMain)
-	if fflags.Remote() {
-		assert.NotRegexp(t, "\t", UsageMainFFREMOTE)
-	}
+	assert.NotRegexp(t, "\t", usageDoc)
 }
 
 func TestGetOptMainStart(t *testing.T) {

@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"github.com/crosseyed/prjstart/internal/fflags"
 	"github.com/crosseyed/prjstart/internal/utils/errutils"
 	"github.com/docopt/docopt-go"
 )
@@ -10,21 +9,7 @@ import (
 // Document strings
 //
 
-var UsageMain = `Generate project scaffolding from a predefined set of templates
-
-Usage:
-    prjstart start
-    prjstart init
-    prjstart list
-
-Options:
-    -h --help     Print help.
-    -v --version  Print version.
-    start         Start a project.
-    init          Initialize configuration.
-    list          List projects/variables.
-`
-var UsageMainFFREMOTE = `Generate project scaffolding from a predefined set of templates
+var usageDoc = `Generate project scaffolding from a predefined set of templates
 
 Usage:
     prjstart start
@@ -76,11 +61,7 @@ func GetOptMain(args []string) *OptMain {
 		filterArgs = append(filterArgs, arg)
 		break
 	}
-	if fflags.Remote() {
-		opts, err = docopt.ParseArgs(UsageMainFFREMOTE, filterArgs, Version)
-	} else {
-		opts, err = docopt.ParseArgs(UsageMain, filterArgs, Version)
-	}
+	opts, err = docopt.ParseArgs(usageDoc, filterArgs, Version)
 	errutils.Epanicf("Can not parse usage doc: %s", err) // nolint
 	o := new(OptMain)
 	err = opts.Bind(o)
