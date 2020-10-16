@@ -49,17 +49,17 @@ func MarshalFile(v interface{}, path string) error {
 }
 
 // UnmarshalFile un-marshals from a json or yaml file.
-func UnmarshalFile(v interface{}, path string) error {
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		return fmt.Errorf("file %s does not exist: %w", path, err)
+func UnmarshalFile(v interface{}, p string) error {
+	if _, err := os.Stat(p); os.IsNotExist(err) {
+		return fmt.Errorf("file %s does not exist: %w", p, err)
 	}
 
-	f, err := ioutil.ReadFile(path)
+	f, err := ioutil.ReadFile(p)
 	if err != nil {
-		return fmt.Errorf("can not read file %s: %w", path, err)
+		return fmt.Errorf("can not read file %s: %w", p, err)
 	}
 
-	st, err := suffixType(path)
+	st, err := suffixType(p)
 	if err != nil {
 		return err
 	}
@@ -69,7 +69,7 @@ func UnmarshalFile(v interface{}, path string) error {
 		err = yaml.Unmarshal([]byte(f), v)
 	}
 	if err != nil {
-		return fmt.Errorf("can not unmarshal file %s: %w", path, err)
+		return fmt.Errorf("can not unmarshal file %s: %w", p, err)
 	}
 	return nil
 }

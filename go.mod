@@ -3,6 +3,7 @@ module github.com/crosseyed/prjstart
 go 1.14
 
 require (
+	github.com/a8m/envsubst v1.2.0
 	github.com/apex/log v1.9.0
 	github.com/docopt/docopt-go v0.0.0-20180111231733-ee0de3bc6815
 	github.com/go-git/go-git/v5 v5.1.0

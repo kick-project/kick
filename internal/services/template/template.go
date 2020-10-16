@@ -13,12 +13,15 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/apex/log"
 	"github.com/crosseyed/prjstart/internal/resources/config"
 	"github.com/crosseyed/prjstart/internal/resources/gitclient"
 	plumb "github.com/crosseyed/prjstart/internal/resources/gitclient/plumbing"
+	"github.com/crosseyed/prjstart/internal/services/template/renderer"
 	"github.com/crosseyed/prjstart/internal/services/template/variables"
 	"github.com/crosseyed/prjstart/internal/utils"
 	"github.com/crosseyed/prjstart/internal/utils/errutils"
+	"github.com/crosseyed/prjstart/internal/utils/marshal"
 )
 
 const (
@@ -32,14 +35,51 @@ const (
 
 // Template the template itself
 type Template struct {
-	Config      *config.File
-	ModeLineLen uint8
-	TemplateDir string
-	Variables   *variables.Variables
-	builddir    string
-	dest        string
-	localpath   string
-	src         string
+	Config         *config.File
+	Log            *log.Logger
+	ModeLineLen    uint8
+	RenderCurrent  string
+	RenderersAvail map[string]renderer.Renderer
+	Stderr         io.Writer
+	Stdout         io.Writer
+	TemplateDir    string
+	Variables      *variables.Variables
+	builddir       string
+	dest           string
+	localpath      string
+	src            string
+}
+
+// SetRender set rendering engine
+func (t *Template) SetRender(renderer string) {
+	if renderer == "" {
+		t.Log.Error("No renderer provided\n")
+		utils.Exit(255)
+	}
+
+	if _, ok := t.RenderersAvail[t.RenderCurrent]; !ok {
+		t.Log.Errorf("No such renderer %s. Valid options are...\n", t.RenderCurrent)
+		for r := range t.RenderersAvail {
+			fmt.Println(r)
+		}
+		utils.Exit(255)
+	}
+	t.RenderCurrent = renderer
+}
+
+func (t *Template) renderer() renderer.Renderer {
+	if t.RenderCurrent == "" {
+		panic("no render")
+	}
+
+	render, ok := t.RenderersAvail[t.RenderCurrent]
+	if ok {
+		return render
+	} else {
+		fmt.Fprintf(t.Stderr, "No such renderer %s\n", t.RenderCurrent)
+		utils.Exit(255)
+	}
+	return nil
 }
 
 func (t *Template) buildDir(id string) {
@@ -67,8 +107,12 @@ func (t *Template) SetSrc(name string) {
 		}
 	}
 	g := plumb.New(t.TemplateDir)
-	// TODO: DI
 	localpath, err := gitclient.Get(tmpl.URL, g)
+
+	// Set renderer from conf
+	confPath := filepath.Join(localpath, ".prjtemplate.yml")
+	t.loadTempateConf(confPath)
+
 	errutils.Efatalf(`template "%s" not found: %v`, name, err)
 
 	stat, err := os.Stat(localpath)
@@ -83,7 +127,7 @@ func (t *Template) SetSrc(name string) {
 	t.localpath = localpath
 }
 
-// SetDest sets the destnation path
+// SetDest sets the destination path
 func (t *Template) SetDest(dest string) {
 	t.dest = dest
 }
@@ -100,7 +144,7 @@ func (t *Template) Run() int {
 			return nil
 		}
 		relative := strings.Replace(srcPath, base, "", 1)
-		relative = renderDir(relative, t.Variables)
+		relative = t.renderDir(relative)
 		dstPath := filepath.Join(t.builddir, relative)
 
 		if err != nil {
@@ -114,6 +158,7 @@ func (t *Template) Run() int {
 			dstPath:   dstPath,
 			variables: t.Variables,
 			mlen:      t.ModeLineLen,
+			renderer:  t.renderer(),
 		}
 		err = pair.route()
 		errutils.Epanicf("Build Error: %v", err)
@@ -136,8 +181,41 @@ func (t *Template) checkDstExists() {
 		errutils.Epanicf("Build Error: %v", err)
 	}
 	if stat != nil {
-		fmt.Printf("Path '%s' exists. Aborting.", t.dest) // nolint
+		fmt.Printf("Path '%s' exists. Aborting.\n", t.dest) // nolint
 		utils.Exit(255)
+	}
+}
+
+// renderDir scans directory names for template markers and renders the directory path as a template
+func (t *Template) renderDir(path string) string {
+	regex := t.renderer().RenderDirRegexp()
+	if !regex.MatchString(path) {
+		return path
+	}
+	path, err := t.renderer().Text2String(path, t.Variables, true, true)
+	errutils.Efatalf("can not substitute path string \"%s\": %v", path, err)
+	return path
+}
+
+// loadTemplateConf loads template configuration
+func (t *Template) loadTempateConf(path string) {
+	t.Log.Debugf("Loading template conf %s\n", path)
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		return
+	} else if err != nil {
+		fmt.Fprintf(t.Stderr, "Can not load file %s: %v\n", path, err)
+	}
+	c := &templateConf{}
+	if !strings.HasSuffix(path, ".yml") {
+		fmt.Fprintf(t.Stderr, "Invalid file %s\n", path)
+		utils.Exit(255)
+	}
+	t.Log.Debugf("Unmarshal file %s\n", path)
+	marshal.UnmarshalFile(c, path)
+	t.Log.Debugf("%#v", c)
+
+	if c.Renderer != "" {
+		t.SetRender(c.Renderer)
 	}
 }
 
@@ -145,12 +223,13 @@ func (t *Template) checkDstExists() {
 // Source Destination pair
 //
 type filePair struct {
-	srcInfo   os.FileInfo
-	srcPath   string // Source path
 	dstPath   string // Destination path
 	mlen      uint8  // Mode line length
-	variables *variables.Variables
 	mu        sync.Mutex
+	renderer  renderer.Renderer
+	srcInfo   os.FileInfo
+	srcPath   string // Source path
+	variables *variables.Variables
 }
 
 func (fp *filePair) route() error {
@@ -168,7 +247,6 @@ func (fp *filePair) route() error {
 		return fp.copy()
 	default:
 		msg := fmt.Sprintf("error FILENOTREGULAR: %s\n", fp.dstPath)
-		fmt.Println(msg)
 		return errors.New(msg)
 	}
 	return nil
@@ -264,7 +342,7 @@ func (fp *filePair) render(mline uint8) error {
 		os.Remove(tempPath)
 	}()
 
-	File2File(tempPath, fp.dstPath, fp.variables)
+	fp.renderer.File2File(tempPath, fp.dstPath, fp.variables, false, false)
 	return nil
 }
 
@@ -298,12 +376,24 @@ LOOP:
 	return action, lnum
 }
 
+//
+// hasML
+//
+
 type hasML []hasMLAction
 
 func (ml hasML) Init() hasML {
 	ml = append(ml, regexCompile(`prj:render\W?`, MLrender))
 	ml = append(ml, regexCompile(`prj:ignore\W?`, MLnorender))
 	return ml
+}
+
+//
+// templateConf
+//
+
+type templateConf struct {
+	Renderer string `yaml:"renderer"`
 }
 
 func regexCompile(rex string, action int) hasMLAction {
@@ -342,14 +432,4 @@ func scanLines(data []byte, atEOF bool) (advance int, token []byte, err error) {
 	}
 	// Request more data.
 	return 0, nil, nil
-}
-
-// renderDir scans directory names for template markers and renders the directory path as a template
-func renderDir(path string, prjvars *variables.Variables) string {
-	regex := regexp.MustCompile(`{{[^}}]+}}`)
-	if !regex.MatchString(path) {
-		return path
-	}
-	path = Txt2String(path, prjvars)
-	return path
 }

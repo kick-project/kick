@@ -14,7 +14,8 @@ import (
 	fp "path/filepath"
 
 	"github.com/apex/log"
-	"github.com/apex/log/handlers/cli"
+	"github.com/apex/log/handlers/text"
+	"github.com/crosseyed/prjstart/internal/env"
 	"github.com/crosseyed/prjstart/internal/resources/config"
 	_ "github.com/mattn/go-sqlite3" // Driver for database/sql
 )
@@ -80,6 +81,10 @@ func GetSettings(home string) *Settings {
 	pathTemplateConf := fp.Clean(fmt.Sprintf("%s/.prjstart/templates.yml", home))
 	pathTemplateDir := fp.Clean(fmt.Sprintf("%s/.prjstart/templates", home))
 	pathMetadataDir := fp.Clean(fmt.Sprintf("%s/.prjstart/metadata", home))
+	logLvl := log.ErrorLevel
+	if env.Debug() {
+		logLvl = log.DebugLevel
+	}
 	s := &Settings{
 		DBDriver:         dbdriver,
 		DBDsn:            dbdsn,
@@ -92,7 +97,7 @@ func GetSettings(home string) *Settings {
 		Stderr:           os.Stderr,
 		Stdin:            os.Stdin,
 		Stdout:           os.Stdout,
-		logLevel:         log.ErrorLevel,
+		logLevel:         logLvl,
 	}
 	return s
 }
@@ -133,7 +138,7 @@ func (s *Settings) GetDB() *sql.DB {
 // GetLogger inject logger object.
 func (s *Settings) GetLogger() *log.Logger {
 	logger := &log.Logger{
-		Handler: cli.New(s.Stderr),
+		Handler: text.New(s.Stderr),
 		Level:   s.logLevel,
 	}
 	return logger

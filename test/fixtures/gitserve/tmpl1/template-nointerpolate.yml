@@ -1,2 +1,2 @@
-project: {{.Project.NAME}}
-home: {{.Env.HOME}}
+project: ${PROJECT_NAME}
+home: ${HOME}

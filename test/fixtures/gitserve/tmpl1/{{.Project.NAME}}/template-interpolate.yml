@@ -1,3 +1,0 @@
-# prj:render
-project: {{.Project.NAME}}
-home: {{.Env.HOME}}

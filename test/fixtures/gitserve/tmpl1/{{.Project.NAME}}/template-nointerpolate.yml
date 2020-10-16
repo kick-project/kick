@@ -1,2 +1,0 @@
-project: {{.Project.NAME}}
-home: {{.Env.HOME}}

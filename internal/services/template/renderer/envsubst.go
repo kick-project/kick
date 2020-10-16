@@ -1,0 +1,67 @@
+package renderer
+
+import (
+	"fmt"
+	"io/ioutil"
+	"os"
+	"regexp"
+
+	"github.com/a8m/envsubst"
+	"github.com/crosseyed/prjstart/internal/services/template/variables"
+	"github.com/crosseyed/prjstart/internal/utils/errutils"
+)
+
+// RenderEnv renders using environment variables
+type RenderEnv struct {
+	Renderer
+}
+
+// File2File takes a src file populates a dst file with the results of the
+// template populated with variables
+func (r *RenderEnv) File2File(src, dst string, vars *variables.Variables, nounset, noempty bool) (err error) {
+	b, err := ioutil.ReadFile(src)
+	errutils.Elogf("Can not open template file %s for reading: %v", src, err)
+	r.Text2File(string(b), dst, vars, nounset, noempty)
+	return
+}
+
+// Text2File takes template text text and outputs to dst file
+func (r *RenderEnv) Text2File(text, dst string, vars *variables.Variables, nounset, noempty bool) (err error) {
+	td := os.Getenv("TEMP")
+	f, err := ioutil.TempFile(td, "prjstart-*")
+	if err != nil {
+		return fmt.Errorf("Text2File: %w", err)
+	}
+
+	result, err := r.Text2String(text, vars, nounset, noempty)
+	if err != nil {
+		return fmt.Errorf("Text2File: %w", err)
+	}
+
+	_, err = f.WriteString(result)
+	if err != nil {
+		return fmt.Errorf("Text2File: %w", err)
+	}
+
+	err = f.Close()
+	if err != nil {
+		return fmt.Errorf("Text2File: %w", err)
+	}
+	err = os.Rename(f.Name(), dst)
+	if err != nil {
+		return fmt.Errorf("Text2File: %w", err)
+	}
+	return
+}
+
+// Text2String renders input text and returns result as a string.
+func (r *RenderEnv) Text2String(text string, vars *variables.Variables, nounset, noempty bool) (result string, err error) {
+	result, err = envsubst.StringRestricted(text, nounset, noempty)
+	return
+}
+
+// RenderDirRegexp returns the regex to match directory names that should be rendered.
+func (r *RenderEnv) RenderDirRegexp() *regexp.Regexp {
+	regex := regexp.MustCompile(`\${[A-Za-z0-9_]+}`)
+	return regex
+}

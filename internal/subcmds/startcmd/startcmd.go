@@ -1,6 +1,8 @@
 package startcmd
 
 import (
+	"path/filepath"
+
 	"github.com/crosseyed/prjstart/internal/resources/sync"
 	"github.com/crosseyed/prjstart/internal/services/template"
 	"github.com/crosseyed/prjstart/internal/settings"
@@ -25,7 +27,6 @@ type OptStart struct {
 	Start       bool   `docopt:"start"`
 	Template    string `docopt:"<handle>"`
 	ProjectPath string `docopt:"<project>"`
-	ProjectName string
 }
 
 // Start start cli option
@@ -39,7 +40,7 @@ func Start(args []string, s *settings.Settings) int {
 	synchro.Templates()
 
 	// Set project name
-	s.ProjectName = opts.ProjectName
+	s.ProjectName = filepath.Base(opts.ProjectPath)
 	t := &template.Template{}
 	copier.Copy(t, itemplate.Inject(s))
 	t.SetSrcDest(opts.Template, opts.ProjectPath)

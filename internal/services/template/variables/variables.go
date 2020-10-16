@@ -23,6 +23,7 @@ func New() *Variables {
 // ProjectVariable sets a project variable
 func (v *Variables) ProjectVariable(name, value string) {
 	v.Project[name] = value
+	os.Setenv("PROJECT_"+name, value)
 }
 
 func (v *Variables) genVarsEnv() map[string]string {

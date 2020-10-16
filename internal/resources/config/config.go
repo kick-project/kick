@@ -3,7 +3,6 @@ package config
 import (
 	"fmt"
 	"io"
-	"os"
 	"strings"
 
 	"github.com/crosseyed/prjstart/internal/utils/errutils"
@@ -42,7 +41,7 @@ func (f *File) AppendTemplate(t Template) (stop int) {
 	// Check if template is installed
 	for _, cur := range f.Templates {
 		if t.Handle == cur.Handle {
-			fmt.Fprintf(os.Stderr, "template handle %s already in use\n", t.Handle)
+			fmt.Fprintf(f.Stderr, "template handle %s already in use\n", t.Handle)
 			return 255
 		}
 	}
@@ -54,12 +53,13 @@ func (f *File) AppendTemplate(t Template) (stop int) {
 // Load loads configuration file from disk
 func (f *File) Load() {
 	err := marshal.UnmarshalFile(f, f.PathUserConf)
-	errutils.Epanicf("%w", err)
+	errutils.Efatalf("Can not load file %s: %w\n", f.PathUserConf, err)
 	err = marshal.UnmarshalFile(&f.Templates, f.PathTemplateConf)
-	errutils.Epanicf("%w", err)
+	errutils.Efatalf("Can not load file %s: %w\n", f.PathTemplateConf, err)
 }
 
 // SaveTemplates saves template configuration file to disk
 func (f *File) SaveTemplates() {
-	marshal.MarshalFile(f.Templates, f.PathTemplateConf)
+	err := marshal.MarshalFile(f.Templates, f.PathTemplateConf)
+	errutils.Efatalf("Can not save file %s: %w\n", f.PathTemplateConf, err)
 }
