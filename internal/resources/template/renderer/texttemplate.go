@@ -32,7 +32,7 @@ func (r *RenderText) File2File(src, dst string, vars *variables.Variables, nouns
 // Text2File takes template text text and outputs to dst file
 func (r *RenderText) Text2File(text, dst string, vars *variables.Variables, nounset, noempty bool) error {
 	td := os.Getenv("TEMP")
-	f, err := ioutil.TempFile(td, "prjstart-*")
+	f, err := ioutil.TempFile(td, "kick-*")
 	errutils.Epanicf("Error creating tempfile %v", err)
 
 	t := tt.Must(tt.New("texttemplate").Parse(text))
@@ -50,7 +50,7 @@ func (r *RenderText) Text2File(text, dst string, vars *variables.Variables, noun
 // Text2String renders input text and returns result as a string.
 func (r *RenderText) Text2String(text string, vars *variables.Variables, nounset, noempty bool) (string, error) {
 	td := os.Getenv("TEMP")
-	f, err := ioutil.TempFile(td, "prjstart-*")
+	f, err := ioutil.TempFile(td, "kick-*")
 	errutils.Epanicf("Error creating tempfile %v", err)
 	f.Close() // nolint
 	err = r.Text2File(text, f.Name(), vars, nounset, noempty)

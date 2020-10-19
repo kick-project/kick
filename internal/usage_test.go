@@ -11,7 +11,7 @@ func TestUsageDoc(t *testing.T) {
 }
 
 func TestGetOptMainStart(t *testing.T) {
-	args := []string{"prjstart", "start"}
+	args := []string{"kick", "start"}
 	o := GetOptMain(args)
 	assert.True(t, o.Start)
 	assert.False(t, o.Install)
@@ -19,7 +19,7 @@ func TestGetOptMainStart(t *testing.T) {
 }
 
 func TestGetOptMainList(t *testing.T) {
-	args := []string{"prjstart", "list"}
+	args := []string{"kick", "list"}
 	o := GetOptMain(args)
 	assert.True(t, o.List)
 	assert.False(t, o.Start)
@@ -27,7 +27,7 @@ func TestGetOptMainList(t *testing.T) {
 }
 
 func TestGetOptMainInstall(t *testing.T) {
-	args := []string{"prjstart", "install"}
+	args := []string{"kick", "install"}
 	o := GetOptMain(args)
 	assert.True(t, o.Install)
 	assert.False(t, o.Start)

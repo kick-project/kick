@@ -16,7 +16,7 @@ import (
 var usageDoc = `Generate project scaffolding
 
 Usage:
-    prjstart start <handle> <project>
+    kick start <handle> <project>
 
 Options:
     -h --help     Print help.

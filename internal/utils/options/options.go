@@ -1,8 +1,8 @@
 package options
 
 import (
-	"github.com/kick-project/kick/internal/utils/errutils"
 	"github.com/docopt/docopt-go"
+	"github.com/kick-project/kick/internal/utils/errutils"
 )
 
 // Bind parse options from document text and populate a struct "opts".

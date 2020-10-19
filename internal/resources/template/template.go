@@ -83,7 +83,7 @@ func (t *Template) renderer() renderer.Renderer {
 }
 
 func (t *Template) buildDir(id string) {
-	d, err := ioutil.TempDir(os.Getenv("TEMP"), fmt.Sprintf("prjstart-%s-", id))
+	d, err := ioutil.TempDir(os.Getenv("TEMP"), fmt.Sprintf("kick-%s-", id))
 	errutils.Epanicf("Build Error: %v", err)
 	t.builddir = d
 }
@@ -314,7 +314,7 @@ func (fp *filePair) stripModeline(lnum uint8) string {
 	defer inF.Close()                                          // nolint
 
 	tmpdir := os.Getenv("TMPDIR")
-	outF, err := ioutil.TempFile(tmpdir, "prjstart-")
+	outF, err := ioutil.TempFile(tmpdir, "kick-")
 	errutils.Epanicf("Can not create tempfile: %s", err) // nolint
 	defer outF.Close()                                   // nolint
 

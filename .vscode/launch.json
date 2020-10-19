@@ -13,29 +13,29 @@
             "envFile": "${workspaceFolder}/.env"
         },
         {
-            "name": "prjstart --help",
+            "name": "kick --help",
             "type": "go",
             "request": "launch",
             "mode": "auto",
-            "program": "${workspaceFolder}/cmd/prjstart",
+            "program": "${workspaceFolder}/cmd/kick",
             "args": ["--help"],
             "envFile": "${workspaceFolder}/.env"
         },
         {
-            "name": "prjstart search",
+            "name": "kick search",
             "type": "go",
             "request": "launch",
             "mode": "auto",
-            "program": "${workspaceFolder}/cmd/prjstart",
+            "program": "${workspaceFolder}/cmd/kick",
             "args": ["search", "-l", "template1"],
             "envFile": "${workspaceFolder}/.env"
         },
         {
-            "name": "prjstart start go /tmp/fooo",
+            "name": "kick start go /tmp/fooo",
             "type": "go",
             "request": "launch",
             "mode": "auto",
-            "program": "${workspaceFolder}/cmd/prjstart",
+            "program": "${workspaceFolder}/cmd/kick",
             "args": ["start", "go", "/tmp/foo"]
         },
     ]

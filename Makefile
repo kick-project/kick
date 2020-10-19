@@ -3,7 +3,7 @@ SHELL = /bin/bash
 MAKEFLAGS += --no-print-directory
 
 # Project
-NAME := prjstart
+NAME := kick
 GOPATH := $(shell go env GOPATH)
 VERSION ?= $(shell cat VERSION)
 COMMIT := $(shell test -d .git && git rev-parse --short HEAD)
@@ -82,7 +82,7 @@ _install: $(GOPATH)/bin/$(NAME) ## Install to $(GOPATH)/bin
 
 clean: ## Reset project to original state
 	-test -f tmp/server.pid && kill -TERM $$(cat tmp/server.pid)
-	rm -rf .cache prjstart dist reports tmp vendor
+	rm -rf .cache kick dist reports tmp vendor
 
 test: ## Test
 	$(MAKE) lint
@@ -230,7 +230,7 @@ $(NAME): dist/$(NAME)_$(GOOS)_$(GOARCH)/$(NAME)
 
 dist/$(NAME)_$(GOOS)_$(GOARCH)/$(NAME) dist/$(NAME)_$(GOOS)_$(GOARCH)/$(NAME).exe: $(GOFILES) internal/version.go
 	@mkdir -p $$(dirname $@)
-	go build -o $@ ./cmd/prjstart
+	go build -o $@ ./cmd/kick
 
 dist/$(NAME)-$(VERSION).$(ARCH).rpm: dist/$(NAME)_$(GOOS)_$(GOARCH)/$(NAME)
 	@mkdir -p $$(dirname $@)

@@ -14,7 +14,7 @@ import (
 var usageDoc = `Initialize configuration
 
 Usage:
-    prjstart init
+    kick init
 
 Options:
     -h --help     Print help.

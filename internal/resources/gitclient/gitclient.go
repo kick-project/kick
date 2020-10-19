@@ -3,10 +3,10 @@ package gitclient
 import (
 	"os"
 
-	plumb "github.com/kick-project/kick/internal/resources/gitclient/plumbing"
-	"github.com/kick-project/kick/internal/utils/errutils"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
+	plumb "github.com/kick-project/kick/internal/resources/gitclient/plumbing"
+	"github.com/kick-project/kick/internal/utils/errutils"
 )
 
 // Get Downloads using the data provider by getter

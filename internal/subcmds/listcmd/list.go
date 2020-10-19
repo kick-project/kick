@@ -19,7 +19,7 @@ import (
 var usageDoc = `List handles/templates
 
 Usage:
-    prjstart list [-l]
+    kick list [-l]
 
 Options:
 	-h --help     Print help.

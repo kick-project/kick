@@ -28,6 +28,6 @@
 /reports/
 /tmp/
 /vendor/
-/prjstart
+/kick
 /.cache
 /nfpm.yaml

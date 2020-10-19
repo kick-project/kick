@@ -73,7 +73,7 @@ templates:
 
 Create the project using go
 ```bash
-prjstart start goproject ~/mynewproject
+kick start goproject ~/mynewproject
 ```
 
 # Git templates
@@ -95,7 +95,7 @@ templates:
 
 Start a new project with the recently checked in boilerplate
 ```bash
-prjstart start goproject ~/myproject
+kick start goproject ~/myproject
 ```
 
 # Variables
@@ -104,6 +104,6 @@ or project variables.
 
 To list available project variables run
 ```bash
-prjstart list --vars
+kick list --vars
 ```
 

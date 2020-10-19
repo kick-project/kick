@@ -16,7 +16,7 @@ import (
 var usageDoc = `Install template
 
 Usage:
-    prjstart install <handle> <location>
+    kick install <handle> <location>
 
 Options:
     -h --help        Print help.

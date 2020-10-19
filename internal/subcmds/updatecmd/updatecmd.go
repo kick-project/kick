@@ -12,7 +12,7 @@ import (
 var usageDoc = `Update repository data
 
 Usage:
-    prjstart update
+    kick update
 
 Options:
     -h --help     Print help.

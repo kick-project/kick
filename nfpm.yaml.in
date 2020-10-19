@@ -1,4 +1,4 @@
-name: prjstart
+name: kick
 arch: amd64
 platform: linux
 version: 'v${VERSION}'
@@ -14,7 +14,7 @@ description: |
     Project Templates can also be referenced on local disk
 license: Apache-2.0
 files:
-    dist/prjstart_linux_amd64/prjstart: /usr/bin/prjstart
+    dist/kick_linux_amd64/kick: /usr/bin/kick
 
 rpm:
     group: Unspecified

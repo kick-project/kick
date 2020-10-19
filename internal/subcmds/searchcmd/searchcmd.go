@@ -14,7 +14,7 @@ import (
 var usageDoc = `Search for templates using a keyword
 
 Usage:
-    prjstart search [--long] <term>
+    kick search [--long] <term>
 
 Options:
     -h --help     Print help.

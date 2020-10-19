@@ -29,7 +29,7 @@ func (r *RenderEnv) File2File(src, dst string, vars *variables.Variables, nounse
 // Text2File takes template text text and outputs to dst file
 func (r *RenderEnv) Text2File(text, dst string, vars *variables.Variables, nounset, noempty bool) (err error) {
 	td := os.Getenv("TEMP")
-	f, err := ioutil.TempFile(td, "prjstart-*")
+	f, err := ioutil.TempFile(td, "kick-*")
 	if err != nil {
 		return fmt.Errorf("Text2File: %w", err)
 	}

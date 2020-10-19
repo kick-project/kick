@@ -5,6 +5,7 @@ import (
 	"path"
 
 	"github.com/apex/log"
+	"github.com/joho/godotenv"
 	"github.com/kick-project/kick/internal"
 	"github.com/kick-project/kick/internal/settings"
 	"github.com/kick-project/kick/internal/subcmds/initcmd"
@@ -15,7 +16,6 @@ import (
 	"github.com/kick-project/kick/internal/subcmds/updatecmd"
 	"github.com/kick-project/kick/internal/utils"
 	"github.com/kick-project/kick/internal/utils/errutils"
-	"github.com/joho/godotenv"
 )
 
 func main() {

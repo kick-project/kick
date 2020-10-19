@@ -1,8 +1,8 @@
 package internal
 
 import (
-	"github.com/kick-project/kick/internal/utils/errutils"
 	"github.com/docopt/docopt-go"
+	"github.com/kick-project/kick/internal/utils/errutils"
 )
 
 //
@@ -12,12 +12,12 @@ import (
 var usageDoc = `Generate project scaffolding from a predefined set of templates
 
 Usage:
-    prjstart start
-    prjstart init
-    prjstart install
-    prjstart list
-    prjstart search
-    prjstart update
+    kick start
+    kick init
+    kick install
+    kick list
+    kick search
+    kick update
 
 Options:
     -h --help     Print help.
