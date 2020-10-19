@@ -46,10 +46,10 @@ func Sha256Sum(rdr io.Reader) (bytesum []byte, err error) {
 
 func VerifySha256sum(srcFile, sumfile string) (pass bool, sum string, err error) {
 	srcAbs, err := filepath.Abs(srcFile)
-	errutils.Efatalf("Can not get absoulte path for %s: %v", srcFile, err)
+	errutils.Efatalf("Can not get absolute path for %s: %v", srcFile, err)
 
 	sumfileDir, err := filepath.Abs(filepath.Dir(sumfile))
-	errutils.Efatalf("Can not get absoulte path for %s: %v", sumfile, err)
+	errutils.Efatalf("Can not get absolute path for %s: %v", sumfile, err)
 
 	// Get original checksum
 	file, err := os.Open(sumfile)
