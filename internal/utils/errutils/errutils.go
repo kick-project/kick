@@ -12,7 +12,10 @@ func hasErrPrint(err error) bool {
 		return false
 	}
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
-	log.Output(3, err.Error())
+	e := log.Output(3, err.Error())
+	if e != nil {
+		panic(e)
+	}
 	log.SetFlags(log.LstdFlags)
 	return true
 }

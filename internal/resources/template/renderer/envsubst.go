@@ -8,7 +8,6 @@ import (
 
 	"github.com/a8m/envsubst"
 	"github.com/kick-project/kick/internal/resources/template/variables"
-	"github.com/kick-project/kick/internal/utils/errutils"
 )
 
 // RenderEnv renders using environment variables
@@ -20,8 +19,10 @@ type RenderEnv struct {
 // template populated with variables
 func (r *RenderEnv) File2File(src, dst string, vars *variables.Variables, nounset, noempty bool) (err error) {
 	b, err := ioutil.ReadFile(src)
-	errutils.Elogf("Can not open template file %s for reading: %v", src, err)
-	r.Text2File(string(b), dst, vars, nounset, noempty)
+	if err != nil {
+		return
+	}
+	err = r.Text2File(string(b), dst, vars, nounset, noempty)
 	return
 }
 

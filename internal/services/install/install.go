@@ -143,7 +143,7 @@ func (i *Install) checkInUse(handle string) (stop int) {
 // returns them as entries. If stop is returned as non 0 then the caller should
 // exit the program execution with the value of stop.
 func (i *Install) templateMatches(name, origin string) (entries []config.Template) {
-	rows := &sql.Rows{}
+	var rows *sql.Rows
 	entries = []config.Template{}
 	if origin == "" {
 		i.Log.Debugf(utils.SQL2fmt(selectWithoutOrigin), name)
@@ -177,13 +177,14 @@ func (i *Install) promptEntry(handle string, entries []config.Template) {
 	}
 	fmt.Fprint(i.Stdout, "\n  Please select an entry\n")
 
-	match := []string{}
+	var match []string
 	selected := 0
 	re := regexp.MustCompile(`^(\d+)\n$`)
 	for {
 		fmt.Fprintf(i.Stdout, "  Select an entry between 1-%d: ", l)
 		reader := bufio.NewReader(i.Stdin)
 		text, err := reader.ReadString('\n')
+		errutils.Epanic(err)
 
 		match = re.FindStringSubmatch(text)
 		if len(match) == 0 {

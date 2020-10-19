@@ -7,13 +7,14 @@ import (
 	"regexp"
 	"testing"
 
+	"github.com/jinzhu/copier"
 	"github.com/kick-project/kick/internal/resources/db"
 	"github.com/kick-project/kick/internal/services/initialize"
 	"github.com/kick-project/kick/internal/settings"
 	"github.com/kick-project/kick/internal/settings/iinitialize"
 	"github.com/kick-project/kick/internal/settings/isearch"
 	"github.com/kick-project/kick/internal/utils"
-	"github.com/jinzhu/copier"
+	"github.com/kick-project/kick/internal/utils/errutils"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -31,7 +32,8 @@ func TestSearch(t *testing.T) {
 	home := filepath.Join(utils.TempDir(), "TestSearch")
 	s := settings.GetSettings(home)
 	i := &initialize.Initialize{}
-	copier.Copy(i, iinitialize.Inject(s))
+	err := copier.Copy(i, iinitialize.Inject(s))
+	errutils.Epanic(err)
 	i.Init()
 	dbconn := s.GetDB()
 	buildSearchData(t, dbconn)
@@ -40,7 +42,8 @@ func TestSearch(t *testing.T) {
 	searchTerm := "template"
 
 	srch := &Search{}
-	copier.Copy(srch, isearch.Inject(s))
+	err = copier.Copy(srch, isearch.Inject(s))
+	errutils.Epanic(err)
 
 	// Parallel arrays to count regexp
 	matchmaker := map[string]*regexp.Regexp{}

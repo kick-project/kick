@@ -17,6 +17,7 @@ import (
 	"github.com/apex/log/handlers/text"
 	"github.com/kick-project/kick/internal/env"
 	"github.com/kick-project/kick/internal/resources/config"
+	"github.com/kick-project/kick/internal/utils/errutils"
 	_ "github.com/mattn/go-sqlite3" // Driver for database/sql
 )
 
@@ -117,7 +118,8 @@ func (s *Settings) ConfigFile() *config.File {
 		PathUserConf:     s.PathUserConf,
 		PathTemplateConf: s.PathTemplateConf,
 	}
-	conf.Load()
+	err := conf.Load()
+	errutils.Epanic(err)
 	return conf
 }
 

@@ -211,7 +211,11 @@ func (t *Template) loadTempateConf(path string) {
 		utils.Exit(255)
 	}
 	t.Log.Debugf("Unmarshal file %s\n", path)
-	marshal.UnmarshalFile(c, path)
+	err := marshal.UnmarshalFile(c, path)
+	if err != nil {
+		fmt.Fprintf(t.Stderr, "Can not unmarshal file %s: %s\n", path, err.Error())
+		utils.Exit(255)
+	}
 	t.Log.Debugf("%#v", c)
 
 	if c.Renderer != "" {
@@ -240,7 +244,8 @@ func (fp *filePair) route() error {
 	case fp.skipFile():
 		return nil
 	case lnum > 0 && action == MLrender:
-		fp.render(lnum)
+		err := fp.render(lnum)
+		errutils.Epanic(err)
 	case lnum > 0 && action == MLnorender:
 		return nil
 	case fp.srcInfo.Mode().IsRegular():
@@ -314,7 +319,6 @@ func (fp *filePair) stripModeline(lnum uint8) string {
 	defer outF.Close()                                   // nolint
 
 	var cnt uint8
-	cnt = 0
 	scner := bufio.NewScanner(inF)
 	scner.Split(scanLines)
 	for scner.Scan() {
@@ -342,7 +346,8 @@ func (fp *filePair) render(mline uint8) error {
 		os.Remove(tempPath)
 	}()
 
-	fp.renderer.File2File(tempPath, fp.dstPath, fp.variables, false, false)
+	err := fp.renderer.File2File(tempPath, fp.dstPath, fp.variables, false, false)
+	errutils.Epanic(err)
 	return nil
 }
 

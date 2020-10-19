@@ -6,6 +6,8 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+
+	"github.com/kick-project/kick/internal/utils/errutils"
 )
 
 func Compress(plainSrc, gzDst string) (bytes int64, err error) {
@@ -29,7 +31,8 @@ func Compress(plainSrc, gzDst string) (bytes int64, err error) {
 	gzWriter.Close()
 	dstIO.Close()
 
-	os.Rename(dstIO.Name(), gzDst)
+	err = os.Rename(dstIO.Name(), gzDst)
+	errutils.Epanic(err)
 	return written, nil
 }
 
@@ -52,9 +55,11 @@ func Decompress(gzSrc, plainDst string) (bytes int64, err error) {
 		return 0, err
 	}
 	srcIO.Close()
-	gzReader.Close()
+	err = gzReader.Close()
+	errutils.Epanic(err)
 	dstIO.Close()
 
-	os.Rename(dstIO.Name(), plainDst)
+	err = os.Rename(dstIO.Name(), plainDst)
+	errutils.Epanic(err)
 	return written, nil
 }

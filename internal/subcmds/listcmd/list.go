@@ -6,12 +6,13 @@ import (
 	"sort"
 	"text/tabwriter"
 
+	"github.com/jinzhu/copier"
 	"github.com/kick-project/kick/internal/resources/config"
 	"github.com/kick-project/kick/internal/resources/sync"
 	"github.com/kick-project/kick/internal/settings"
 	"github.com/kick-project/kick/internal/settings/isync"
+	"github.com/kick-project/kick/internal/utils/errutils"
 	"github.com/kick-project/kick/internal/utils/options"
-	"github.com/jinzhu/copier"
 	terminal "github.com/wayneashleyberry/terminal-dimensions"
 )
 
@@ -44,7 +45,8 @@ func List(args []string, s *settings.Settings) int {
 
 	// Sync DB table "installed" with configuration file
 	synchro := &sync.Sync{}
-	copier.Copy(synchro, isync.Inject(s))
+	err := copier.Copy(synchro, isync.Inject(s))
+	errutils.Epanic(err)
 	synchro.Templates()
 	if opts.Long {
 		return lc.LongOutput()

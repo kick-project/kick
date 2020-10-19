@@ -41,13 +41,20 @@ func installTest(t *testing.T, handle, template string) {
 	id := "TestInstall"
 	src := filepath.Join(utils.TempDir(), id, ".kick", "templates.yml.save")
 	dest := filepath.Join(utils.TempDir(), id, ".kick", "templates.yml")
-	file.Copy(src, dest)
+	_, err := file.Copy(src, dest)
+	if err != nil {
+		t.Error(err)
+	}
+
 	home := filepath.Join(utils.TempDir(), id)
 	s := settings.GetSettings(home)
 	s.LogLevel(log.DebugLevel)
 
 	ec := initcmd.InitCmd([]string{"init"}, s)
+	assert.Equal(t, 0, ec)
+
 	ec = updatecmd.Update([]string{"update"}, s)
+	assert.Equal(t, 0, ec)
 
 	ec = Install([]string{"install", handle, template}, s)
 	assert.Equal(t, 0, ec)

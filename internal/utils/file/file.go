@@ -40,10 +40,15 @@ func NewAtomicWrite(dst string) *AtomicWrite {
 func (a *AtomicWrite) Close() error {
 	if a.file == nil {
 		err := fmt.Errorf("Object is nil")
-		errutils.Elogf("Can not close file: %w", err)
+		if err != nil {
+			return err
+		}
 	}
 	a.file.Close()
-	os.Rename(a.file.Name(), a.dst)
+	err := os.Rename(a.file.Name(), a.dst)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -54,6 +59,7 @@ func (a *AtomicWrite) Copy(rdr io.Reader) (written int64, err error) {
 		return 0, err
 	}
 	written, err = io.Copy(f, rdr)
+	errutils.Epanic(err)
 	a.written += written
 	return written, nil
 }

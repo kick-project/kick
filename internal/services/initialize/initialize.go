@@ -53,6 +53,7 @@ func (i *Initialize) InitConfig() {
 		defer f.Close()
 		_, err = f.WriteString(`---
 `)
+		errutils.Epanic(err)
 	} else if err != nil {
 		errutils.Epanicf("can not save configuration file: %w", err)
 	}
@@ -63,6 +64,7 @@ func (i *Initialize) InitConfig() {
 		defer f.Close()
 		_, err = f.WriteString(`---
 `)
+		errutils.Epanic(err)
 	} else if err != nil {
 		errutils.Epanicf("can not save configuration file: %w", err)
 	}

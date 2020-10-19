@@ -75,5 +75,4 @@ func CreateSchema(dbconn *sql.DB) {
 			errutils.Efatalf("error creating database scheme: %v", err)
 		}
 	}
-	return
 }

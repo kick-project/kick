@@ -5,13 +5,14 @@ import (
 	"io"
 
 	"github.com/apex/log"
+	"github.com/jinzhu/copier"
 	"github.com/kick-project/kick/internal/resources/config"
 	"github.com/kick-project/kick/internal/resources/gitclient/plumbing"
 	"github.com/kick-project/kick/internal/resources/sync"
 	"github.com/kick-project/kick/internal/settings"
 	"github.com/kick-project/kick/internal/settings/iplumbing"
 	"github.com/kick-project/kick/internal/settings/isync"
-	"github.com/jinzhu/copier"
+	"github.com/kick-project/kick/internal/utils/errutils"
 )
 
 // Inject inject options for install.Install
@@ -26,9 +27,11 @@ func Inject(s *settings.Settings) (opts struct {
 	Sync       *sync.Sync
 }) {
 	synchro := &sync.Sync{}
-	copier.Copy(synchro, isync.Inject(s))
+	err := copier.Copy(synchro, isync.Inject(s))
+	errutils.Epanic(err)
 	plumb := &plumbing.Plumbing{}
-	copier.Copy(plumb, iplumbing.Inject(s))
+	err = copier.Copy(plumb, iplumbing.Inject(s))
+	errutils.Epanic(err)
 	opts.ConfigFile = s.ConfigFile()
 	opts.DB = s.GetDB()
 	opts.Log = s.GetLogger()

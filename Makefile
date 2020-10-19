@@ -85,6 +85,7 @@ clean: ## Reset project to original state
 	rm -rf .cache prjstart dist reports tmp vendor
 
 test: ## Test
+	$(MAKE) lint
 	$(MAKE) unit
 	@exit $$(cat reports/exitcode.txt)
 

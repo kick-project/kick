@@ -7,12 +7,13 @@ import (
 	fp "path/filepath"
 	"testing"
 
+	"github.com/jinzhu/copier"
 	"github.com/kick-project/kick/internal/services/initialize"
 	"github.com/kick-project/kick/internal/settings"
 	"github.com/kick-project/kick/internal/settings/iinitialize"
 	"github.com/kick-project/kick/internal/settings/iupdate"
 	"github.com/kick-project/kick/internal/utils"
-	"github.com/jinzhu/copier"
+	"github.com/kick-project/kick/internal/utils/errutils"
 	"syreclabs.com/go/faker"
 )
 
@@ -21,13 +22,20 @@ func TestBuild(t *testing.T) {
 	s := settings.GetSettings(home)
 	initIt(s)
 	m := &Update{}
-	copier.Copy(m, iupdate.Inject(s))
-	m.Build()
+	err := copier.Copy(m, iupdate.Inject(s))
+	if err != nil {
+		t.Error(err)
+	}
+	err = m.Build()
+	if err != nil {
+		t.Error(err)
+	}
 }
 
 func initIt(s *settings.Settings) {
 	i := &initialize.Initialize{}
-	copier.Copy(i, iinitialize.Inject(s))
+	err := copier.Copy(i, iinitialize.Inject(s))
+	errutils.Epanic(err)
 	i.Init()
 }
 
@@ -36,7 +44,10 @@ func TestMaster_Load(t *testing.T) {
 	defer os.Remove(path)
 	notEmpty(t, path)
 	m := Master{}
-	m.Load(path)
+	err := m.Load(path)
+	if err != nil {
+		errutils.Epanic(err)
+	}
 	if m.Name != fname {
 		t.Fail()
 	}
@@ -52,14 +63,19 @@ func TestMaster_Save(t *testing.T) {
 	path, _, _, _ := fakeJSON(t)
 	defer os.Remove(path)
 	m := Master{}
-	m.Load(path)
+	err := m.Load(path)
+	errutils.Epanic(err)
 	tmpfile, err := ioutil.TempFile("", "*.json")
 	if err != nil {
 		t.Fatal("Error opening tempfile")
 	}
 	tmpfile.Close()
 	defer os.Remove(tmpfile.Name())
-	m.Save(tmpfile.Name())
+	err = m.Save(tmpfile.Name())
+	if err != nil {
+		t.Error(err)
+	}
+
 	notEmpty(t, tmpfile.Name())
 }
 
@@ -68,7 +84,10 @@ func TestTemplate_Load(t *testing.T) {
 	defer os.Remove(path)
 	notEmpty(t, path)
 	tpl := Template{}
-	tpl.Load(path)
+	err := tpl.Load(path)
+	if err != nil {
+		t.Error(err)
+	}
 	if tpl.Name != fname {
 		t.Fail()
 	}
@@ -84,14 +103,20 @@ func TestTemplate_Save(t *testing.T) {
 	path, _, _, _ := fakeJSON(t)
 	defer os.Remove(path)
 	tpl := Template{}
-	tpl.Load(path)
+	err := tpl.Load(path)
+	if err != nil {
+		t.Error(err)
+	}
 	tmpfile, err := ioutil.TempFile("", "*.json")
 	if err != nil {
 		t.Fatal("Error opening tempfile")
 	}
 	tmpfile.Close()
 	defer os.Remove(tmpfile.Name())
-	tpl.Save(tmpfile.Name())
+	err = tpl.Save(tmpfile.Name())
+	if err != nil {
+		t.Error(err)
+	}
 	notEmpty(t, tmpfile.Name())
 }
 
@@ -116,7 +141,10 @@ func fakeJSON(t *testing.T) (path, name, url, desc string) {
 	if err != nil {
 		t.Fatalf("ERROR: Can not open temporary file: %v", err)
 	}
-	tf.WriteString(template)
+	_, err = tf.WriteString(template)
+	if err != nil {
+		t.Error(err)
+	}
 	tf.Close()
 	return tf.Name(), name, url, desc
 }

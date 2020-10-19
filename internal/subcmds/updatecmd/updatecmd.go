@@ -1,11 +1,12 @@
 package updatecmd
 
 import (
+	"github.com/jinzhu/copier"
 	"github.com/kick-project/kick/internal/services/update"
 	"github.com/kick-project/kick/internal/settings"
 	"github.com/kick-project/kick/internal/settings/iupdate"
+	"github.com/kick-project/kick/internal/utils/errutils"
 	"github.com/kick-project/kick/internal/utils/options"
-	"github.com/jinzhu/copier"
 )
 
 var usageDoc = `Update repository data
@@ -28,8 +29,10 @@ func Update(args []string, s *settings.Settings) int {
 	options.Bind(usageDoc, args, opts)
 
 	u := &update.Update{}
-	copier.Copy(u, iupdate.Inject(s))
-	u.Build()
+	err := copier.Copy(u, iupdate.Inject(s))
+	errutils.Epanic(err)
+	err = u.Build()
+	errutils.Epanic(err)
 
 	return 0
 }

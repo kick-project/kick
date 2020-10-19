@@ -3,6 +3,7 @@ package installcmd
 import (
 	"errors"
 
+	"github.com/jinzhu/copier"
 	"github.com/kick-project/kick/internal/services/install"
 	"github.com/kick-project/kick/internal/services/update"
 	"github.com/kick-project/kick/internal/settings"
@@ -10,7 +11,6 @@ import (
 	"github.com/kick-project/kick/internal/settings/iupdate"
 	"github.com/kick-project/kick/internal/utils/errutils"
 	"github.com/kick-project/kick/internal/utils/options"
-	"github.com/jinzhu/copier"
 )
 
 var usageDoc = `Install template
@@ -36,16 +36,19 @@ type OptInstall struct {
 func Install(args []string, s *settings.Settings) int {
 	opts := &OptInstall{}
 	options.Bind(usageDoc, args, opts)
-	if opts.Install == false {
+	if !opts.Install {
 		errutils.Epanic(errors.New("Install set to false"))
 		return 256
 	}
 
 	m := &update.Update{}
-	copier.Copy(m, iupdate.Inject(s))
-	m.Build()
+	err := copier.Copy(m, iupdate.Inject(s))
+	errutils.Epanic(err)
+	err = m.Build()
+	errutils.Epanic(err)
 
 	inst := &install.Install{}
-	copier.Copy(inst, iinstall.Inject(s))
+	err = copier.Copy(inst, iinstall.Inject(s))
+	errutils.Epanic(err)
 	return inst.Install(opts.Handle, opts.Template)
 }

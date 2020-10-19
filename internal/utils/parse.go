@@ -2,10 +2,8 @@ package utils
 
 import (
 	"fmt"
-	"os/user"
 	"path/filepath"
 	"regexp"
-	"strings"
 )
 
 // URLx take a URI or Something Specific to this project and break it into parts
@@ -80,13 +78,4 @@ func fileParse(uri string) (scheme, host, path, project string, match bool) {
 		return m[1], "", filepath.Clean(filepath.Join(m[2], m[3])), m[3], true
 	}
 	return "", "", "", "", false
-}
-
-func expandPath(path string) string {
-	if strings.HasPrefix(path, "~/") {
-		usr, _ := user.Current()
-		dir := usr.HomeDir
-		path = filepath.Join(dir, path[2:])
-	}
-	return path
 }

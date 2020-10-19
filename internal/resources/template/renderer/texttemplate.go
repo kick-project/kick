@@ -24,7 +24,8 @@ type RenderText struct {
 func (r *RenderText) File2File(src, dst string, vars *variables.Variables, nounset, noempty bool) error {
 	b, err := ioutil.ReadFile(src)
 	errutils.Elogf("Can not open template file %s for reading: %v", src, err)
-	r.Text2File(string(b), dst, vars, nounset, noempty)
+	err = r.Text2File(string(b), dst, vars, nounset, noempty)
+	errutils.Epanic(err)
 	return err
 }
 
@@ -52,7 +53,8 @@ func (r *RenderText) Text2String(text string, vars *variables.Variables, nounset
 	f, err := ioutil.TempFile(td, "prjstart-*")
 	errutils.Epanicf("Error creating tempfile %v", err)
 	f.Close() // nolint
-	r.Text2File(text, f.Name(), vars, nounset, noempty)
+	err = r.Text2File(text, f.Name(), vars, nounset, noempty)
+	errutils.Epanic(err)
 	b, err := ioutil.ReadFile(f.Name())
 	errutils.Elogf("Can not open template file %s for reading: %v", f.Name(), err)
 	os.Remove(f.Name()) // nolint

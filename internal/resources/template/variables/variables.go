@@ -7,9 +7,8 @@ import (
 
 // Variables consists of the variables that are to be passed to the template
 type Variables struct {
-	projectDesc map[string]string // Parallel project map holding descriptions
-	Env         map[string]string // Environment variables
-	Project     map[string]string // Project variables
+	Env     map[string]string // Environment variables
+	Project map[string]string // Project variables
 }
 
 // New sets up environment and project variables to be passed through to the text template

@@ -5,13 +5,15 @@ import (
 	"testing"
 
 	"github.com/kick-project/kick/internal/utils"
+	"github.com/kick-project/kick/internal/utils/errutils"
 )
 
 func TestSha256sum(t *testing.T) {
 	plainfile := filepath.Join(utils.TempDir(), "checksum", "plaintext.txt")
 	origsumfile := filepath.Join(utils.TempDir(), "checksum", "plaintext.txt.sha256")
 	newsumfile := filepath.Join(utils.TempDir(), "checksum", "plaintext.txt.sha256-test")
-	Sha256SumFile(plainfile, newsumfile)
+	_, err := Sha256SumFile(plainfile, newsumfile)
+	errutils.Epanic(err)
 
 	passorig, sumorig, err := VerifySha256sum(plainfile, origsumfile)
 	if err != nil {

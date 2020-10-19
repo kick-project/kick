@@ -73,7 +73,8 @@ func (s *Sync) Templates() {
 	db.Lock()
 	defer db.Unlock()
 	// Reload configuration incase the file changed after creation of self.
-	s.Config.Load()
+	err := s.Config.Load()
+	errutils.Epanic(err)
 	t := time.Now()
 	ts := t.Format("2006-01-02T15:04:05")
 	for _, item := range s.Config.Templates {
@@ -85,7 +86,7 @@ func (s *Sync) Templates() {
 		errutils.Epanicf("%w", err)
 	}
 
-	_, err := s.DB.Exec(deleteMissing, ts)
+	_, err = s.DB.Exec(deleteMissing, ts)
 	errutils.Epanicf("%w", err)
 
 	_, err = s.DB.Exec(insertReplaceSync, key, ts)

@@ -28,9 +28,11 @@ func Sha256SumFile(srcFile string, sumfile string) (sum string, err error) {
 	if err != nil {
 		return "", fmt.Errorf("Failed to open temporary file for %s: %s", sumfile, err)
 	}
-	dstIO.WriteString(sum)
+	_, err = dstIO.WriteString(sum)
+	errutils.Epanic(err)
 	dstIO.Close()
-	os.Rename(dstIO.Name(), sumfile)
+	err = os.Rename(dstIO.Name(), sumfile)
+	errutils.Epanic(err)
 	return sum, err
 }
 

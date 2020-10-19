@@ -9,6 +9,7 @@ import (
 	"sync"
 
 	"github.com/kick-project/kick/internal/resources/config"
+	"github.com/kick-project/kick/internal/utils/errutils"
 	"github.com/sevlyar/go-daemon"
 	"github.com/sosedoff/gitkit"
 )
@@ -35,7 +36,10 @@ func main() {
 	if d != nil {
 		return
 	}
-	defer cntxt.Release()
+	defer func() {
+		err = cntxt.Release()
+		errutils.Epanic(err)
+	}()
 
 	StartTestServer(home, srvpath)
 }
@@ -49,7 +53,7 @@ type TestServerStruct struct {
 func (s *TestServerStruct) ServerUp(home string, servpath string) {
 	TestServerSync.Lock()
 	defer TestServerSync.Unlock()
-	if TestServerUp == true {
+	if TestServerUp {
 		return
 	}
 	s.home = home
@@ -57,8 +61,6 @@ func (s *TestServerStruct) ServerUp(home string, servpath string) {
 	s.loadConfig()
 	spathexists := true
 	homeexists := true
-	log.Printf("HOMEDIR: %s EXISTS=%t", home, homeexists)
-	log.Printf("SERVDIR: %s EXISTS=%t", servpath, spathexists)
 	_, err := os.Stat(servpath)
 	if os.IsNotExist(err) {
 		spathexists = false
@@ -69,6 +71,8 @@ func (s *TestServerStruct) ServerUp(home string, servpath string) {
 		homeexists = false
 	}
 	TestServerUp = true
+	log.Printf("HOMEDIR: %s EXISTS=%t", home, homeexists)
+	log.Printf("SERVDIR: %s EXISTS=%t", servpath, spathexists)
 }
 
 func (s *TestServerStruct) GetHome() string {
@@ -113,7 +117,8 @@ func (s *TestServerStruct) loadConfig() {
 		PathUserConf:     filepath.Join(s.home, ".kick", "config.yml"),
 		PathTemplateConf: filepath.Join(s.home, ".kick", "templates.yml"),
 	}
-	conf.Load()
+	err := conf.Load()
+	errutils.Epanic(err)
 
 	s.config = conf
 }

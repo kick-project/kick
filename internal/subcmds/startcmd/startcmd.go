@@ -3,13 +3,14 @@ package startcmd
 import (
 	"path/filepath"
 
+	"github.com/jinzhu/copier"
 	"github.com/kick-project/kick/internal/resources/sync"
 	"github.com/kick-project/kick/internal/resources/template"
 	"github.com/kick-project/kick/internal/settings"
 	"github.com/kick-project/kick/internal/settings/isync"
 	"github.com/kick-project/kick/internal/settings/itemplate"
+	"github.com/kick-project/kick/internal/utils/errutils"
 	"github.com/kick-project/kick/internal/utils/options"
-	"github.com/jinzhu/copier"
 )
 
 var usageDoc = `Generate project scaffolding
@@ -36,13 +37,15 @@ func Start(args []string, s *settings.Settings) int {
 
 	// Sync DB table "installed" with configuration file
 	synchro := &sync.Sync{}
-	copier.Copy(synchro, isync.Inject(s))
+	err := copier.Copy(synchro, isync.Inject(s))
+	errutils.Epanic(err)
 	synchro.Templates()
 
 	// Set project name
 	s.ProjectName = filepath.Base(opts.ProjectPath)
 	t := &template.Template{}
-	copier.Copy(t, itemplate.Inject(s))
+	err = copier.Copy(t, itemplate.Inject(s))
+	errutils.Epanic(err)
 	t.SetSrcDest(opts.Template, opts.ProjectPath)
 	ret := t.Run()
 	return ret

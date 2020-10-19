@@ -1,13 +1,14 @@
 package searchcmd
 
 import (
+	"github.com/jinzhu/copier"
 	"github.com/kick-project/kick/internal/resources/sync"
 	"github.com/kick-project/kick/internal/services/search"
 	"github.com/kick-project/kick/internal/settings"
 	"github.com/kick-project/kick/internal/settings/isearch"
 	"github.com/kick-project/kick/internal/settings/isync"
+	"github.com/kick-project/kick/internal/utils/errutils"
 	"github.com/kick-project/kick/internal/utils/options"
-	"github.com/jinzhu/copier"
 )
 
 var usageDoc = `Search for templates using a keyword
@@ -34,9 +35,11 @@ func Search(args []string, s *settings.Settings) int {
 
 	// Sync DB table "installed" with configuration file
 	synchro := &sync.Sync{}
-	copier.Copy(synchro, isync.Inject(s))
+	err := copier.Copy(synchro, isync.Inject(s))
+	errutils.Epanic(err)
 	synchro.Templates()
 	srch := &search.Search{}
-	copier.Copy(srch, isearch.Inject(s))
+	err = copier.Copy(srch, isearch.Inject(s))
+	errutils.Epanic(err)
 	return srch.Search2Output(opts.Term)
 }
