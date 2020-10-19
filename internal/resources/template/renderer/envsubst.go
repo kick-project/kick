@@ -7,7 +7,7 @@ import (
 	"regexp"
 
 	"github.com/a8m/envsubst"
-	"github.com/crosseyed/prjstart/internal/services/template/variables"
+	"github.com/crosseyed/prjstart/internal/resources/template/variables"
 	"github.com/crosseyed/prjstart/internal/utils/errutils"
 )
 

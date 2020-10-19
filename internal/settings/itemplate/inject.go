@@ -5,8 +5,8 @@ import (
 
 	"github.com/apex/log"
 	"github.com/crosseyed/prjstart/internal/resources/config"
-	"github.com/crosseyed/prjstart/internal/services/template/renderer"
-	"github.com/crosseyed/prjstart/internal/services/template/variables"
+	"github.com/crosseyed/prjstart/internal/resources/template/renderer"
+	"github.com/crosseyed/prjstart/internal/resources/template/variables"
 	"github.com/crosseyed/prjstart/internal/settings"
 )
 

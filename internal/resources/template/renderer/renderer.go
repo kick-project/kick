@@ -3,7 +3,7 @@ package renderer
 import (
 	"regexp"
 
-	"github.com/crosseyed/prjstart/internal/services/template/variables"
+	"github.com/crosseyed/prjstart/internal/resources/template/variables"
 )
 
 // Renderer is an interface to render templates.

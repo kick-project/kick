@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 
 	"github.com/crosseyed/prjstart/internal/resources/sync"
-	"github.com/crosseyed/prjstart/internal/services/template"
+	"github.com/crosseyed/prjstart/internal/resources/template"
 	"github.com/crosseyed/prjstart/internal/settings"
 	"github.com/crosseyed/prjstart/internal/settings/isync"
 	"github.com/crosseyed/prjstart/internal/settings/itemplate"
