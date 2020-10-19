@@ -1,7 +1,0 @@
-name: prjorg
-short: prjorg packages
-description: prjorg packages
-
-templates:
-    - https://server.com/templates/template1.git
-    - https://server.com/templates/template2.git

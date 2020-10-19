@@ -1,7 +1,0 @@
-name: global
-short: Prjstart Master List
-description: Global Master List for Available Packages
-
-orgs:
-    - name: prjstart
-      url: https://github.com/kick-project/kickorg.git

@@ -1,7 +1,0 @@
-name: master2
-short: master2 short
-description: master2 description
-
-orgs:
-  - https://127.0.0.1/org3.git
-  - https://127.0.0.1/org4.git

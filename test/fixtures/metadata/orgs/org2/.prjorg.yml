@@ -1,7 +1,0 @@
-name: org2
-short: org2 short
-description: org1 description
-
-templates:
-  - http://127.0.0.1/t3.git
-  - http://127.0.0.1/t4.git

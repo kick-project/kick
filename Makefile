@@ -119,8 +119,6 @@ _test_setup_dirs:
 	@cp -r test/fixtures/checksum tmp/
 	@cp -r test/fixtures/compression tmp/
 	@cp -r test/fixtures/TestInstall tmp/
-	@mkdir -p tmp/metadata
-	@cp -r test/fixtures/metadata/serve tmp/metadata/
 
 _test_setup_gitserver:
 	@mkdir -p tmp/gitserveclient
