@@ -1,4 +1,4 @@
-module github.com/crosseyed/prjstart
+module github.com/kick-project/kick
 
 go 1.14
 

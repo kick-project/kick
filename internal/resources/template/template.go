@@ -14,14 +14,14 @@ import (
 	"sync"
 
 	"github.com/apex/log"
-	"github.com/crosseyed/prjstart/internal/resources/config"
-	"github.com/crosseyed/prjstart/internal/resources/gitclient"
-	plumb "github.com/crosseyed/prjstart/internal/resources/gitclient/plumbing"
-	"github.com/crosseyed/prjstart/internal/resources/template/renderer"
-	"github.com/crosseyed/prjstart/internal/resources/template/variables"
-	"github.com/crosseyed/prjstart/internal/utils"
-	"github.com/crosseyed/prjstart/internal/utils/errutils"
-	"github.com/crosseyed/prjstart/internal/utils/marshal"
+	"github.com/kick-project/kick/internal/resources/config"
+	"github.com/kick-project/kick/internal/resources/gitclient"
+	plumb "github.com/kick-project/kick/internal/resources/gitclient/plumbing"
+	"github.com/kick-project/kick/internal/resources/template/renderer"
+	"github.com/kick-project/kick/internal/resources/template/variables"
+	"github.com/kick-project/kick/internal/utils"
+	"github.com/kick-project/kick/internal/utils/errutils"
+	"github.com/kick-project/kick/internal/utils/marshal"
 )
 
 const (
@@ -110,7 +110,7 @@ func (t *Template) SetSrc(name string) {
 	localpath, err := gitclient.Get(tmpl.URL, g)
 
 	// Set renderer from conf
-	confPath := filepath.Join(localpath, ".prjtemplate.yml")
+	confPath := filepath.Join(localpath, ".kicktemplate.yml")
 	t.loadTempateConf(confPath)
 
 	errutils.Efatalf(`template "%s" not found: %v`, name, err)
@@ -256,11 +256,11 @@ func (fp *filePair) route() error {
 func (fp *filePair) skipFile() bool {
 	rvalue := false
 	switch {
-	case strings.HasSuffix(fp.srcPath, ".prjglobal.yml"):
+	case strings.HasSuffix(fp.srcPath, ".kickglobal.yml"):
 		rvalue = true
-	case strings.HasSuffix(fp.srcPath, ".prjmaster.yml"):
+	case strings.HasSuffix(fp.srcPath, ".kickmaster.yml"):
 		rvalue = true
-	case strings.HasSuffix(fp.srcPath, ".prjtemplate.yml"):
+	case strings.HasSuffix(fp.srcPath, ".kicktemplate.yml"):
 		rvalue = true
 	}
 	return rvalue

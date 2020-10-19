@@ -7,8 +7,8 @@ import (
 	"regexp"
 
 	"github.com/a8m/envsubst"
-	"github.com/crosseyed/prjstart/internal/resources/template/variables"
-	"github.com/crosseyed/prjstart/internal/utils/errutils"
+	"github.com/kick-project/kick/internal/resources/template/variables"
+	"github.com/kick-project/kick/internal/utils/errutils"
 )
 
 // RenderEnv renders using environment variables

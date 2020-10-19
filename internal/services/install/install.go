@@ -9,12 +9,12 @@ import (
 	"strconv"
 
 	"github.com/apex/log"
-	"github.com/crosseyed/prjstart/internal/resources/config"
-	"github.com/crosseyed/prjstart/internal/resources/gitclient"
-	"github.com/crosseyed/prjstart/internal/resources/gitclient/plumbing"
-	"github.com/crosseyed/prjstart/internal/resources/sync"
-	"github.com/crosseyed/prjstart/internal/utils"
-	"github.com/crosseyed/prjstart/internal/utils/errutils"
+	"github.com/kick-project/kick/internal/resources/config"
+	"github.com/kick-project/kick/internal/resources/gitclient"
+	"github.com/kick-project/kick/internal/resources/gitclient/plumbing"
+	"github.com/kick-project/kick/internal/resources/sync"
+	"github.com/kick-project/kick/internal/utils"
+	"github.com/kick-project/kick/internal/utils/errutils"
 )
 
 // Install manage installation of templates

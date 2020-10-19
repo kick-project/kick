@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/crosseyed/prjstart/internal/utils"
+	"github.com/kick-project/kick/internal/utils"
 )
 
 const (

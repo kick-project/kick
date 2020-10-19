@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/crosseyed/prjstart/internal/services/search/entry"
-	"github.com/crosseyed/prjstart/internal/services/search/formatter"
-	"github.com/crosseyed/prjstart/internal/utils/errutils"
+	"github.com/kick-project/kick/internal/services/search/entry"
+	"github.com/kick-project/kick/internal/services/search/formatter"
+	"github.com/kick-project/kick/internal/utils/errutils"
 )
 
 var querySearch = `

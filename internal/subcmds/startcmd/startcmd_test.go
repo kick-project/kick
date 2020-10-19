@@ -5,8 +5,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/crosseyed/prjstart/internal/settings"
-	"github.com/crosseyed/prjstart/internal/utils"
+	"github.com/kick-project/kick/internal/settings"
+	"github.com/kick-project/kick/internal/utils"
 )
 
 func TestStart(t *testing.T) {

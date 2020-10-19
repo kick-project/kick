@@ -5,8 +5,8 @@ import (
 	"io"
 	"os"
 
-	"github.com/crosseyed/prjstart/internal/services/search/formatter"
-	"github.com/crosseyed/prjstart/internal/settings"
+	"github.com/kick-project/kick/internal/services/search/formatter"
+	"github.com/kick-project/kick/internal/settings"
 )
 
 // Inject creates settings for search.New

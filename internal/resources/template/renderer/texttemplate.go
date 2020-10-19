@@ -6,8 +6,8 @@ import (
 	"regexp"
 	tt "text/template"
 
-	"github.com/crosseyed/prjstart/internal/resources/template/variables"
-	"github.com/crosseyed/prjstart/internal/utils/errutils"
+	"github.com/kick-project/kick/internal/resources/template/variables"
+	"github.com/kick-project/kick/internal/utils/errutils"
 )
 
 //

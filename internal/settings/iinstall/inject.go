@@ -5,12 +5,12 @@ import (
 	"io"
 
 	"github.com/apex/log"
-	"github.com/crosseyed/prjstart/internal/resources/config"
-	"github.com/crosseyed/prjstart/internal/resources/gitclient/plumbing"
-	"github.com/crosseyed/prjstart/internal/resources/sync"
-	"github.com/crosseyed/prjstart/internal/settings"
-	"github.com/crosseyed/prjstart/internal/settings/iplumbing"
-	"github.com/crosseyed/prjstart/internal/settings/isync"
+	"github.com/kick-project/kick/internal/resources/config"
+	"github.com/kick-project/kick/internal/resources/gitclient/plumbing"
+	"github.com/kick-project/kick/internal/resources/sync"
+	"github.com/kick-project/kick/internal/settings"
+	"github.com/kick-project/kick/internal/settings/iplumbing"
+	"github.com/kick-project/kick/internal/settings/isync"
 	"github.com/jinzhu/copier"
 )
 

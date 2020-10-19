@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/crosseyed/prjstart/internal/utils/errutils"
+	"github.com/kick-project/kick/internal/utils/errutils"
 )
 
 func Reader2File(rdr io.Reader, dst string) (written int64, err error) {

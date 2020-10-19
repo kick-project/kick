@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/crosseyed/prjstart/internal/utils"
+	"github.com/kick-project/kick/internal/utils"
 )
 
 func hasErrPrint(err error) bool {

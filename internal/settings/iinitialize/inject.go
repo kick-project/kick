@@ -1,7 +1,7 @@
 package iinitialize
 
 import (
-	"github.com/crosseyed/prjstart/internal/settings"
+	"github.com/kick-project/kick/internal/settings"
 )
 
 // Inject creates settings for initialize.New

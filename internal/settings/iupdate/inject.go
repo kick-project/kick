@@ -4,8 +4,8 @@ import (
 	"database/sql"
 
 	"github.com/apex/log"
-	"github.com/crosseyed/prjstart/internal/resources/config"
-	"github.com/crosseyed/prjstart/internal/settings"
+	"github.com/kick-project/kick/internal/resources/config"
+	"github.com/kick-project/kick/internal/settings"
 )
 
 // Inject creates settings for metadata.New

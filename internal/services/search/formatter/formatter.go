@@ -6,8 +6,8 @@ import (
 	"os"
 	"text/tabwriter"
 
-	"github.com/crosseyed/prjstart/internal/resources/ansicodes"
-	"github.com/crosseyed/prjstart/internal/services/search/entry"
+	"github.com/kick-project/kick/internal/resources/ansicodes"
+	"github.com/kick-project/kick/internal/services/search/entry"
 	"github.com/mattn/go-isatty"
 	term "github.com/wayneashleyberry/terminal-dimensions"
 )

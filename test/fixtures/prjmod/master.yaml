@@ -4,4 +4,4 @@ description: Global Master List for Available Packages
 
 orgs:
     - name: prjstart
-      url: https://github.com/crosseyed/prjstartorg.git
+      url: https://github.com/kick-project/kickorg.git

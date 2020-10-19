@@ -6,11 +6,11 @@ import (
 	"sort"
 	"text/tabwriter"
 
-	"github.com/crosseyed/prjstart/internal/resources/config"
-	"github.com/crosseyed/prjstart/internal/resources/sync"
-	"github.com/crosseyed/prjstart/internal/settings"
-	"github.com/crosseyed/prjstart/internal/settings/isync"
-	"github.com/crosseyed/prjstart/internal/utils/options"
+	"github.com/kick-project/kick/internal/resources/config"
+	"github.com/kick-project/kick/internal/resources/sync"
+	"github.com/kick-project/kick/internal/settings"
+	"github.com/kick-project/kick/internal/settings/isync"
+	"github.com/kick-project/kick/internal/utils/options"
 	"github.com/jinzhu/copier"
 	terminal "github.com/wayneashleyberry/terminal-dimensions"
 )

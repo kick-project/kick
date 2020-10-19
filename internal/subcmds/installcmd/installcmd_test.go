@@ -6,12 +6,12 @@ import (
 	"testing"
 
 	"github.com/apex/log"
-	"github.com/crosseyed/prjstart/internal/settings"
-	"github.com/crosseyed/prjstart/internal/subcmds/initcmd"
-	"github.com/crosseyed/prjstart/internal/subcmds/startcmd"
-	"github.com/crosseyed/prjstart/internal/subcmds/updatecmd"
-	"github.com/crosseyed/prjstart/internal/utils"
-	"github.com/crosseyed/prjstart/internal/utils/file"
+	"github.com/kick-project/kick/internal/settings"
+	"github.com/kick-project/kick/internal/subcmds/initcmd"
+	"github.com/kick-project/kick/internal/subcmds/startcmd"
+	"github.com/kick-project/kick/internal/subcmds/updatecmd"
+	"github.com/kick-project/kick/internal/utils"
+	"github.com/kick-project/kick/internal/utils/file"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -39,8 +39,8 @@ func TestInstallTemplateURL(t *testing.T) {
 
 func installTest(t *testing.T, handle, template string) {
 	id := "TestInstall"
-	src := filepath.Join(utils.TempDir(), id, ".prjstart", "templates.yml.save")
-	dest := filepath.Join(utils.TempDir(), id, ".prjstart", "templates.yml")
+	src := filepath.Join(utils.TempDir(), id, ".kick", "templates.yml.save")
+	dest := filepath.Join(utils.TempDir(), id, ".kick", "templates.yml")
 	file.Copy(src, dest)
 	home := filepath.Join(utils.TempDir(), id)
 	s := settings.GetSettings(home)

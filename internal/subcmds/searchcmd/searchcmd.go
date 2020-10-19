@@ -1,12 +1,12 @@
 package searchcmd
 
 import (
-	"github.com/crosseyed/prjstart/internal/resources/sync"
-	"github.com/crosseyed/prjstart/internal/services/search"
-	"github.com/crosseyed/prjstart/internal/settings"
-	"github.com/crosseyed/prjstart/internal/settings/isearch"
-	"github.com/crosseyed/prjstart/internal/settings/isync"
-	"github.com/crosseyed/prjstart/internal/utils/options"
+	"github.com/kick-project/kick/internal/resources/sync"
+	"github.com/kick-project/kick/internal/services/search"
+	"github.com/kick-project/kick/internal/settings"
+	"github.com/kick-project/kick/internal/settings/isearch"
+	"github.com/kick-project/kick/internal/settings/isync"
+	"github.com/kick-project/kick/internal/utils/options"
 	"github.com/jinzhu/copier"
 )
 

@@ -6,7 +6,7 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/crosseyed/prjstart/internal/utils"
+	"github.com/kick-project/kick/internal/utils"
 	"github.com/stretchr/testify/assert"
 )
 

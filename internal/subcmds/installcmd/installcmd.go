@@ -3,13 +3,13 @@ package installcmd
 import (
 	"errors"
 
-	"github.com/crosseyed/prjstart/internal/services/install"
-	"github.com/crosseyed/prjstart/internal/services/update"
-	"github.com/crosseyed/prjstart/internal/settings"
-	"github.com/crosseyed/prjstart/internal/settings/iinstall"
-	"github.com/crosseyed/prjstart/internal/settings/iupdate"
-	"github.com/crosseyed/prjstart/internal/utils/errutils"
-	"github.com/crosseyed/prjstart/internal/utils/options"
+	"github.com/kick-project/kick/internal/services/install"
+	"github.com/kick-project/kick/internal/services/update"
+	"github.com/kick-project/kick/internal/settings"
+	"github.com/kick-project/kick/internal/settings/iinstall"
+	"github.com/kick-project/kick/internal/settings/iupdate"
+	"github.com/kick-project/kick/internal/utils/errutils"
+	"github.com/kick-project/kick/internal/utils/options"
 	"github.com/jinzhu/copier"
 )
 

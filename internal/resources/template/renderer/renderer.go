@@ -3,7 +3,7 @@ package renderer
 import (
 	"regexp"
 
-	"github.com/crosseyed/prjstart/internal/resources/template/variables"
+	"github.com/kick-project/kick/internal/resources/template/variables"
 )
 
 // Renderer is an interface to render templates.

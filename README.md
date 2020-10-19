@@ -1,8 +1,8 @@
-[![Github Actions](https://github.com/crosseyed/prjstart/workflows/Go/badge.svg?branch=master)](https://github.com/crosseyed/prjstart/actions) [![Go Report Card](https://goreportcard.com/badge/crosseyed/prjstart)](https://goreportcard.com/report/crosseyed/prjstart)  [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/crosseyed/prjstart/blob/master/LICENSE)
+[![Github Actions](https://github.com/kick-project/kick/workflows/Go/badge.svg?branch=master)](https://github.com/kick-project/kick/actions) [![Go Report Card](https://goreportcard.com/badge/kick-project/kick)](https://goreportcard.com/report/kick-project/kick)  [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/kick-project/kick/blob/master/LICENSE)
 
-# Project Start - prjstart
+# Project Start -.kick
 
-Project Start `prjstart` is a cli tool to start a project using template 
+Project Start .kick` is a cli tool to start a project using template 
 boilerplates.
 
 # Quickstart
@@ -25,7 +25,7 @@ mkdir -p ~/prjs/prjgo
 
 `~/prjs/prjgo/AUTHORS`
 ```yaml
-# prj:render <--- This modeline tells prjstart to render file as a template. Line is stripped out from output file.
+# prj:render <--- This modeline tells.kick to render file as a template. Line is stripped out from output file.
 {{.Env.AUTHOR}}
 ```
 
@@ -64,7 +64,7 @@ func main() {
 }
 ```
 
-Add the following file `~/.prjstart.yml`
+Add the following file `~/.kick.yml`
 ```yaml
 templates:
     - name: goproject
@@ -86,7 +86,7 @@ git commit -m "first commit"
 git push --set-upstream git@github.com/owner/prjgo.git master
 ```
 
-Modify `~/.prjstart.yml`
+Modify `~/.kick.yml`
 ```yaml
 templates:
     - name: goproject

@@ -4,10 +4,10 @@ import (
 	"io"
 
 	"github.com/apex/log"
-	"github.com/crosseyed/prjstart/internal/resources/config"
-	"github.com/crosseyed/prjstart/internal/resources/template/renderer"
-	"github.com/crosseyed/prjstart/internal/resources/template/variables"
-	"github.com/crosseyed/prjstart/internal/settings"
+	"github.com/kick-project/kick/internal/resources/config"
+	"github.com/kick-project/kick/internal/resources/template/renderer"
+	"github.com/kick-project/kick/internal/resources/template/variables"
+	"github.com/kick-project/kick/internal/settings"
 )
 
 // Inject creates settings for template.New

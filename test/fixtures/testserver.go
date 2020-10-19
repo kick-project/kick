@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"sync"
 
-	"github.com/crosseyed/prjstart/internal/resources/config"
+	"github.com/kick-project/kick/internal/resources/config"
 	"github.com/sevlyar/go-daemon"
 	"github.com/sosedoff/gitkit"
 )
@@ -110,8 +110,8 @@ func (s *TestServerStruct) gitServer(dir string) *http.Server {
 
 func (s *TestServerStruct) loadConfig() {
 	conf := &config.File{
-		PathUserConf:     filepath.Join(s.home, ".prjstart", "config.yml"),
-		PathTemplateConf: filepath.Join(s.home, ".prjstart", "templates.yml"),
+		PathUserConf:     filepath.Join(s.home, ".kick", "config.yml"),
+		PathTemplateConf: filepath.Join(s.home, ".kick", "templates.yml"),
 	}
 	conf.Load()
 

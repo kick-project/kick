@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/crosseyed/prjstart/internal/utils"
+	"github.com/kick-project/kick/internal/utils"
 )
 
 func TestReader2File(t *testing.T) {

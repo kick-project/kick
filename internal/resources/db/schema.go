@@ -3,7 +3,7 @@ package db
 import (
 	"database/sql"
 
-	"github.com/crosseyed/prjstart/internal/utils/errutils"
+	"github.com/kick-project/kick/internal/utils/errutils"
 )
 
 var tblMaster = `

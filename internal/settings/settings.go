@@ -15,8 +15,8 @@ import (
 
 	"github.com/apex/log"
 	"github.com/apex/log/handlers/text"
-	"github.com/crosseyed/prjstart/internal/env"
-	"github.com/crosseyed/prjstart/internal/resources/config"
+	"github.com/kick-project/kick/internal/env"
+	"github.com/kick-project/kick/internal/resources/config"
 	_ "github.com/mattn/go-sqlite3" // Driver for database/sql
 )
 
@@ -51,10 +51,10 @@ type Settings struct {
 // contextualized by the home variable. For instance when home is
 // set the paths...
 //
-//     {{home}}/.prjstart/config.yml
-//     {{home}}/.prjstart/templates.yml
-//     {{home}}/.prjstart/metadata/metadata.db
-//     {{home}}/.prjstart/templates
+//     {{home}}/.kick/config.yml
+//     {{home}}/.kick/templates.yml
+//     {{home}}/.kick/metadata/metadata.db
+//     {{home}}/.kick/templates
 //     etc..
 //
 // are then factored in when creating dependency injections.
@@ -74,12 +74,12 @@ func GetSettings(home string) *Settings {
 		panic("home is set to an empty string")
 	}
 	dbdriver := "sqlite3"
-	sqlitedb := fp.Clean(fmt.Sprintf("%s/.prjstart/metadata/metadata.db", home))
+	sqlitedb := fp.Clean(fmt.Sprintf("%s/.kick/metadata/metadata.db", home))
 	dbdsn := fmt.Sprintf("file:%s?_foreign_key=on", sqlitedb)
-	pathUserConf := fp.Clean(fmt.Sprintf("%s/.prjstart/config.yml", home))
-	pathTemplateConf := fp.Clean(fmt.Sprintf("%s/.prjstart/templates.yml", home))
-	pathTemplateDir := fp.Clean(fmt.Sprintf("%s/.prjstart/templates", home))
-	pathMetadataDir := fp.Clean(fmt.Sprintf("%s/.prjstart/metadata", home))
+	pathUserConf := fp.Clean(fmt.Sprintf("%s/.kick/config.yml", home))
+	pathTemplateConf := fp.Clean(fmt.Sprintf("%s/.kick/templates.yml", home))
+	pathTemplateDir := fp.Clean(fmt.Sprintf("%s/.kick/templates", home))
+	pathMetadataDir := fp.Clean(fmt.Sprintf("%s/.kick/metadata", home))
 	logLvl := log.ErrorLevel
 	if env.Debug() {
 		logLvl = log.DebugLevel

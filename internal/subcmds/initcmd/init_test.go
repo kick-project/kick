@@ -5,8 +5,8 @@ import (
 	fp "path/filepath"
 	"testing"
 
-	"github.com/crosseyed/prjstart/internal/settings"
-	"github.com/crosseyed/prjstart/internal/utils"
+	"github.com/kick-project/kick/internal/settings"
+	"github.com/kick-project/kick/internal/utils"
 	_ "github.com/mattn/go-sqlite3" // Required by 'database/sql'
 	"github.com/stretchr/testify/assert"
 )
@@ -15,12 +15,12 @@ func TestInit(t *testing.T) {
 	home := fp.Join(utils.TempDir(), "init")
 	set := settings.GetSettings(home)
 	InitCmd([]string{"init"}, set)
-	dbfile := fp.Clean(fmt.Sprintf("%s/.prjstart/metadata/metadata.db", home))
-	assert.DirExists(t, fp.Clean(fmt.Sprintf("%s/.prjstart", home)))
-	assert.FileExists(t, fp.Clean(fmt.Sprintf("%s/.prjstart/config.yml", home)))
-	assert.DirExists(t, fp.Clean(fmt.Sprintf("%s/.prjstart/metadata", home)))
+	dbfile := fp.Clean(fmt.Sprintf("%s/.kick/metadata/metadata.db", home))
+	assert.DirExists(t, fp.Clean(fmt.Sprintf("%s/.kick", home)))
+	assert.FileExists(t, fp.Clean(fmt.Sprintf("%s/.kick/config.yml", home)))
+	assert.DirExists(t, fp.Clean(fmt.Sprintf("%s/.kick/metadata", home)))
 	assert.FileExists(t, dbfile)
-	assert.DirExists(t, fp.Clean(fmt.Sprintf("%s/.prjstart/templates", home)))
+	assert.DirExists(t, fp.Clean(fmt.Sprintf("%s/.kick/templates", home)))
 
 	db := set.GetDB()
 	defer db.Close()

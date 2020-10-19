@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/crosseyed/prjstart/internal/utils"
+	"github.com/kick-project/kick/internal/utils"
 )
 
 func TestSha256sum(t *testing.T) {

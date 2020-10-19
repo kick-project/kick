@@ -7,12 +7,12 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/crosseyed/prjstart/internal/resources/db"
-	"github.com/crosseyed/prjstart/internal/services/initialize"
-	"github.com/crosseyed/prjstart/internal/settings"
-	"github.com/crosseyed/prjstart/internal/settings/iinitialize"
-	"github.com/crosseyed/prjstart/internal/settings/isearch"
-	"github.com/crosseyed/prjstart/internal/utils"
+	"github.com/kick-project/kick/internal/resources/db"
+	"github.com/kick-project/kick/internal/services/initialize"
+	"github.com/kick-project/kick/internal/settings"
+	"github.com/kick-project/kick/internal/settings/iinitialize"
+	"github.com/kick-project/kick/internal/settings/isearch"
+	"github.com/kick-project/kick/internal/utils"
 	"github.com/jinzhu/copier"
 	"github.com/stretchr/testify/assert"
 )

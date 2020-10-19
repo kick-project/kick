@@ -11,7 +11,7 @@ func BaseProjectPath(home string) string {
 	if home == "" {
 		home = os.Getenv("HOME")
 	}
-	p := filepath.Join(home, ".prjstart", "projects")
+	p := filepath.Join(home, ".kick", "projects")
 	return p
 }
 
@@ -20,7 +20,7 @@ func BaseMetadataPath(home string) string {
 	if home == "" {
 		home = os.Getenv("HOME")
 	}
-	p := filepath.Join(home, ".prjstart", "metadata")
+	p := filepath.Join(home, ".kick", "metadata")
 	return p
 }
 

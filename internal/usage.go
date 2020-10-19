@@ -1,7 +1,7 @@
 package internal
 
 import (
-	"github.com/crosseyed/prjstart/internal/utils/errutils"
+	"github.com/kick-project/kick/internal/utils/errutils"
 	"github.com/docopt/docopt-go"
 )
 

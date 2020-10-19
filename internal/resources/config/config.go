@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/crosseyed/prjstart/internal/utils/marshal"
+	"github.com/kick-project/kick/internal/utils/marshal"
 )
 
 // File configuration as loaded from the configuration file

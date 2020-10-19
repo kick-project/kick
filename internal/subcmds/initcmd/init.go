@@ -3,10 +3,10 @@ package initcmd
 import (
 	"log"
 
-	"github.com/crosseyed/prjstart/internal/services/initialize"
-	"github.com/crosseyed/prjstart/internal/settings"
-	"github.com/crosseyed/prjstart/internal/settings/iinitialize"
-	"github.com/crosseyed/prjstart/internal/utils/options"
+	"github.com/kick-project/kick/internal/services/initialize"
+	"github.com/kick-project/kick/internal/settings"
+	"github.com/kick-project/kick/internal/settings/iinitialize"
+	"github.com/kick-project/kick/internal/utils/options"
 	"github.com/jinzhu/copier"
 )
 

@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/crosseyed/prjstart/internal/utils/errutils"
+	"github.com/kick-project/kick/internal/utils/errutils"
 )
 
 func Sha256SumFile(srcFile string, sumfile string) (sum string, err error) {

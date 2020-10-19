@@ -5,8 +5,8 @@ import (
 	"os"
 	fp "path/filepath"
 
-	"github.com/crosseyed/prjstart/internal/resources/db"
-	"github.com/crosseyed/prjstart/internal/utils/errutils"
+	"github.com/kick-project/kick/internal/resources/db"
+	"github.com/kick-project/kick/internal/utils/errutils"
 )
 
 // Initialize is responsible for initializing all disk paths
