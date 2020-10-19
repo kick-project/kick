@@ -1,4 +1,4 @@
-package metadata
+package update
 
 import (
 	"fmt"
@@ -10,7 +10,7 @@ import (
 	"github.com/crosseyed/prjstart/internal/services/initialize"
 	"github.com/crosseyed/prjstart/internal/settings"
 	"github.com/crosseyed/prjstart/internal/settings/iinitialize"
-	"github.com/crosseyed/prjstart/internal/settings/imetadata"
+	"github.com/crosseyed/prjstart/internal/settings/iupdate"
 	"github.com/crosseyed/prjstart/internal/utils"
 	"github.com/jinzhu/copier"
 	"syreclabs.com/go/faker"
@@ -20,8 +20,8 @@ func TestBuild(t *testing.T) {
 	home := fp.Join(utils.TempDir(), "home")
 	s := settings.GetSettings(home)
 	initIt(s)
-	m := &Metadata{}
-	copier.Copy(m, imetadata.Inject(s))
+	m := &Update{}
+	copier.Copy(m, iupdate.Inject(s))
 	m.Build()
 }
 

@@ -1,4 +1,4 @@
-package metadata
+package update
 
 import (
 	"database/sql"
@@ -17,8 +17,8 @@ import (
 	_ "github.com/mattn/go-sqlite3" // Required by 'database/sql'
 )
 
-// Metadata build metadata
-type Metadata struct {
+// Update build metadata
+type Update struct {
 	ConfigFile  *config.File
 	DB          *sql.DB
 	Log         *log.Logger
@@ -26,7 +26,7 @@ type Metadata struct {
 }
 
 // Build metadata. Conf defaults to globals.Config if Conf is nil.
-func (m *Metadata) Build() error {
+func (m *Update) Build() error {
 	conf := m.ConfigFile
 
 	c := workers{

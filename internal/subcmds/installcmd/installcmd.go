@@ -4,10 +4,10 @@ import (
 	"errors"
 
 	"github.com/crosseyed/prjstart/internal/services/install"
-	"github.com/crosseyed/prjstart/internal/services/metadata"
+	"github.com/crosseyed/prjstart/internal/services/update"
 	"github.com/crosseyed/prjstart/internal/settings"
 	"github.com/crosseyed/prjstart/internal/settings/iinstall"
-	"github.com/crosseyed/prjstart/internal/settings/imetadata"
+	"github.com/crosseyed/prjstart/internal/settings/iupdate"
 	"github.com/crosseyed/prjstart/internal/utils/errutils"
 	"github.com/crosseyed/prjstart/internal/utils/options"
 	"github.com/jinzhu/copier"
@@ -41,8 +41,8 @@ func Install(args []string, s *settings.Settings) int {
 		return 256
 	}
 
-	m := &metadata.Metadata{}
-	copier.Copy(m, imetadata.Inject(s))
+	m := &update.Update{}
+	copier.Copy(m, iupdate.Inject(s))
 	m.Build()
 
 	inst := &install.Install{}

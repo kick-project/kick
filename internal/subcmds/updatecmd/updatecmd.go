@@ -1,9 +1,9 @@
 package updatecmd
 
 import (
-	"github.com/crosseyed/prjstart/internal/services/metadata"
+	"github.com/crosseyed/prjstart/internal/services/update"
 	"github.com/crosseyed/prjstart/internal/settings"
-	"github.com/crosseyed/prjstart/internal/settings/imetadata"
+	"github.com/crosseyed/prjstart/internal/settings/iupdate"
 	"github.com/crosseyed/prjstart/internal/utils/options"
 	"github.com/jinzhu/copier"
 )
@@ -27,9 +27,9 @@ func Update(args []string, s *settings.Settings) int {
 	opts := &OptUpdate{}
 	options.Bind(usageDoc, args, opts)
 
-	m := &metadata.Metadata{}
-	copier.Copy(m, imetadata.Inject(s))
-	m.Build()
+	u := &update.Update{}
+	copier.Copy(u, iupdate.Inject(s))
+	u.Build()
 
 	return 0
 }
