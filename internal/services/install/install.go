@@ -3,7 +3,6 @@ package install
 import (
 	"bufio"
 	"database/sql"
-	"errors"
 	"fmt"
 	"io"
 	"regexp"
@@ -35,8 +34,7 @@ SELECT
 	templates.name AS templateName,
 	templates.url AS templateURL,
 	master.name AS origin,
-	templates.desc AS desc,
-	count(*) AS count
+	templates.desc AS desc
 FROM templates LEFT JOIN master ON (templates.masterid = master.id)
 WHERE templates.name = ? AND master.name = ?
 `
@@ -46,32 +44,31 @@ SELECT
 	templates.name AS templateName,
 	templates.url AS templateURL,
 	master.name AS origin,
-	templates.desc AS desc,
-	count(*) AS count
+	templates.desc AS desc
 FROM templates LEFT JOIN master ON (templates.masterid = master.id)
 WHERE templates.name = ?
 `
 
 // Install install template
-func (i *Install) Install(handle, template string) (stop int) {
+func (i *Install) Install(handle, template string) (ret int) {
 	i.Log.Debugf("Install(%s, %s)", handle, template)
 
 	// Check if handle is in use
-	stop = i.checkInUse(handle)
-	if stop != 0 {
+	ret = i.checkInUse(handle)
+	if ret != 0 {
 		fmt.Fprintf(i.Stderr, "handle %s is already in use\n", handle)
 		return
 	}
 
 	// Install from a template name
-	stop, processed := i.processTemplate(handle, template)
-	if processed {
+	found := i.processTemplate(handle, template)
+	if found {
 		return
 	}
 
 	// Install from a URL
-	stop = i.processURL(handle, template)
-	if stop != 0 {
+	ret = i.processURL(handle, template)
+	if ret != 0 {
 		fmt.Fprintf(i.Stderr, "invalid template or url %s\n", template)
 	}
 	return
@@ -91,7 +88,7 @@ func (i *Install) processURL(handle, url string) (stop int) {
 	return
 }
 
-func (i *Install) processTemplate(handle, template string) (stop int, processed bool) {
+func (i *Install) processTemplate(handle, template string) (processed bool) {
 	i.Log.Debugf("processTemplate(%s, %s)", handle, template)
 	var (
 		entries []config.Template
@@ -104,30 +101,25 @@ func (i *Install) processTemplate(handle, template string) (stop int, processed 
 	if len(match) == 0 {
 		return
 	}
-	processed = true
 	full = match[0]
 	name = match[1]
 	origin = match[2]
 	if full == "" {
-		fmt.Fprintf(i.Stderr, "invalid template name %s\n", template)
-		stop = 255
 		return
 	}
 
 	// Add entry
-	entries, stop = i.templateMatches(name, origin)
-	if stop != 0 {
-		return
-	}
+	entries = i.templateMatches(name, origin)
 	switch len(entries) {
 	case 0:
-		errutils.Efatal(errors.New("unexpected length. length should be > 0"))
+		return false
 	case 1:
-		return i.createEntry(handle, entries[0]), processed
+		i.createEntry(handle, entries[0])
+		return true
 	default:
-		return i.promptEntry(handle, entries), processed
+		i.promptEntry(handle, entries)
+		return true
 	}
-	return 255, processed
 }
 
 // checkInUse Check if a handle is in use. If stop is non 0 then the caller
@@ -150,7 +142,7 @@ func (i *Install) checkInUse(handle string) (stop int) {
 // templateMatches searches for template matches in the database and
 // returns them as entries. If stop is returned as non 0 then the caller should
 // exit the program execution with the value of stop.
-func (i *Install) templateMatches(name, origin string) (entries []config.Template, stop int) {
+func (i *Install) templateMatches(name, origin string) (entries []config.Template) {
 	rows := &sql.Rows{}
 	entries = []config.Template{}
 	if origin == "" {
@@ -159,7 +151,6 @@ func (i *Install) templateMatches(name, origin string) (entries []config.Templat
 		errutils.Efatal(err)
 		rows = r
 	} else {
-		i.Log.Debugf(utils.SQL2fmt(selectWithOrigin), name, origin)
 		r, err := i.DB.Query(selectWithOrigin, name, origin)
 		errutils.Efatal(err)
 		rows = r
@@ -167,23 +158,17 @@ func (i *Install) templateMatches(name, origin string) (entries []config.Templat
 	for rows.Next() {
 		var (
 			entry config.Template
-			count int
 		)
-		err := rows.Scan(&entry.Template, &entry.URL, &entry.Origin, &entry.Desc, &count)
+		err := rows.Scan(&entry.Template, &entry.URL, &entry.Origin, &entry.Desc)
 		errutils.Epanic(err)
-
-		if count == 0 {
-			fmt.Fprintf(i.Stderr, "could not find template %s\n", name)
-			return entries, 255
-		}
 
 		entries = append(entries, entry)
 	}
-	return entries, 0
+	return entries
 }
 
 // promptEntry prompts for an entry
-func (i *Install) promptEntry(handle string, entries []config.Template) (stop int) {
+func (i *Install) promptEntry(handle string, entries []config.Template) {
 	l := len(entries)
 	fmt.Fprint(i.Stdout, "multiple matches\n", l)
 	for x := 0; x < l; x++ {
@@ -214,23 +199,28 @@ func (i *Install) promptEntry(handle string, entries []config.Template) (stop in
 			break
 		}
 	}
-	return i.createEntry(handle, entries[selected-1])
+	i.createEntry(handle, entries[selected-1])
 }
 
 // createEntry creates a entry
-func (i *Install) createEntry(handle string, entry config.Template) (stop int) {
+func (i *Install) createEntry(handle string, entry config.Template) {
 	_, err := i.getRepo(entry.URL)
 	if err != nil {
-		fmt.Fprintf(i.Stdout, "Error installing %s: %s\n", entry.Handle, err.Error())
-		return 255
+		fmt.Fprintf(i.Stderr, "Error installing %s: %s\n", entry.Handle, err.Error())
+		utils.Exit(255)
 	}
 
 	entry.Handle = handle
-	stop = i.ConfigFile.AppendTemplate(entry)
-	if stop != 0 {
-		return
+	err = i.ConfigFile.AppendTemplate(entry)
+	if err != nil {
+		fmt.Fprintf(i.Stderr, "%s\n", err.Error())
+		utils.Exit(255)
 	}
-	i.ConfigFile.SaveTemplates()
+	err = i.ConfigFile.SaveTemplates()
+	if err != nil {
+		fmt.Fprintf(i.Stderr, "%s\n", err.Error())
+		utils.Exit(255)
+	}
 	i.Sync.Templates()
 	switch {
 	case entry.Template == "":
@@ -240,7 +230,6 @@ func (i *Install) createEntry(handle string, entry config.Template) (stop int) {
 	default:
 		fmt.Fprintf(i.Stdout, "Installed %s %s/%s -> %s\n", entry.Handle, entry.Template, entry.Origin, entry.URL)
 	}
-	return 0
 }
 
 // getRepo get version control system repository or set a location to a template.

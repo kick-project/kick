@@ -44,7 +44,6 @@ type Settings struct {
 	Stdin            io.Reader
 	Stderr           io.Writer
 	Stdout           io.Writer
-	confFile         *config.File
 }
 
 // GetSettings get settings using the supplied "home" directory option. Any
@@ -114,16 +113,12 @@ func (s *Settings) LogLevel(lvl log.Level) {
 
 // ConfigFile load settings from configuration file
 func (s *Settings) ConfigFile() *config.File {
-	if s.confFile != nil {
-		return s.confFile
-	}
 	conf := &config.File{
 		PathUserConf:     s.PathUserConf,
 		PathTemplateConf: s.PathTemplateConf,
 	}
 	conf.Load()
-	s.confFile = conf
-	return s.confFile
+	return conf
 }
 
 // GetDB return DB object.

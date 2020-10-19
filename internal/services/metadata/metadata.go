@@ -6,10 +6,12 @@ import (
 	"path/filepath"
 	"sync"
 
+	"github.com/apex/log"
 	"github.com/crosseyed/prjstart/internal/resources/config"
 	"github.com/crosseyed/prjstart/internal/resources/db"
 	"github.com/crosseyed/prjstart/internal/resources/gitclient"
 	"github.com/crosseyed/prjstart/internal/resources/gitclient/plumbing"
+	"github.com/crosseyed/prjstart/internal/utils"
 	"github.com/crosseyed/prjstart/internal/utils/errutils"
 	"github.com/crosseyed/prjstart/internal/utils/marshal"
 	_ "github.com/mattn/go-sqlite3" // Required by 'database/sql'
@@ -18,8 +20,9 @@ import (
 // Metadata build metadata
 type Metadata struct {
 	ConfigFile  *config.File
-	MetadataDir string
 	DB          *sql.DB
+	Log         *log.Logger
+	MetadataDir string
 }
 
 // Build metadata. Conf defaults to globals.Config if Conf is nil.
@@ -28,6 +31,7 @@ func (m *Metadata) Build() error {
 
 	c := workers{
 		wait: &sync.WaitGroup{},
+		log:  m.Log,
 	}
 
 	churl := make(chan string, 64)
@@ -48,6 +52,7 @@ func (m *Metadata) Build() error {
 }
 
 type workers struct {
+	log  *log.Logger
 	wait *sync.WaitGroup
 }
 
@@ -126,10 +131,12 @@ func (c *workers) concurInserts(dbconn *sql.DB, ch <-chan *Template) {
 
 func (c *workers) insert(dbconn *sql.DB, t *Template) {
 	insertMaster := `INSERT OR IGNORE INTO master (name, url, desc) VALUES (?, ?, ?)`
+	c.log.Debugf(utils.SQL2fmt(insertMaster), t.Master.Name, t.Master.URL, t.Master.Description)
 	_, err := dbconn.Exec(insertMaster, t.Master.Name, t.Master.URL, t.Master.Description)
 	errutils.Efatalf("error: inserting master metadata: %w", err)
 
 	insertTemplate := `INSERT OR IGNORE INTO templates (masterid, name, url, desc) SELECT master.id, ?, ?, ? FROM master WHERE master.url = ?`
+	c.log.Debugf(utils.SQL2fmt(insertTemplate), t.Name, t.URL, t.Description, t.Master.URL)
 	insertParams := []interface{}{t.Name, t.URL, t.Description, t.Master.URL}
 	_, err = dbconn.Exec(insertTemplate, insertParams...)
 	errutils.Efatalf("error: inserting template metadata: %w", err)

@@ -107,22 +107,24 @@ _package: ## Create an RPM & DEB
 	make dist/$(NAME)-$(VERSION).$(ARCH).rpm
 	make dist/$(NAME)_$(VERSION)_$(GOARCH).deb
 
-_test_setup:
+_test_setup: ## Setup test directories
 	@mkdir -p tmp
 	@mkdir -p reports/html
 	@$(MAKE) _test_setup_dirs 2> /dev/null > /dev/null
+	@$(MAKE) _test_setup_gitserver 2> /dev/null > /dev/null
 	@sync
 
 _test_setup_dirs:
 	@cp -r test/fixtures/home tmp/
 	@cp -r test/fixtures/checksum tmp/
 	@cp -r test/fixtures/compression tmp/
+	@cp -r test/fixtures/TestInstall tmp/
 	@mkdir -p tmp/metadata
 	@cp -r test/fixtures/metadata/serve tmp/metadata/
 
 _test_setup_gitserver:
 	@mkdir -p tmp/gitserveclient
-	@-kill -0 $$(cat tmp/server.pid) 2>/dev/null >/dev/null || go run test/fixtures/testserver.go
+	@-kill -0 $$(cat tmp/server.pid 2>/dev/null) >/dev/null 2>&1 || go run test/fixtures/testserver.go
 	@echo "Waiting for git server to launch on 5000..."
 	@bash -c 'while ! nc -z localhost 5000; do sleep 0.1; done'
 	@echo "git server launched"

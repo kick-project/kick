@@ -6,8 +6,6 @@ import "strings"
 // exist.
 func SQL2fmt(sql string) (out string) {
 	out = strings.ReplaceAll(sql, "?", "\"%s\"")
-	if !strings.HasSuffix(out, "\n") {
-		out += out
-	}
+	out += "\n"
 	return
 }
