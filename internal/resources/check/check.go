@@ -25,7 +25,7 @@ type Check struct {
 // Init checks to see if an initialization has been performed. This function
 // will print an error message and exit if initialization is needed.
 func (c *Check) Init() error {
-	msg := "not initalized. please run \"kick init\" to initialize configuration"
+	msg := "not initialized. please run \"kick init\" to initialize configuration"
 	// Directory checks
 	dirs := []string{c.HomeDir, c.MetadataDir, c.TemplateDir}
 	for _, d := range dirs {
