@@ -10,7 +10,12 @@ import (
 	"github.com/kick-project/kick/internal/settings/iinitialize"
 	"github.com/kick-project/kick/internal/utils"
 	"github.com/kick-project/kick/internal/utils/errutils"
+	"github.com/stretchr/testify/assert"
 )
+
+func TestUsageDoc(t *testing.T) {
+	assert.NotRegexp(t, "\t", usageDoc)
+}
 
 func TestSearch(t *testing.T) {
 	utils.ExitMode(utils.MPanic)

@@ -10,6 +10,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestUsageDoc(t *testing.T) {
+	assert.NotRegexp(t, "\t", usageDoc)
+}
+
 func TestStart(t *testing.T) {
 	utils.ExitMode(utils.MPanic)
 	tmpdir := utils.TempDir()

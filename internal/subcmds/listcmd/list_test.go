@@ -13,6 +13,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestUsageDoc(t *testing.T) {
+	assert.NotRegexp(t, "\t", usageDoc)
+}
+
 func TestList(t *testing.T) {
 	utils.ExitMode(utils.MPanic)
 	home := filepath.Join(utils.TempDir(), "home")

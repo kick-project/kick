@@ -20,7 +20,7 @@ Usage:
     kick list [-l]
 
 Options:
-	-h --help     Print help.
+    -h --help     Print help.
     -l            Print Long output.
 `
 
