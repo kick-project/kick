@@ -19,18 +19,18 @@ import (
 var usageDoc = `Search for templates using a keyword
 
 Usage:
-    kick search [--long] <term>
+    kick search [-l] <term>
 
 Options:
-    -h --help     Print help.
-    -l --long     Long output.
+    -h --help  Print help.
+    -l         Long output.
 `
 
 // OptSearch bindings for docopts
 type OptSearch struct {
 	Search bool   `docopt:"search"`
 	Term   string `docopt:"<term>"`
-	Long   bool   `docopt:"--long"`
+	Long   bool   `docopt:"-l"`
 }
 
 // Search for templates
