@@ -53,7 +53,10 @@ func (s *Sync) Check(key, file string) bool {
 	file, err := filepath.Abs(filepath.Clean(file))
 	errutils.Epanicf("%w", err)
 	info, err := os.Stat(file)
-	errutils.Epanicf("%w", err)
+	if err != nil && os.IsNotExist(err) {
+		return false
+	}
+	errutils.Epanic(err)
 	ts := info.ModTime().Format("2006-01-02T15:04:05")
 	row := s.DB.QueryRow(selectSync, ts, key)
 	update := 0

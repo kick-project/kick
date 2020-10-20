@@ -2,13 +2,17 @@ package installcmd
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/jinzhu/copier"
+	"github.com/kick-project/kick/internal/resources/check"
 	"github.com/kick-project/kick/internal/services/install"
 	"github.com/kick-project/kick/internal/services/update"
 	"github.com/kick-project/kick/internal/settings"
+	"github.com/kick-project/kick/internal/settings/icheck"
 	"github.com/kick-project/kick/internal/settings/iinstall"
 	"github.com/kick-project/kick/internal/settings/iupdate"
+	"github.com/kick-project/kick/internal/utils"
 	"github.com/kick-project/kick/internal/utils/errutils"
 	"github.com/kick-project/kick/internal/utils/options"
 )
@@ -41,9 +45,19 @@ func Install(args []string, s *settings.Settings) int {
 		return 256
 	}
 
-	m := &update.Update{}
-	err := copier.Copy(m, iupdate.Inject(s))
+	chk := &check.Check{}
+	err := copier.Copy(chk, icheck.Inject(s))
 	errutils.Epanic(err)
+
+	if err = chk.Init(); err != nil {
+		fmt.Fprintf(s.Stderr, "%s\n", err.Error())
+		utils.Exit(255)
+	}
+
+	m := &update.Update{}
+	err = copier.Copy(m, iupdate.Inject(s))
+	errutils.Epanic(err)
+
 	err = m.Build()
 	errutils.Epanic(err)
 

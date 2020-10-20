@@ -13,6 +13,7 @@ import (
 )
 
 func TestSearch(t *testing.T) {
+	utils.ExitMode(utils.MPanic)
 	args := []string{"search", "keyword"}
 	home := filepath.Join(utils.TempDir(), "home")
 	s := settings.GetSettings(home)

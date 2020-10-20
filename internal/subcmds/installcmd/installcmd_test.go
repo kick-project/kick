@@ -38,6 +38,7 @@ func TestInstallTemplateURL(t *testing.T) {
 }
 
 func installTest(t *testing.T, handle, template string) {
+	utils.ExitMode(utils.MPanic)
 	id := "TestInstall"
 	src := filepath.Join(utils.TempDir(), id, ".kick", "templates.yml.save")
 	dest := filepath.Join(utils.TempDir(), id, ".kick", "templates.yml")

@@ -12,6 +12,7 @@ import (
 )
 
 func TestInit(t *testing.T) {
+	utils.ExitMode(utils.MPanic)
 	home := fp.Join(utils.TempDir(), "init")
 	set := settings.GetSettings(home)
 	InitCmd([]string{"init"}, set)

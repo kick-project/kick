@@ -8,18 +8,26 @@ import (
 	"github.com/kick-project/kick/internal/services/initialize"
 	"github.com/kick-project/kick/internal/settings"
 	"github.com/kick-project/kick/internal/settings/iinitialize"
+	"github.com/kick-project/kick/internal/subcmds/updatecmd"
 	"github.com/kick-project/kick/internal/utils"
-	"github.com/kick-project/kick/internal/utils/errutils"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestList(t *testing.T) {
-	args := []string{"list"}
+	utils.ExitMode(utils.MPanic)
 	home := filepath.Join(utils.TempDir(), "home")
 	s := settings.GetSettings(home)
 	i := &initialize.Initialize{}
 	err := copier.Copy(i, iinitialize.Inject(s))
-	errutils.Epanic(err)
+	if err != nil {
+		t.Error(err)
+	}
 	i.Init()
+
+	updatecmd.Update([]string{"update"}, s)
+
+	// No entries
+	args := []string{"list"}
 	ret := List(args, s)
-	_ = ret
+	assert.Equal(t, 0, ret)
 }
