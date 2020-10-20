@@ -158,7 +158,7 @@ tag:
 
 deps: go.mod ## Install build dependencies
 	$(GOMODOPTS) go mod tidy
-	$(GOMODOPTS) go mod vendor
+	$(GOMODOPTS) go mod download
 
 depsdev: ## Install development dependencies
 ifeq ($(USEGITLAB),true)
