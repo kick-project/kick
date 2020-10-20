@@ -24,7 +24,7 @@ func main() {
 	errutils.Efatalf("error: %w", err)
 	s := settings.GetSettings(home)
 
-	if os.Getenv("PRJSTART_DEBUG") == "true" {
+	if os.Getenv("KICK_DEBUG") == "true" {
 		s.LogLevel(log.DebugLevel)
 	}
 

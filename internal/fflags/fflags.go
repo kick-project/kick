@@ -14,10 +14,10 @@ func enabled() bool {
 
 // Remote enables remote operations
 func Remote() bool {
-	return enabled() && os.Getenv("FF_PRJSTART_REMOTE") == "true"
+	return enabled() && os.Getenv("FF_KICK_REMOTE") == "true"
 }
 
 // GitClone refactor the way git repositories are cloned
 func GitClone() bool {
-	return enabled() && os.Getenv("FF_PRJSTART_GIT_CLONE") == "true"
+	return enabled() && os.Getenv("FF_KICK_GIT_CLONE") == "true"
 }

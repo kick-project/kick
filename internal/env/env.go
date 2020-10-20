@@ -7,5 +7,5 @@ import "os"
 
 // Debug Turn debug logging on. See settings.Settings
 func Debug() bool {
-	return os.Getenv("PRJSTART_DEBUG") == "true"
+	return os.Getenv("KICK_DEBUG") == "true"
 }
