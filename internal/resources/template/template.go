@@ -388,8 +388,8 @@ LOOP:
 type hasML []hasMLAction
 
 func (ml hasML) Init() hasML {
-	ml = append(ml, regexCompile(`prj:render\W?`, MLrender))
-	ml = append(ml, regexCompile(`prj:ignore\W?`, MLnorender))
+	ml = append(ml, regexCompile(`kick:render\W?`, MLrender))
+	ml = append(ml, regexCompile(`kick:ignore\W?`, MLnorender))
 	return ml
 }
 

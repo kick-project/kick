@@ -1,19 +1,19 @@
-VERSION=$(shell versionbump list .prjmod.yml)
+VERSION=$(shell versionbump list .kickmod.yml)
 
 version:
 	@echo $(VERSION)
 
 bumpmajor:
 	git fetch --tags
-	versionbump --checktags major .prjmod.yml
+	versionbump --checktags major .kickmod.yml
 
 bumpminor:
 	git fetch --tags
-	versionbump --checktags minor .prjmod.yml
+	versionbump --checktags minor .kickmod.yml
 
 bumppatch:
 	git fetch --tags
-	versionbump --checktags patch .prjmod.yml
+	versionbump --checktags patch .kickmod.yml
 
 release:
 	git fetch --tags

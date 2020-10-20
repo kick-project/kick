@@ -1,16 +1,15 @@
 [![Github Actions](https://github.com/kick-project/kick/workflows/Go/badge.svg?branch=master)](https://github.com/kick-project/kick/actions) [![Go Report Card](https://goreportcard.com/badge/kick-project/kick)](https://goreportcard.com/report/kick-project/kick)  [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/kick-project/kick/blob/master/LICENSE)
 
-# Project Start -.kick
+# Kick
 
-Project Start .kick` is a cli tool to start a project using template 
-boilerplates.
+`kick` is a cli tool to start a project using templates under version control
+or stored on local disk.
 
 # Quickstart
 
-Add a set of variables that will be used in your project.
-Variables are stored in `~/.env`. All the variables defined here
-are passed to templates along with all environment variables as
-`.Env.$VARIABLE`
+Add a set of variables that will be used in your project. Variables are
+stored in `~/.env`. All the variables defined here are passed to templates
+along with all environment variables as `${VARIABLE}`
 
 `~/.env`
 ```dotenv
@@ -18,24 +17,25 @@ AUTHOR=First Last <first.last@somedomain.com>
 ```
 
 Create a project that will be used as an example to generate go projects.
-Templates are rendered using Go's text/template
+Templates are rendered using a go library that emulates the function of GNUs
+envsubst command.
 ```bash
-mkdir -p ~/prjs/prjgo
+mkdir -p ~/kicks/kickgo
 ```
 
-`~/prjs/prjgo/AUTHORS`
+`~/kicks/kickgo/AUTHORS`
 ```yaml
-# prj:render <--- This modeline tells.kick to render file as a template. Line is stripped out from output file.
-{{.Env.AUTHOR}}
+# kick:render <--- This modeline tells.kick to render file as a template. Line is stripped out from output file.
+${AUTHOR}
 ```
 
-`~/prjs/prjgo/README.md`
+`~/kicks/kickgo/README.md`
 ```markdown
-# prj:render
-# {{.Project.NAME}}
+# kick:render
+# ${PROJECT_NAME}
 ```
 
-`~/prjs/prjgo/.gitignore`
+`~/kicks/kickgo/.gitignore`
 ```.gitignore
 # Vim
 .*.swp
@@ -48,27 +48,26 @@ mkdir -p ~/prjs/prjgo
 
 Add a binary
 ```bash
-mkdir -p ~/prjs/prjgo/cmd/\{\{.Project.NAME\}\}
-touch ~/prjs/prjgo/cmd/\{\{.Project.NAME\}\}/main.go 
+mkdir -p ~/kicks/kickgo/cmd/\${PROJECT_NAME}
+touch ~/kicks/kickgo/cmd/\${PROJECT_NAME}/main.go 
 ```
 
-`~/prjs/prjgo/cmd/\{\{.Project.NAME\}\}/main.go`
+`~/kicks/kickgo/cmd/\${PROJECT_NAME}/main.go`
 ```go
-// prj:render
+// kick:render
 package main
 
 import "fmt"
 
 func main() {
-    fmt.Println("Project {{.Project.NAME}}")
+    fmt.Println("Project ${PROJECT_NAME}")
 }
 ```
 
-Add the following file `~/.kick.yml`
+Add the following file `~/.kick/templates.yml`
 ```yaml
-templates:
-    - name: goproject
-      url: ~/prjs/prjgo
+- name: goproject
+  url: ~/kicks/kickgo
 ```
 
 Create the project using go
@@ -79,31 +78,20 @@ kick start goproject ~/mynewproject
 # Git templates
 
 ```bash
-cd ~/prjs/prjgo
+cd ~/kicks/kickgo
 git init
 git add .
 git commit -m "first commit"
-git push --set-upstream git@github.com/owner/prjgo.git master
+git push --set-upstream git@github.com/owner/kickgo.git master
 ```
 
-Modify `~/.kick.yml`
+Modify `~/.kick/templates.yml`
 ```yaml
-templates:
-    - name: goproject
-      url: http://github.com/owner/prjgo.git
+- name: goproject
+  url: http://github.com/owner/kickgo.git
 ```
 
 Start a new project with the recently checked in boilerplate
 ```bash
 kick start goproject ~/myproject
 ```
-
-# Variables
-Variables are either environment variables, variables defined in `~/.env`
-or project variables.
-
-To list available project variables run
-```bash
-kick list --vars
-```
-
