@@ -31,3 +31,22 @@ func TestList(t *testing.T) {
 	ret := List(args, s)
 	assert.Equal(t, 0, ret)
 }
+
+func TestListLong(t *testing.T) {
+	utils.ExitMode(utils.MPanic)
+	home := filepath.Join(utils.TempDir(), "home")
+	s := settings.GetSettings(home)
+	i := &initialize.Initialize{}
+	err := copier.Copy(i, iinitialize.Inject(s))
+	if err != nil {
+		t.Error(err)
+	}
+	i.Init()
+
+	updatecmd.Update([]string{"update"}, s)
+
+	// No entries
+	args := []string{"list", "-l"}
+	ret := List(args, s)
+	assert.Equal(t, 0, ret)
+}
