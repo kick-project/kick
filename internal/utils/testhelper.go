@@ -6,6 +6,7 @@ import (
 	"runtime"
 )
 
+// FixtureDir returns the path to the fixture directory.
 func FixtureDir() (fixturedir string) {
 	_, filename, _, ok := runtime.Caller(0)
 	if !ok {
@@ -18,6 +19,7 @@ func FixtureDir() (fixturedir string) {
 	return fixturedir
 }
 
+// TempDir returns the path to the localized tmp/ directory.
 func TempDir() (tempdir string) {
 	_, filename, _, ok := runtime.Caller(0)
 	if !ok {

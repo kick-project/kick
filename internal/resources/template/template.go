@@ -75,10 +75,9 @@ func (t *Template) renderer() renderer.Renderer {
 	render, ok := t.RenderersAvail[t.RenderCurrent]
 	if ok {
 		return render
-	} else {
-		fmt.Fprintf(t.Stderr, "No such renderer %s\n", t.RenderCurrent)
-		utils.Exit(255)
 	}
+	fmt.Fprintf(t.Stderr, "No such renderer %s\n", t.RenderCurrent)
+	utils.Exit(255)
 	return nil
 }
 
@@ -211,7 +210,7 @@ func (t *Template) loadTempateConf(path string) {
 		utils.Exit(255)
 	}
 	t.Log.Debugf("Unmarshal file %s\n", path)
-	err := marshal.UnmarshalFile(c, path)
+	err := marshal.UnmarshalFromFile(c, path)
 	if err != nil {
 		fmt.Fprintf(t.Stderr, "Can not unmarshal file %s: %s\n", path, err.Error())
 		utils.Exit(255)

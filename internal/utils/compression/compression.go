@@ -10,7 +10,9 @@ import (
 	"github.com/kick-project/kick/internal/utils/errutils"
 )
 
-func Compress(plainSrc, gzDst string) (bytes int64, err error) {
+// Compress takes the path plainSrc compresses it and writes it to the path gzDst.
+// Returns the number of bytes that were written to gzDst.
+func Compress(plainSrc, gzDst string) (written int64, err error) {
 	srcIO, err := os.Open(plainSrc)
 	if err != nil {
 		return 0, fmt.Errorf("Failed to open file %s: %s", plainSrc, err)
@@ -23,7 +25,8 @@ func Compress(plainSrc, gzDst string) (bytes int64, err error) {
 
 	gzWriter := gzip.NewWriter(dstIO)
 
-	written, err := io.Copy(gzWriter, srcIO)
+	// TODO: Bugfix written should reflect the number of bytes written not read.
+	written, err = io.Copy(gzWriter, srcIO)
 	if err != nil {
 		return 0, err
 	}
@@ -36,7 +39,9 @@ func Compress(plainSrc, gzDst string) (bytes int64, err error) {
 	return written, nil
 }
 
-func Decompress(gzSrc, plainDst string) (bytes int64, err error) {
+// Decompress loads the path gzSrc decompresses the contents and writes to plainDst.
+// Returns the number of bytes that were written to plainDst.
+func Decompress(gzSrc, plainDst string) (written int64, err error) {
 	srcIO, err := os.Open(gzSrc)
 	if err != nil {
 		return 0, fmt.Errorf("Failed to open file %s: %s", gzSrc, err)
@@ -50,7 +55,9 @@ func Decompress(gzSrc, plainDst string) (bytes int64, err error) {
 	if err != nil {
 		return 0, err
 	}
-	written, err := io.Copy(dstIO, gzReader)
+
+	// TODO: Bugfix written should reflect the number of bytes written not read.
+	written, err = io.Copy(dstIO, gzReader)
 	if err != nil {
 		return 0, err
 	}

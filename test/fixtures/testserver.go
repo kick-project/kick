@@ -14,8 +14,8 @@ import (
 	"github.com/sosedoff/gitkit"
 )
 
-var TestServerSync sync.Mutex
-var TestServerUp bool
+var testServerSync sync.Mutex
+var testServerUp bool
 
 func main() {
 	home, _ := filepath.Abs("tmp/home")
@@ -41,19 +41,19 @@ func main() {
 		errutils.Epanic(err)
 	}()
 
-	StartTestServer(home, srvpath)
+	startTestServer(home, srvpath)
 }
 
-type TestServerStruct struct {
+type testServerStruct struct {
 	server *http.Server
 	config *config.File
 	home   string
 }
 
-func (s *TestServerStruct) ServerUp(home string, servpath string) {
-	TestServerSync.Lock()
-	defer TestServerSync.Unlock()
-	if TestServerUp {
+func (s *testServerStruct) ServerUp(home string, servpath string) {
+	testServerSync.Lock()
+	defer testServerSync.Unlock()
+	if testServerUp {
 		return
 	}
 	s.home = home
@@ -70,16 +70,16 @@ func (s *TestServerStruct) ServerUp(home string, servpath string) {
 	if os.IsNotExist(err) {
 		homeexists = false
 	}
-	TestServerUp = true
+	testServerUp = true
 	log.Printf("HOMEDIR: %s EXISTS=%t", home, homeexists)
 	log.Printf("SERVDIR: %s EXISTS=%t", servpath, spathexists)
 }
 
-func (s *TestServerStruct) GetHome() string {
+func (s *testServerStruct) GetHome() string {
 	return s.home
 }
 
-func (s *TestServerStruct) gitServer(dir string) *http.Server {
+func (s *testServerStruct) gitServer(dir string) *http.Server {
 	addr := getAddr()
 
 	service := gitkit.New(gitkit.Config{
@@ -105,14 +105,13 @@ func (s *TestServerStruct) gitServer(dir string) *http.Server {
 	if err != nil {
 		if err.Error() == fmt.Sprintf("listen tcp %s: bind: address already in use", addr) {
 			return nil
-		} else {
-			log.Fatalf("%v", err)
 		}
+		log.Fatalf("%v", err)
 	}
 	return server
 }
 
-func (s *TestServerStruct) loadConfig() {
+func (s *testServerStruct) loadConfig() {
 	conf := &config.File{
 		PathUserConf:     filepath.Join(s.home, ".kick", "config.yml"),
 		PathTemplateConf: filepath.Join(s.home, ".kick", "templates.yml"),
@@ -123,8 +122,8 @@ func (s *TestServerStruct) loadConfig() {
 	s.config = conf
 }
 
-func StartTestServer(home string, servpath string) {
-	testserver := &TestServerStruct{}
+func startTestServer(home string, servpath string) {
+	testserver := &testServerStruct{}
 	testserver.ServerUp(home, servpath)
 }
 

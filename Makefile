@@ -149,7 +149,7 @@ _release: ## Release
 
 lint: internal/version.go ## Lint tests
 	golangci-lint run --enable=gocyclo
-	golint ./... | grep --color=never . && exit 1
+	golint -set_exit_status ./...
 
 tag:
 	git fetch --tags

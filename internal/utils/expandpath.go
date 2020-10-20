@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// ExpandPath expands the ~ into to the setting of the $HOME variable.
 func ExpandPath(path string) string {
 	if strings.HasPrefix(path, "~/") {
 		usr, _ := user.Current()

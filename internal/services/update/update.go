@@ -151,12 +151,12 @@ type Master struct {
 
 // Load loads from a json or yaml file, depending on the file suffix.
 func (m *Master) Load(path string) error {
-	return marshal.UnmarshalFile(m, path)
+	return marshal.UnmarshalFromFile(m, path)
 }
 
 // Save saves to json or yaml file, depending on the file suffix.
 func (m *Master) Save(path string) error {
-	return marshal.MarshalFile(m, path)
+	return marshal.Marshal2File(m, path)
 }
 
 // Template is a template creator
@@ -169,10 +169,10 @@ type Template struct {
 
 // Load loads from a json or yaml file
 func (g *Template) Load(path string) error {
-	return marshal.UnmarshalFile(g, path)
+	return marshal.UnmarshalFromFile(g, path)
 }
 
 // Save saves to json or yaml file.
 func (g *Template) Save(path string) error {
-	return marshal.MarshalFile(g, path)
+	return marshal.Marshal2File(g, path)
 }

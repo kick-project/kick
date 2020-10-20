@@ -12,8 +12,9 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-// MarshalFile marshals to a json or yaml.
-func MarshalFile(v interface{}, path string) error {
+// Marshal2File marshals to a json or yaml. This function relies on the file
+// suffix to determine which marshaler to use.
+func Marshal2File(v interface{}, path string) error {
 	d, err := filepath.Abs(filepath.Dir(path))
 	if err != nil {
 		return fmt.Errorf("can not get absolute path: %w", err)
@@ -48,18 +49,19 @@ func MarshalFile(v interface{}, path string) error {
 	return nil
 }
 
-// UnmarshalFile un-marshals from a json or yaml file.
-func UnmarshalFile(v interface{}, p string) error {
-	if _, err := os.Stat(p); os.IsNotExist(err) {
-		return fmt.Errorf("file %s does not exist: %w", p, err)
+// UnmarshalFromFile un-marshals from a json or yaml file. This function uses
+// the file suffix to determine which unmarshaler to use.
+func UnmarshalFromFile(v interface{}, path string) error {
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		return fmt.Errorf("file %s does not exist: %w", path, err)
 	}
 
-	f, err := ioutil.ReadFile(p)
+	f, err := ioutil.ReadFile(path)
 	if err != nil {
-		return fmt.Errorf("can not read file %s: %w", p, err)
+		return fmt.Errorf("can not read file %s: %w", path, err)
 	}
 
-	st, err := suffixType(p)
+	st, err := suffixType(path)
 	if err != nil {
 		return err
 	}
@@ -69,7 +71,7 @@ func UnmarshalFile(v interface{}, p string) error {
 		err = yaml.Unmarshal([]byte(f), v)
 	}
 	if err != nil {
-		return fmt.Errorf("can not unmarshal file %s: %w", p, err)
+		return fmt.Errorf("can not unmarshal file %s: %w", path, err)
 	}
 	return nil
 }

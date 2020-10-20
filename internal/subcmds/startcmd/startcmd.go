@@ -28,6 +28,7 @@ Options:
     <project>     Project path.
 `
 
+// OptStart start a new project from templates.
 type OptStart struct {
 	Start       bool   `docopt:"start"`
 	Template    string `docopt:"<handle>"`

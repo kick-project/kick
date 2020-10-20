@@ -13,6 +13,8 @@ import (
 	"github.com/kick-project/kick/internal/utils/errutils"
 )
 
+// Sha256SumFile generates a sha256sum for srcFile and writes the output to sumfile.
+// It will also return the sum of the srcFile.
 func Sha256SumFile(srcFile string, sumfile string) (sum string, err error) {
 	srcIO, err := os.Open(srcFile)
 	if err != nil {
@@ -36,6 +38,8 @@ func Sha256SumFile(srcFile string, sumfile string) (sum string, err error) {
 	return sum, err
 }
 
+// Sha256Sum generate a sha256sum from rdr and return an array of bytes
+// representing the sha256sum.
 func Sha256Sum(rdr io.Reader) (bytesum []byte, err error) {
 	hash := sha256.New()
 	_, err = io.Copy(hash, rdr)
@@ -44,6 +48,8 @@ func Sha256Sum(rdr io.Reader) (bytesum []byte, err error) {
 	return bytesum, nil
 }
 
+// VerifySha256sum calculates the sha256sum of srcFile and checks the contents
+// of sumfile to determine if the sha256sums match.
 func VerifySha256sum(srcFile, sumfile string) (pass bool, sum string, err error) {
 	srcAbs, err := filepath.Abs(srcFile)
 	errutils.Efatalf("Can not get absolute path for %s: %v", srcFile, err)

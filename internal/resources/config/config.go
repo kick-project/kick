@@ -54,7 +54,7 @@ func (f *File) Load() error {
 	pathUserConf := f.PathUserConf
 	pathTemplateConf := f.PathTemplateConf
 	if _, err := os.Stat(pathUserConf); err == nil {
-		err := marshal.UnmarshalFile(f, pathUserConf)
+		err := marshal.UnmarshalFromFile(f, pathUserConf)
 		if err != nil {
 			return fmt.Errorf("can not load file %s: %w", pathUserConf, err)
 		}
@@ -63,7 +63,7 @@ func (f *File) Load() error {
 	}
 
 	if _, err := os.Stat(pathTemplateConf); err == nil {
-		err = marshal.UnmarshalFile(&f.Templates, pathTemplateConf)
+		err = marshal.UnmarshalFromFile(&f.Templates, pathTemplateConf)
 		if err != nil {
 			return fmt.Errorf("can not load file %s: %w", pathTemplateConf, err)
 		}
@@ -75,7 +75,7 @@ func (f *File) Load() error {
 
 // SaveTemplates saves template configuration file to disk
 func (f *File) SaveTemplates() error {
-	err := marshal.MarshalFile(f.Templates, f.PathTemplateConf)
+	err := marshal.Marshal2File(f.Templates, f.PathTemplateConf)
 	if err != nil {
 		return fmt.Errorf("can not save file %s: %w", f.PathTemplateConf, err)
 	}

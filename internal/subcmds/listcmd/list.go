@@ -24,6 +24,7 @@ Options:
     -l            Print Long output.
 `
 
+// OptList docopts options to list installed templates
 type OptList struct {
 	List bool `docopt:"list"`
 	Long bool `docopt:"-l"`
