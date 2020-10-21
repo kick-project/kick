@@ -1,0 +1,13 @@
+// kick:render
+package main
+
+import (
+    "fmt"
+    "github.com/kick-project/${PROJECT_NAME}/internal/options"
+    "os"
+)
+
+func main() {
+    opts := options.GetUsage(os.Args[1:],internal.Version)
+    _ = opts
+}

@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"fmt"
 	"io"
+	"os"
+	"path/filepath"
 	"regexp"
 	"strconv"
 
@@ -67,25 +69,38 @@ func (i *Install) Install(handle, template string) (ret int) {
 	}
 
 	// Install from a URL
-	ret = i.processURL(handle, template)
-	if ret != 0 {
+	found = i.processLocation(handle, template)
+	if !found {
 		fmt.Fprintf(i.Stderr, "invalid template or url %s\n", template)
+		ret = 255
 	}
 	return
 }
 
-func (i *Install) processURL(handle, url string) (stop int) {
-	i.Log.Debugf("processURL(%s, %s)", handle, url)
-	urlx, err := utils.Parse(url)
+func (i *Install) processLocation(handle, location string) (found bool) {
+	i.Log.Debugf("processLocation(%s, %s)", handle, location)
+
+	p, err := filepath.Abs(utils.ExpandPath(location))
+	errutils.Epanic(err)
+	// Check if its a path on the local file system
+	if info, err := os.Stat(p); err == nil && info.IsDir() {
+		t := config.Template{
+			URL: p,
+		}
+		i.createEntry(handle, t)
+		return true
+	}
+
+	urlx, err := utils.Parse(location)
 	if err != nil {
-		return 255
+		return false
 	}
 	t := config.Template{
 		URL:  urlx.URL,
 		Desc: "Direct installation",
 	}
 	i.createEntry(handle, t)
-	return
+	return true
 }
 
 func (i *Install) processTemplate(handle, template string) (processed bool) {

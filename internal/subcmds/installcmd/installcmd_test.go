@@ -37,6 +37,12 @@ func TestInstallTemplateURL(t *testing.T) {
 	installTest(t, handle, template)
 }
 
+func TestInstallPath(t *testing.T) {
+	handle := "handle4"
+	template := filepath.Clean(utils.TempDir() + "/TestInstall/kicks/go")
+	installTest(t, handle, template)
+}
+
 func installTest(t *testing.T, handle, template string) {
 	utils.ExitMode(utils.MPanic)
 	id := "TestInstall"

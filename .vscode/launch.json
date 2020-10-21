@@ -38,5 +38,14 @@
             "program": "${workspaceFolder}/cmd/kick",
             "args": ["start", "go", "/tmp/foo"]
         },
+        {
+            "name": "kick install handle1 tmp/TestInstall/kicks/go",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/cmd/kick",
+            "args": ["install", "handle1", "tmp/TestInstall/kicks/go"],
+            "cwd": "${workspaceFolder}"
+        },
     ]
 }

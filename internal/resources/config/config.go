@@ -53,6 +53,16 @@ func (f *File) AppendTemplate(t Template) (err error) {
 func (f *File) Load() error {
 	pathUserConf := f.PathUserConf
 	pathTemplateConf := f.PathTemplateConf
+	stderr := f.Stderr
+
+	// Workaround for yaml.v2 clobbering fields with yaml:"-" set.
+	// This bug is hard to reproduce as it seems to be intermittent.
+	defer func() {
+		f.PathUserConf = pathUserConf
+		f.PathTemplateConf = pathTemplateConf
+		f.Stderr = stderr
+	}()
+
 	if _, err := os.Stat(pathUserConf); err == nil {
 		err := marshal.UnmarshalFromFile(f, pathUserConf)
 		if err != nil {
