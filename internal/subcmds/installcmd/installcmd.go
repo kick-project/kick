@@ -24,14 +24,13 @@ Usage:
 
 Options:
     -h --help        Print help.
-    <location>       Template name, URL or location of template
-    <name>           Name to use when creating new projects
+    <handle>         Name to use when creating new projects
+    <location>       Template name, URL or location of template.
 `
 
 // OptInstall initialize configuration file
 type OptInstall struct {
 	Install  bool   `docopt:"install"`
-	URL      string `docopt:"--url"`
 	Template string `docopt:"<location>"`
 	Handle   string `docopt:"<handle>"`
 }

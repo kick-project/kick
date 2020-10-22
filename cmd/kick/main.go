@@ -11,6 +11,7 @@ import (
 	"github.com/kick-project/kick/internal/subcmds/initcmd"
 	"github.com/kick-project/kick/internal/subcmds/installcmd"
 	"github.com/kick-project/kick/internal/subcmds/listcmd"
+	"github.com/kick-project/kick/internal/subcmds/removecmd"
 	"github.com/kick-project/kick/internal/subcmds/searchcmd"
 	"github.com/kick-project/kick/internal/subcmds/startcmd"
 	"github.com/kick-project/kick/internal/subcmds/updatecmd"
@@ -43,6 +44,8 @@ func main() {
 		utils.Exit(updatecmd.Update(args[1:], s))
 	case o.Install:
 		utils.Exit(installcmd.Install(args[1:], s))
+	case o.Remove:
+		utils.Exit(removecmd.Remove(args[1:], s))
 	}
 	utils.Exit(255)
 }

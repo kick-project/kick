@@ -16,6 +16,7 @@ Usage:
     kick init
     kick install
     kick list
+    kick remove
     kick search
     kick update
 
@@ -27,6 +28,7 @@ Options:
     update        Update repository data.
     init          Initialize configuration.
     list          List available project options.
+    remove        Remove an installed template.
     search        Search for available templates.
 `
 
@@ -40,6 +42,7 @@ type OptMain struct {
 	Init    bool `docopt:"init"`
 	Install bool `docopt:"install"`
 	List    bool `docopt:"list"`
+	Remove  bool `docopt:"remove"`
 	Search  bool `docopt:"search"`
 	Update  bool `docopt:"update"`
 }

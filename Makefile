@@ -116,10 +116,7 @@ _test_setup: ## Setup test directories
 	@sync
 
 _test_setup_dirs:
-	@cp -r test/fixtures/home tmp/
-	@cp -r test/fixtures/checksum tmp/
-	@cp -r test/fixtures/compression tmp/
-	@cp -r test/fixtures/TestInstall tmp/
+	@find test/fixtures -maxdepth 1 -type d -exec cp -r {} tmp/ \; 
 
 _test_setup_gitserver:
 	@mkdir -p tmp/gitserveclient
