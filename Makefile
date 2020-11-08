@@ -245,8 +245,14 @@ dist/$(NAME)_$(VERSION)_$(GOARCH).deb: dist/$(NAME)_$(GOOS)_$(GOARCH)/$(NAME)
 internal/version.go: internal/version.go.in VERSION
 	@VERSION=$(VERSION) $(DOTENV) envsubst < $< > $@
 
+kick.rb: kick.rb.in dist/kick-$(VERSION).tar.gz
+	@VERSION=$(VERSION) SHA256=$$(sha256sum dist/kick-1.1.0.tar.gz | awk '{print $$1}') $(DOTENV) envsubst < $< > $@
+
 nfpm.yaml: nfpm.yaml.in VERSION
 	@VERSION=$(VERSION) $(DOTENV) envsubst < $< > $@
+
+dist/kick-$(VERSION).tar.gz: $(GOFILES)
+	tar -zcf dist/kick-$(VERSION).tar.gz $$(find . \( -path ./test -prune -o -path ./tmp \) -prune -false -o \( -name go.mod -o -name go.sum -o -name \*.go \))
 
 go.mod:
 	@$(DOTENV) $(MAKE) _go.mod

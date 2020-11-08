@@ -1,0 +1,17 @@
+class Kick < Formula
+  desc "Tool to create project templating"
+  homepage "https://github.com/kick-project/kick"
+  url "https://github.com/kick-project/kick/archive/kick-${VERSION}.tar.gz"
+  version "${VERSION}"
+  sha256 "${SHA256}"
+  license "APACHE-2.0"
+
+  depends_on "go@1.15" => :build
+  depends_on "sqlite"
+
+  def install
+    ENV["CGO_ENABLED"] = "1"
+    system "go", "install", "./cmd/kick"
+    bin.install ENV["GOPATH"] + "/bin/kick"
+  end
+end
