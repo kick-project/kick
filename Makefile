@@ -105,6 +105,7 @@ _cx: test_setup ## Code complexity test
 
 _package: ## Create an RPM & DEB
 	@VERSION=$(VERSION) envsubst < nfpm.yaml.in > nfpm.yaml
+	make dist/kick.rb
 	make dist/$(NAME)-$(VERSION).$(ARCH).rpm
 	make dist/$(NAME)_$(VERSION)_$(GOARCH).deb
 
@@ -245,7 +246,7 @@ dist/$(NAME)_$(VERSION)_$(GOARCH).deb: dist/$(NAME)_$(GOOS)_$(GOARCH)/$(NAME)
 internal/version.go: internal/version.go.in VERSION
 	@VERSION=$(VERSION) $(DOTENV) envsubst < $< > $@
 
-kick.rb: kick.rb.in dist/kick-$(VERSION).tar.gz
+dist/kick.rb: kick.rb.in dist/kick-$(VERSION).tar.gz
 	@VERSION=$(VERSION) SHA256=$$(sha256sum dist/kick-1.1.0.tar.gz | awk '{print $$1}') $(DOTENV) envsubst < $< > $@
 
 nfpm.yaml: nfpm.yaml.in VERSION
