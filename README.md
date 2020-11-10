@@ -26,30 +26,30 @@ kick start pypi ~/workspace/mypypiproject
 ```
 
 * Simple templates using environment variables or dotenv variables from
-  `${HOME}/.env`. Dotenv files provide a way to create "environment" variables without polluting the Users environment variables as they are only loaded when a program sourcing the `.env` file runs. Note that `.env` variables will _not_ override existing environment variables.
+  `${HOME}/.env`.
+  
+  Dotenv files provide a way to create "environment" variables without polluting the users environment variables as they are only loaded when a program sourcing the `.env` file runs. Note that `.env` variables will _not_ override existing environment variables.
   Using the sample variables below, a template file is easily populated.
-  - `${USER}`: From the users environment variables
   - `${PROJECT_NAME}`: The directory name parsed from `<path>` when the command `kick start <handle> <path>` is called. 
 
 ```text
 cat > Makefile <<EOF
 # kick:render <- Tell "kick start ..." to render this file as a template. Stripped from the generated file.
-DOTENV:=dotenv .env
-
-AUTHOR="${USER}"
 
 _build:
-  go build cmd/${PROJECT_NAME}
+  go build ./cmd/${PROJECT_NAME}
 
-# make wrapper - Execute any target prefixed with a underscore if the target is
-# not explicitly defined in the Makefile. EG 'make build' will result in the
-# execution of 'make _build'.
-%:
-	@egrep -q '^_$@:' Makefile && $(DOTENV) $(MAKE) _$
 EOF
 ```
 
-# Why?
+* Template directory paths
+
+```bash
+mkdir -p pypi/src/\${PROJECT_NAME}/
+touch pypi/src/\${PROJECT_NAME}/\${PROJECT_NAME}.py
+```
+
+## Benefits of using Kick
 
 Kick can supercharge the creation of a project to include "starter files"
 that will work with the CI of choice or add those additional supporting files
@@ -67,10 +67,10 @@ following additions that a project may include...
 * Ignore files
   - Git ignore: `.gitignore`
   - Docker ignore: `.dockerignore`
-* Custom test tools
-  - Python test tools: `pytest`
+* Testing tools & libraries
+* Linters
 * Editor config
-  - [Editorconfig](https://editorconfig.org/). Project level indentation: `.editorconfig`
+  - [Editorconfig](https://editorconfig.org/), project level indentation: `.editorconfig`
 * Task automation
   - Make: `Makefile`
   - Python [Invoke](http://www.pyinvoke.org/): `tasks.py`
@@ -78,54 +78,74 @@ following additions that a project may include...
 
 This can all be added to a template which can be called from the command line.
 
-# Quick start
+## Getting started
 
-Add a set of variables that will be used in your project. Variables are
-stored in `~/.env`. All the variables defined here are passed to templates
-along with all environment variables as `${VARIABLE}`
+### Install Software
 
-`~/.env`
-```dotenv
-AUTHOR=First Last <first.last@somedomain.com>
+*MacOS*
+```bash
+brew install kick 
 ```
+
+*RPMs RHEL/CentOS*
+```bash
+yum install -y http://github.com/kick-project/kick/archives/kick-1.0.0.rpm
+```
+
+*Debs Debian/Ubuntu*
+```bash
+curl -sLO https://github.com/kick-project/kick/archives/kick-1.0.0.deb
+sudo dpkg -i kick-1.0.0.deb
+```
+
+### Create variables
+
+Kick uses environment variables or variables defined in `~/.env` to populate
+templates. All environment variables and variables defined in `~/.env` are
+passed to the templates.
+
+Using an editor add variables to `~/.env`
+
+```dotenv
+# ~/.env
+AUTHOR=First Last
+EMAIL=email@address.com
+```
+
+### Create template 
 
 Create a project that will be used as an example to generate go projects.
 Templates are rendered using a go library that emulates the function of GNUs
 envsubst command.
+
 ```bash
-mkdir -p ~/kicks/kickgo
+mkdir template-go
 ```
 
-`~/kicks/kickgo/AUTHORS`
+Add an AUTHORS file with ${AUTHOR} and ${EMAIL}
+
+`template-go/AUTHORS`
 ```yaml
 # kick:render <--- This modeline tells.kick to render file as a template. Line is stripped out from output file.
-${AUTHOR}
+${AUTHOR} ${EMAIL}
 ```
 
-`~/kicks/kickgo/README.md`
+Add a README.md
+
+`template-go/README.md`
 ```markdown
 # kick:render
 # ${PROJECT_NAME}
 ```
 
-`~/kicks/kickgo/.gitignore`
-```.gitignore
-# Vim
-.*.swp
+Add the main function
 
-# Mac
-.DS_Store
-
-/vendor/
-```
-
-Add a binary
 ```bash
-mkdir -p ~/kicks/kickgo/cmd/\${PROJECT_NAME}
-touch ~/kicks/kickgo/cmd/\${PROJECT_NAME}/main.go 
+mkdir -p template-go/cmd/\${PROJECT_NAME}
+touch template-go/cmd/\${PROJECT_NAME}/main.go 
 ```
 
-`~/kicks/kickgo/cmd/\${PROJECT_NAME}/main.go`
+`template-go/cmd/\${PROJECT_NAME}/main.go`
 ```go
 // kick:render
 package main
@@ -137,34 +157,44 @@ func main() {
 }
 ```
 
-Add the following file `~/.kick/templates.yml`
-```yaml
-- name: goproject
-  url: ~/kicks/kickgo
-```
-
-Create the project using go
-```bash
-kick start goproject ~/mynewproject
-```
-
-# Git templates
+### Install the template
 
 ```bash
-cd ~/kicks/kickgo
+kick install go path/to/template-go
+```
+
+### Use the template
+
+```bash
+kick start go path/to/project
+```
+
+### Upload template to a git repository
+
+```bash
+cd template-go
 git init
 git add .
 git commit -m "first commit"
-git push --set-upstream git@github.com/owner/kickgo.git master
+git push --set-upstream git@github.com:owner/template-go.git master
 ```
 
-Modify `~/.kick/templates.yml`
-```yaml
-- name: goproject
-  url: http://github.com/owner/kickgo.git
-```
+### Install the remote template
 
-Start a new project with the recently checked in boilerplate
+Remove the installed `go` handle
+
 ```bash
-kick start goproject ~/myproject
+kick remove go
+```
+
+Install the template using a valid git URL
+
+```bash
+kick install go git@github.com:owner/template-go.git
+```
+
+### Use the remote template
+
+```bash
+kick start go path/to/project
 ```
