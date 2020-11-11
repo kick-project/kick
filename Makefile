@@ -104,6 +104,7 @@ _cx: test_setup ## Code complexity test
 	@gocyclo -avg $(GODIRS) | grep -v _test.go | tee reports/cyclocomplexity.txt
 
 _package: ## Create an RPM & DEB
+	@XCOMPILE=true make build
 	@VERSION=$(VERSION) envsubst < nfpm.yaml.in > nfpm.yaml
 	make dist/kick.rb
 	make dist/$(NAME)-$(VERSION).$(ARCH).rpm
@@ -200,6 +201,7 @@ $(GOPATH)/bin/$(NAME): $(NAME)
 GOGETS := github.com/crosseyed/versionbump/cmd/versionbump \
 		  github.com/golangci/golangci-lint/cmd/golangci-lint \
 		  github.com/joho/godotenv/cmd/godotenv github.com/sosedoff/gitkit \
+		  github.com/goreleaser/nfpm/cmd/nfpm \
 		  golang.org/x/lint/golint github.com/fzipp/gocyclo gotest.tools/gotestsum
 
 .PHONY: $(GOGETS)
