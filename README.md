@@ -51,9 +51,11 @@ touch pypi/src/\${PROJECT_NAME}/\${PROJECT_NAME}.py
 
 ## Benefits of using Kick
 
-Kick can supercharge the creation of a project to include "starter files"
-that will work with the CI of choice or add those additional supporting files
-to speed up development.
+Kick saves time and supercharges the creation of a project by using cookie
+cutter "starter files" that will work with the CI, add task automation using
+make, Rake, Invoke, add support to create packages such as gems, pypi, rpms,
+debs and many more files and tools that are needed in the development
+process.
 
 Starting a project from scratch can be time consuming, there are a few CLI
 tools that help (E.G. `go mod init ...` Go project, `rails new` Ruby on
