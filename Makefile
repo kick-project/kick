@@ -249,7 +249,7 @@ internal/version.go: internal/version.go.in VERSION
 	@VERSION=$(VERSION) $(DOTENV) envsubst < $< > $@
 
 dist/kick.rb: kick.rb.in dist/kick-$(VERSION).tar.gz
-	@VERSION=$(VERSION) SHA256=$$(sha256sum dist/kick-1.1.0.tar.gz | awk '{print $$1}') $(DOTENV) envsubst < $< > $@
+	@VERSION=$(VERSION) SHA256=$$(sha256sum dist/kick-$(VERSION).tar.gz | awk '{print $$1}') $(DOTENV) envsubst < $< > $@
 
 nfpm.yaml: nfpm.yaml.in VERSION
 	@VERSION=$(VERSION) $(DOTENV) envsubst < $< > $@
