@@ -17,15 +17,15 @@ import (
 	"github.com/kick-project/kick/internal/utils/options"
 )
 
-var usageDoc = `Generate project scaffolding
+var usageDoc = `generate project scaffolding
 
 Usage:
     kick start <handle> <project>
 
 Options:
-    -h --help     Print help.
-    <handle>      Template handle.
-    <project>     Project path.
+    -h --help     print help
+    <handle>      template handle
+    <project>     project path
 `
 
 // OptStart start a new project from templates.

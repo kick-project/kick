@@ -11,13 +11,13 @@ import (
 	"github.com/kick-project/kick/internal/utils/options"
 )
 
-var usageDoc = `Initialize configuration
+var usageDoc = `initialize configuration
 
 Usage:
     kick init
 
 Options:
-    -h --help     Print help.
+    -h --help     print help
 `
 
 // OptInit initialize configuration file

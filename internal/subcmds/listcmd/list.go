@@ -14,14 +14,14 @@ import (
 	"github.com/kick-project/kick/internal/utils/options"
 )
 
-var usageDoc = `List handles/templates
+var usageDoc = `list handles/templates
 
 Usage:
     kick list [-l]
 
 Options:
-    -h --help     Print help.
-    -l            Print Long output.
+    -h --help     print help
+    -l            print long output
 `
 
 // OptList docopts options to list installed templates

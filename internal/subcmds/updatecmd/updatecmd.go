@@ -14,13 +14,13 @@ import (
 	"github.com/kick-project/kick/internal/utils/options"
 )
 
-var usageDoc = `Update repository data
+var usageDoc = `update repository data
 
 Usage:
     kick update
 
 Options:
-    -h --help     Print help.
+    -h --help     print help
 `
 
 // OptUpdate bindings for docopts

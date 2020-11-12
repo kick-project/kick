@@ -23,9 +23,9 @@ Usage:
     kick install <handle> <location>
 
 Options:
-    -h --help        Print help.
-    <handle>         Name to use when creating new projects
-    <location>       Template name, URL or location of template.
+    -h --help        print help
+    <handle>         name to use when creating new projects
+    <location>       template name, URL or location of template
 `
 
 // OptInstall initialize configuration file

@@ -21,8 +21,8 @@ Usage:
     kick remove <handle>
 
 Options:
-    -h --help        Print help.
-    <handle>         Handle to remove.
+    -h --help        print help
+    <handle>         handle to remove
 `
 
 // OptRemove remove an installed template

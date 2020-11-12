@@ -16,14 +16,15 @@ import (
 	"github.com/kick-project/kick/internal/utils/options"
 )
 
-var usageDoc = `Search for templates using a keyword
+var usageDoc = `search for templates using a keyword
 
 Usage:
     kick search [-l] <term>
 
 Options:
-    -h --help  Print help.
-    -l         Long output.
+    -h --help  print help
+    -l         long output
+    <term>     search term
 `
 
 // OptSearch bindings for docopts
