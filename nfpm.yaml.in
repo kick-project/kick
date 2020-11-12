@@ -6,11 +6,9 @@ section: default
 maintainer: ${AUTHOR} <${EMAIL}>
 description: |
     Create your projects using templates under git version control.
-    
     Prjstart will automatically download any git repository templates defined in
     your configuration file or download a git repository from any upstream
     template provider.
-    
     Project Templates can also be referenced on local disk
 license: Apache-2.0
 files:
