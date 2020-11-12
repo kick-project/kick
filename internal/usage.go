@@ -21,15 +21,15 @@ Usage:
     kick update
 
 Options:
-    -h --help     Print help.
-    -v --version  Print version.
-    start         Start a project.
-    install       Install a template.
-    update        Update repository data.
-    init          Initialize configuration.
-    list          List available project options.
-    remove        Remove an installed template.
-    search        Search for available templates.
+    -h --help     print help
+    -v --version  print version
+    start         start a project
+    init          initialize configuration
+    install       install a template
+    list          list available project options
+    remove        remove an installed template
+    search        search for available templates
+    update        update repository data
 `
 
 //
