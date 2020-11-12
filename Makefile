@@ -106,9 +106,9 @@ _cx: test_setup ## Code complexity test
 _package: ## Create an RPM & DEB
 	@XCOMPILE=true make build
 	@VERSION=$(VERSION) envsubst < nfpm.yaml.in > nfpm.yaml
-	make dist/kick.rb
-	make dist/$(NAME)-$(VERSION).$(ARCH).rpm
-	make dist/$(NAME)_$(VERSION)_$(GOARCH).deb
+	$(MAKE) dist/kick.rb
+	$(MAKE) dist/$(NAME)-$(VERSION).$(ARCH).rpm
+	$(MAKE) dist/$(NAME)_$(VERSION)_$(GOARCH).deb
 
 _test_setup: ## Setup test directories
 	@mkdir -p tmp
@@ -140,11 +140,45 @@ _test_setup_metadata:
 	@-(find test/fixtures/metadata -mindepth 1 -maxdepth 1 -type d -exec cp -r {} tmp/metadata \;) 2>&1 > /dev/null
 	@-(for i in $$(pwd)/tmp/metadata/templates/*; do cd $$i; git init; git add .; git commit -m 'Initial commit';make release; make bumpmajor; make release; git push --set-upstream http://127.0.0.1:5000/$$(basename $$(pwd)).git master; git push --tags; done) 2> /dev/null > /dev/null
 
-_release: ## Release 
+_release: ## Trigger a release
 	@echo "### Releasing v$(VERSION)"
-	@$(MAKE) --no-print-directory _isreleased 2> /dev/null
+	@$(MAKE) _isreleased 2> /dev/null
 	git tag v$(VERSION)
 	git push --tags
+
+_release_github: _package ## To be run inside a github workflow
+	github-release release \
+	  --user kick-project \
+	  --repo kick \
+	  --tag v$(VERSION)
+
+	github-release upload \
+	  --name kick-$(VERSION).tar.gz \
+	  --user kick-project \
+	  --repo kick \
+	  --tag v$(VERSION) \
+	  --file dist/kick-$(VERSION).tar.gz
+
+	github-release upload \
+	  --name kick.rb \
+	  --user kick-project \
+	  --repo kick \
+	  --tag v$(VERSION) \
+	  --file dist/kick.rb
+
+	github-release upload \
+	  --name kick-$(VERSION).x86_64.rpm \
+	  --user kick-project \
+	  --repo kick \
+	  --tag v$(VERSION) \
+	  --file dist/kick-$(VERSION).x86_64.rpm
+
+	github-release upload \
+	  --name kick_$(VERSION)_amd64.deb \
+	  --user kick-project \
+	  --repo kick \
+	  --tag v$(VERSION) \
+	  --file dist/kick_$(VERSION)_amd64.deb
 
 lint: internal/version.go ## Lint tests
 	golangci-lint run --enable=gocyclo
@@ -199,9 +233,10 @@ $(GOPATH)/bin/$(NAME): $(NAME)
 	install -m 755 $(NAME) $(GOPATH)/bin/$(NAME)
 
 GOGETS := github.com/crosseyed/versionbump/cmd/versionbump \
+		  github.com/github-release/github-release \
 		  github.com/golangci/golangci-lint/cmd/golangci-lint \
-		  github.com/joho/godotenv/cmd/godotenv github.com/sosedoff/gitkit \
 		  github.com/goreleaser/nfpm/cmd/nfpm \
+		  github.com/joho/godotenv/cmd/godotenv github.com/sosedoff/gitkit \
 		  golang.org/x/lint/golint github.com/fzipp/gocyclo gotest.tools/gotestsum
 
 .PHONY: $(GOGETS)
@@ -237,12 +272,12 @@ dist/$(NAME)_$(GOOS)_$(GOARCH)/$(NAME) dist/$(NAME)_$(GOOS)_$(GOARCH)/$(NAME).ex
 
 dist/$(NAME)-$(VERSION).$(ARCH).rpm: dist/$(NAME)_$(GOOS)_$(GOARCH)/$(NAME)
 	@mkdir -p $$(dirname $@)
-	@make nfpm.yaml
+	@$(MAKE) nfpm.yaml
 	nfpm pkg --packager rpm --target dist/
 
 dist/$(NAME)_$(VERSION)_$(GOARCH).deb: dist/$(NAME)_$(GOOS)_$(GOARCH)/$(NAME)
 	@mkdir -p $$(dirname $@)
-	@make nfpm.yaml
+	@$(MAKE) nfpm.yaml
 	nfpm pkg --packager deb --target dist/
 
 internal/version.go: internal/version.go.in VERSION
