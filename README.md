@@ -1,6 +1,6 @@
 [![Github Actions](https://github.com/kick-project/kick/workflows/Go/badge.svg?branch=master)](https://github.com/kick-project/kick/actions) [![Go Report Card](https://goreportcard.com/badge/kick-project/kick)](https://goreportcard.com/report/kick-project/kick)  [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/kick-project/kick/blob/master/LICENSE)
 
-# Kick - A work in progress
+# Kick
 
 Kick is a cli tool to start a project using templates under version control
 or from a path on local disk.
