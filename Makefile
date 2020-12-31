@@ -107,6 +107,7 @@ _package: ## Create an RPM & DEB
 	@XCOMPILE=true make build
 	@VERSION=$(VERSION) envsubst < nfpm.yaml.in > nfpm.yaml
 	$(MAKE) dist/kick.rb
+	$(MAKE) tmp/kick.rb
 	$(MAKE) dist/$(NAME)-$(VERSION).$(ARCH).rpm
 	$(MAKE) dist/$(NAME)_$(VERSION)_$(GOARCH).deb
 
@@ -284,7 +285,11 @@ internal/version.go: internal/version.go.in VERSION
 	@VERSION=$(VERSION) $(DOTENV) envsubst < $< > $@
 
 dist/kick.rb: kick.rb.in dist/kick-$(VERSION).tar.gz
-	@VERSION=$(VERSION) SHA256=$$(sha256sum dist/kick-$(VERSION).tar.gz | awk '{print $$1}') $(DOTENV) envsubst < $< > $@
+	@BASEURL="https://github.com/kick-project/kick/archive" VERSION=$(VERSION) SHA256=$$(sha256sum dist/kick-$(VERSION).tar.gz | awk '{print $$1}') $(DOTENV) envsubst < $< > $@
+
+tmp/kick.rb: kick.rb.in dist/kick-$(VERSION).tar.gz
+	@mkdir -p tmp
+	@BASEURL="file://$(PWD)/dist" VERSION=$(VERSION) SHA256=$$(sha256sum dist/kick-$(VERSION).tar.gz | awk '{print $$1}') $(DOTENV) envsubst < $< > $@
 
 nfpm.yaml: nfpm.yaml.in VERSION
 	@VERSION=$(VERSION) $(DOTENV) envsubst < $< > $@
