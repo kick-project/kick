@@ -17,31 +17,32 @@ SELECT templateName, templateURL, templateDesc, masterName, masterURL, masterDes
 FROM
 (
 	SELECT
-		templates.name AS templateName,
-		templates.url AS templateURL,
-		templates.desc AS templateDesc,
+		template.name AS templateName,
+		template.url AS templateURL,
+		template.desc AS templateDesc,
 		master.name AS masterName,
 		master.url AS masterURL,
 		master.desc AS masterDesc,
-		CASE WHEN LOWER(templates.name) LIKE LOWER(?)
+		CASE WHEN LOWER(template.name) LIKE LOWER(?)
 			THEN
-				templates.name
+				template.name
 			ELSE
 				NULL
 		END AS match1,
-		CASE WHEN LOWER(templates.url) LIKE LOWER(?)
+		CASE WHEN LOWER(template.url) LIKE LOWER(?)
 			THEN
-				templates.name
+				template.name
 			ELSE
 				NULL
 		END AS match2,
 		CASE WHEN LOWER(master.name) LIKE LOWER(?)
 		THEN
-			templates.name
+			template.name
 		ELSE
 			NULL
 		END AS match3
-	FROM templates LEFT JOIN master ON (templates.masterid = master.id)
+	FROM template LEFT JOIN master_template ON (template.id = master_template.template_id)
+	LEFT JOIN master ON (master_template.master_id = master.id)
 	WHERE match1 IS NOT NULL OR match2 IS NOT NULL OR match3 IS NOT NULL
 	ORDER BY
 		match1 ASC NULLS LAST,
@@ -52,7 +53,6 @@ FROM
 
 // Search search for templates
 type Search struct {
-	DB     *sql.DB
 	ORM    *gorm.DB
 	Format formatter.Format
 	Writer io.Writer
@@ -63,23 +63,38 @@ func (s *Search) Search(term string) <-chan *entry.Entry {
 	ch := make(chan *entry.Entry, 24)
 	go func() {
 		var err error
-		rows, err := s.DB.Query(
+		rows, err := s.ORM.Raw(
 			querySearch,
 			fmt.Sprintf("%s%%", term),
 			fmt.Sprintf("%%%s%%", term),
 			fmt.Sprintf("%%%s%%", term),
-		)
+		).Rows()
 		errutils.Epanicf("query error: %w", err)
 		defer rows.Close()
 
 		for rows.Next() {
-			curEntry := &entry.Entry{}
+			var (
+				name       sql.NullString
+				URL        sql.NullString
+				desc       sql.NullString
+				masterName sql.NullString
+				masterURL  sql.NullString
+				masterDesc sql.NullString
+			)
 			err := rows.Scan(
-				&curEntry.Name, &curEntry.URL, &curEntry.Desc,
-				&curEntry.MasterName, &curEntry.MasterURL, &curEntry.MasterDesc,
+				&name, &URL, &desc,
+				&masterName, &masterURL, &masterDesc,
 			)
 			errutils.Efatalf("%v", err)
-			ch <- curEntry
+
+			ch <- &entry.Entry{
+				Name:       name.String,
+				URL:        URL.String,
+				Desc:       desc.String,
+				MasterName: masterName.String,
+				MasterURL:  masterURL.String,
+				MasterDesc: masterDesc.String,
+			}
 		}
 		close(ch)
 	}()

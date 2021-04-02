@@ -32,7 +32,7 @@ GOGETOPTS = GO111MODULE=off
 GOFILES := $(shell find cmd pkg internal src -name '*.go' 2> /dev/null)
 GODIRS = $(shell find . -maxdepth 1 -mindepth 1 -type d | egrep 'cmd|internal|pkg|api')
 
-.PHONY: _build browsereports cattest clean _deps depsdev _go.mod _go.mod_err help \
+.PHONY: _build report cattest clean _deps depsdev _go.mod _go.mod_err help \
         _isreleased lint _package _release _release_gitlab test _test _test_setup _test_setup_dirs \
         _test_setup_gitserver _unit _cc _cx _install tag
 
@@ -86,13 +86,14 @@ clean: ## Reset project to original state
 
 test: ## Test
 	$(MAKE) lint
-	$(MAKE) unit
+	$(MAKE) cc
 	@exit $$(cat reports/exitcode.txt)
 
 _unit: test_setup ## Unit testing
 	@$(MAKE) _test_setup_gitserver
 	### Unit Tests
-	gotestsum --junitfile reports/junit.xml -- -timeout 5s -covermode atomic -coverprofile=./reports/coverage.out -v ./...; echo $$? > reports/exitcode.txt
+	gotestsum --jsonfile reports/unit.json --junitfile reports/junit.xml -- -timeout 5s -covermode atomic -coverprofile=./reports/coverage.out -v ./...; echo $$? > reports/exitcode.txt
+	@go-test-report -o reports/html/unit.html < reports/unit.json > /dev/null
 
 _cc: _unit ## Code coverage
 	### Code Coverage
@@ -199,6 +200,7 @@ ifeq ($(USEGITLAB),true)
 	@mkdir -p $(ROOT)/.cache/{go,gomod}
 endif
 	@GO111MODULE=on $(MAKE) $(GOGETS)
+	$(MAKE) $(GOGETSU)
 
 bumpmajor: ## Version - major bump
 	git fetch --tags
@@ -212,7 +214,7 @@ bumppatch: ## Version - patch bump
 	git fetch --tags
 	versionbump --checktags patch VERSION
 
-browsereports: _cc ## Open reports in a browser
+report: ## Open reports in a browser
 	@$(MAKE) $(REPORTS)
 
 cattest: ## Print the output of the last set of tests
@@ -229,8 +231,7 @@ getversion:
 
 .PHONY: _schema
 _schema: ## Dump Schema to SQL. Used to inspect 
-	test -f tmp/schema_test.db && sqlite3 tmp/schema_test.db ".schema --indent" > tmp/schema_test.sql
-	test -f tmp/schema_model_test.db && sqlite3 tmp/schema_model_test.db ".schema --indent" > tmp/schema_model_test.sql
+	test -f tmp/schema_test.db && sqlite3 tmp/model_test.db ".schema --indent" > tmp/model_test.sql
 
 #
 # Helper targets
@@ -245,11 +246,16 @@ GOGETS := github.com/crosseyed/versionbump/cmd/versionbump \
 		  github.com/joho/godotenv/cmd/godotenv github.com/sosedoff/gitkit \
 		  golang.org/x/lint/golint github.com/fzipp/gocyclo gotest.tools/gotestsum
 
+GOGETSU := github.com/vakenbolt/go-test-report/
+
 .PHONY: $(GOGETS)
 $(GOGETS):
 	cd /tmp; go get $@
 
-REPORTS = reports/html/coverage.html
+$(GOGETSU):
+	cd /tmp; go get -u $@
+
+REPORTS = reports/html/coverage.html reports/html/unit.html
 .PHONY: $(REPORTS)
 $(REPORTS):
 ifeq ($(GOOS),darwin)

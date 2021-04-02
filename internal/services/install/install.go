@@ -23,7 +23,6 @@ import (
 // Install manage installation of templates
 type Install struct {
 	ConfigFile *config.File
-	DB         *sql.DB
 	ORM        *gorm.DB
 	Log        *log.Logger
 	Plumb      *plumbing.Plumbing
@@ -35,22 +34,24 @@ type Install struct {
 
 var selectWithOrigin = `
 SELECT
-	templates.name AS templateName,
-	templates.url AS templateURL,
+	template.name AS templateName,
+	template.url AS templateURL,
 	master.name AS origin,
-	templates.desc AS desc
-FROM templates LEFT JOIN master ON (templates.masterid = master.id)
-WHERE templates.name = ? AND master.name = ?
+	template.desc AS desc
+FROM template LEFT JOIN master_template ON (template.id = master_template.template_id)
+LEFT JOIN master ON (master_template.master_id = master.id)
+WHERE template.name = ? AND master.name = ?
 `
 
 var selectWithoutOrigin = `
 SELECT
-	templates.name AS templateName,
-	templates.url AS templateURL,
+	template.name AS templateName,
+	template.url AS templateURL,
 	master.name AS origin,
-	templates.desc AS desc
-FROM templates LEFT JOIN master ON (templates.masterid = master.id)
-WHERE templates.name = ?
+	template.desc AS desc
+FROM template LEFT JOIN master_template ON (template.id = master_template.template_id)
+LEFT JOIN master ON (master_template.master_id = master.id)
+WHERE template.name = ?
 `
 
 // Install install template
@@ -145,7 +146,7 @@ func (i *Install) checkInUse(handle string) (stop int) {
 	var (
 		count int
 	)
-	row := i.DB.QueryRow(`SELECT count(*) AS count FROM installed WHERE ?`, handle)
+	row := i.ORM.Raw(`SELECT count(*) AS count FROM installed WHERE ?`, handle).Row()
 	err := row.Scan(&count)
 	errutils.Epanic(err)
 
@@ -164,20 +165,30 @@ func (i *Install) templateMatches(name, origin string) (entries []config.Templat
 	entries = []config.Template{}
 	if origin == "" {
 		i.Log.Debugf(utils.SQL2fmt(selectWithoutOrigin), name)
-		r, err := i.DB.Query(selectWithoutOrigin, name)
+		r, err := i.ORM.Raw(selectWithoutOrigin, name).Rows()
 		errutils.Efatal(err)
 		rows = r
 	} else {
-		r, err := i.DB.Query(selectWithOrigin, name, origin)
+		r, err := i.ORM.Raw(selectWithOrigin, name, origin).Rows()
 		errutils.Efatal(err)
 		rows = r
 	}
 	for rows.Next() {
 		var (
-			entry config.Template
+			template sql.NullString
+			URL      sql.NullString
+			origin   sql.NullString
+			desc     sql.NullString
 		)
-		err := rows.Scan(&entry.Template, &entry.URL, &entry.Origin, &entry.Desc)
+		err := rows.Scan(&template, &URL, &origin, &desc)
 		errutils.Epanic(err)
+
+		entry := config.Template{
+			Template: template.String,
+			URL:      URL.String,
+			Origin:   origin.String,
+			Desc:     desc.String,
+		}
 
 		entries = append(entries, entry)
 	}

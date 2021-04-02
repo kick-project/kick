@@ -1,6 +1,7 @@
 package gitclient
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/go-git/go-git/v5"
@@ -52,10 +53,12 @@ func (d *Gitclient) SetRef(ref string) {
 // Clone will clone a remote repository
 func (d *Gitclient) Clone() {
 	p := d.Local
+	fmt.Printf("action=clone src=%s dest=%s\n", d.URL, p)
 	if p == "" {
 		return
 	}
-	if _, err := os.Stat(p); os.IsNotExist(err) {
+	_, err := os.Stat(p)
+	if os.IsNotExist(err) {
 		_, err := git.PlainClone(d.Local, false, &git.CloneOptions{
 			URL:      d.URL,
 			Progress: os.Stdout,

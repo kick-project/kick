@@ -3,10 +3,8 @@
 package sync
 
 import (
-	"database/sql"
 	"fmt"
 	"io"
-	"os"
 	"path/filepath"
 	"time"
 
@@ -15,31 +13,15 @@ import (
 	"github.com/kick-project/kick/internal/resources/db"
 	"github.com/kick-project/kick/internal/resources/gitclient"
 	"github.com/kick-project/kick/internal/resources/gitclient/plumbing"
+	"github.com/kick-project/kick/internal/resources/model"
 	"github.com/kick-project/kick/internal/utils/errutils"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
-
-//
-// SQL
-//
-
-var selectSync = `SELECT
-  count(CASE WHEN lastupdate < ? THEN 1 ELSE NULL END) AS status, 
-  count(*) AS haskey FROM sync WHERE key=?`
-
-var insertReplaceSync = `INSERT OR REPLACE INTO sync (key, lastupdate) VALUES (?, ?)`
-
-var insertReplaceInstalled = `INSERT OR REPLACE INTO installed (handle, template, origin, url, desc, time) VALUES (?, ?, ?, ?, ?, ?)`
-
-var deleteMissing = `DELETE FROM installed WHERE time < ?`
-
-//
-// Go
-//
 
 // Sync synchronize database tables
 type Sync struct {
-	DB                 *sql.DB
+	BasePath           string
 	ORM                *gorm.DB
 	Config             *config.File
 	ConfigTemplatePath string
@@ -49,32 +31,36 @@ type Sync struct {
 	Stdout             io.Writer
 }
 
-// Check returns true if a file needs synchronizing.
-// key is the key the database which holds the last update time and file is the path to stat
-func (s *Sync) Check(key, file string) bool {
-	file, err := filepath.Abs(filepath.Clean(file))
-	errutils.Epanicf("%w", err)
-	info, err := os.Stat(file)
-	if err != nil && os.IsNotExist(err) {
-		return false
-	}
+// Global syncs global data
+func (s *Sync) Global() {
+	rows, err := s.ORM.Model(&model.Global{}).Rows()
 	errutils.Epanic(err)
-	ts := info.ModTime().Format("2006-01-02T15:04:05")
-	row := s.DB.QueryRow(selectSync, ts, key)
-	update := 0
-	haskey := 0
-	err = row.Scan(&update, &haskey)
-	errutils.Epanicf("%w", err)
-	return update == 1 || haskey == 0
+
+	defer rows.Close()
+	for rows.Next() {
+		var global model.Global
+		err := s.ORM.ScanRows(rows, &global)
+		if err != nil {
+			fmt.Fprintf(s.Stderr, "warning. can not scan table row from `global`: %v\n", err)
+		}
+
+		plumb := plumbing.New(filepath.Join(s.BasePath, "global"))
+		_, err = gitclient.Get(global.URL, plumb)
+		if err != nil {
+			fmt.Fprintf(s.Stderr, "warning. can not download %s: %s\n", global.URL, err.Error())
+			continue
+		}
+	}
+}
+
+// Master syncs master data
+func (s *Sync) Master() {
 }
 
 // Templates synchronizes templates between the YAML configuration, database
 // and its upstream version control repository.
 func (s *Sync) Templates() {
 	key := "installed"
-	if !s.Check("installed", s.ConfigTemplatePath) {
-		return
-	}
 	db.Lock()
 	defer db.Unlock()
 	// Reload configuration incase the file changed after creation of self.
@@ -82,18 +68,37 @@ func (s *Sync) Templates() {
 	errutils.Epanic(err)
 	t := time.Now()
 	ts := t.Format("2006-01-02T15:04:05")
+	plu := plumbing.New(filepath.Join(s.BasePath, "templates"))
 	for _, item := range s.Config.Templates {
-		_, err := gitclient.Get(item.URL, s.Plumb)
+		_, err := gitclient.Get(item.URL, plu)
 		if err != nil {
 			fmt.Fprintf(s.Stderr, "warning. can not download %s: %s\n", item.URL, err.Error())
 		}
-		_, err = s.DB.Exec(insertReplaceInstalled, item.Handle, item.Template, item.Origin, item.URL, item.Desc, ts)
-		errutils.Epanicf("%w", err)
+		inst := model.Installed{
+			Handle:   item.Handle,
+			Template: item.Template,
+			Origin:   item.Origin,
+			URL:      item.URL,
+			Desc:     item.Desc,
+			Time:     t,
+		}
+		result := s.ORM.Clauses(clause.Insert{Modifier: "OR REPLACE"}).Create(&inst)
+		errutils.Epanic(result.Error)
+		if result.RowsAffected != 1 {
+			panic("failed to insert into 'installed' table")
+		}
 	}
 
-	_, err = s.DB.Exec(deleteMissing, ts)
-	errutils.Epanicf("%w", err)
+	result := s.ORM.Raw(`DELETE FROM installed WHERE time < ?`, ts)
+	errutils.Epanic(result.Error)
 
-	_, err = s.DB.Exec(insertReplaceSync, key, ts)
-	errutils.Epanicf("%w", err)
+	syn := model.Sync{
+		Key:        key,
+		LastUpdate: t,
+	}
+	result = s.ORM.Clauses(clause.Insert{Modifier: "OR REPLACE"}).Create(&syn)
+	errutils.Epanic(result.Error)
+	if result.RowsAffected != 1 {
+		panic("failed to insert into 'sync' table")
+	}
 }

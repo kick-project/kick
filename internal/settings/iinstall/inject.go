@@ -1,7 +1,6 @@
 package iinstall
 
 import (
-	"database/sql"
 	"io"
 
 	"github.com/apex/log"
@@ -19,7 +18,6 @@ import (
 // Inject inject options for install.Install
 func Inject(s *settings.Settings) (opts struct {
 	ConfigFile *config.File
-	DB         *sql.DB
 	ORM        *gorm.DB
 	Log        *log.Logger
 	Plumb      *plumbing.Plumbing
@@ -35,7 +33,6 @@ func Inject(s *settings.Settings) (opts struct {
 	err = copier.Copy(plumb, iplumbing.Inject(s))
 	errutils.Epanic(err)
 	opts.ConfigFile = s.ConfigFile()
-	opts.DB = s.GetDB()
 	opts.ORM = s.GetORM()
 	opts.Log = s.GetLogger()
 	opts.Plumb = plumb

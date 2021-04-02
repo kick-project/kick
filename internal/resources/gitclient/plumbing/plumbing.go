@@ -109,6 +109,12 @@ func (plu *Plumbing) Method() int {
 	return plu.mb.method
 }
 
+// Local takes relative path returns absolute path.
+// Slash is replaced using path seperator.
+func (plu *Plumbing) Local(relative string) string {
+	return filepath.Join(plu.Path(), filepath.FromSlash(relative))
+}
+
 // localPath determines local path to template
 func (plu *Plumbing) localPath(u *utils.URLx) string {
 	if u.Scheme == "file" {

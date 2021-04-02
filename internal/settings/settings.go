@@ -32,6 +32,7 @@ import (
 type Settings struct {
 	DBDriver string
 	DBDsn    string
+	db       *sql.DB
 	Home     string
 	// See https://pkg.go.dev/github.com/apex/log#InfoLevel for
 	// available levels.
@@ -43,6 +44,7 @@ type Settings struct {
 	PathMetadataDir  string
 	PathTemplateConf string
 	PathTemplateDir  string
+	PathDownloadDir  string
 	PathUserConf     string
 	SqliteDB         string
 	ModelDB          string
@@ -84,6 +86,7 @@ func GetSettings(home string) *Settings {
 	pathUserConf := fp.Clean(fmt.Sprintf("%s/.kick/config.yml", home))
 	pathTemplateConf := fp.Clean(fmt.Sprintf("%s/.kick/templates.yml", home))
 	pathTemplateDir := fp.Clean(fmt.Sprintf("%s/.kick/templates", home))
+	pathDownloadDir := fp.Clean(fmt.Sprintf("%s/.kick", home))
 	pathMetadataDir := fp.Clean(fmt.Sprintf("%s/.kick/metadata", home))
 	logLvl := log.ErrorLevel
 	if env.Debug() {
@@ -97,6 +100,7 @@ func GetSettings(home string) *Settings {
 		PathMetadataDir:  pathMetadataDir,
 		PathTemplateConf: pathTemplateConf,
 		PathTemplateDir:  pathTemplateDir,
+		PathDownloadDir:  pathDownloadDir,
 		PathUserConf:     pathUserConf,
 		Stderr:           os.Stderr,
 		Stdin:            os.Stdin,
@@ -129,11 +133,15 @@ func (s *Settings) ConfigFile() *config.File {
 
 // GetDB return DB object.
 func (s *Settings) GetDB() *sql.DB {
+	if s.db != nil {
+		return s.db
+	}
 	db, err := sql.Open(s.DBDriver, s.DBDsn)
 	if err != nil {
 		panic(err)
 	}
-	return db
+	s.db = db
+	return s.db
 }
 
 // GetORM return ORM object.
@@ -142,7 +150,7 @@ func (s *Settings) GetORM() *gorm.DB {
 		db  *gorm.DB
 		err error
 	)
-	if _, err = os.Stat(s.SqliteDB); err != nil {
+	if _, err = os.Stat(s.SqliteDB); err == nil {
 		db, err = gorm.Open(sqlite.Open(s.SqliteDB), &gorm.Config{
 			NamingStrategy: &schema.NamingStrategy{
 				SingularTable: true,

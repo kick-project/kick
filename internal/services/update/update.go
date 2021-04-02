@@ -8,14 +8,14 @@ import (
 
 	"github.com/apex/log"
 	"github.com/kick-project/kick/internal/resources/config"
-	"github.com/kick-project/kick/internal/resources/db"
 	"github.com/kick-project/kick/internal/resources/gitclient"
 	"github.com/kick-project/kick/internal/resources/gitclient/plumbing"
-	"github.com/kick-project/kick/internal/utils"
+	"github.com/kick-project/kick/internal/resources/model"
 	"github.com/kick-project/kick/internal/utils/errutils"
 	"github.com/kick-project/kick/internal/utils/marshal"
 	_ "github.com/mattn/go-sqlite3" // Required by 'database/sql'
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 // Update build metadata
@@ -40,7 +40,7 @@ func (m *Update) Build() error {
 	chtemplates := make(chan *Template, 64)
 	p := plumbing.New(m.MetadataDir)
 	c.concurClones(6, p, churl, chtemplates)
-	c.concurInserts(m.DB, chtemplates)
+	c.concurInserts(m.ORM, chtemplates)
 
 	for _, url := range conf.MasterURLs {
 		c.wait.Add(1)
@@ -114,7 +114,7 @@ func (c *workers) processURL(url string, p *plumbing.Plumbing, chtemplate chan<-
 // concurInserts populates the database
 // where num is the number of concurrent routines
 // and ch is the channel to read templates from.
-func (c *workers) concurInserts(dbconn *sql.DB, ch <-chan *Template) {
+func (c *workers) concurInserts(orm *gorm.DB, ch <-chan *Template) {
 	go func() {
 		for {
 			t, ok := <-ch
@@ -122,26 +122,51 @@ func (c *workers) concurInserts(dbconn *sql.DB, ch <-chan *Template) {
 			case !ok:
 				return
 			default:
-				db.Lock()
-				c.insert(dbconn, t)
-				db.Unlock()
+				c.insert(orm, t)
 				c.wait.Done()
 			}
 		}
 	}()
 }
 
-func (c *workers) insert(dbconn *sql.DB, t *Template) {
-	insertMaster := `INSERT OR IGNORE INTO master (name, url, desc) VALUES (?, ?, ?)`
-	c.log.Debugf(utils.SQL2fmt(insertMaster), t.Master.Name, t.Master.URL, t.Master.Description)
-	_, err := dbconn.Exec(insertMaster, t.Master.Name, t.Master.URL, t.Master.Description)
-	errutils.Efatalf("error: inserting master metadata: %w", err)
+func (c *workers) insert(orm *gorm.DB, t *Template) {
+	modMaster := model.Master{
+		Name: t.Master.Name,
+		URL:  t.Master.URL,
+		Desc: t.Master.Description,
+	}
+	result := orm.Clauses(clause.Insert{Modifier: "OR IGNORE"}).Create(&modMaster)
+	if result.RowsAffected != 1 {
+		result = orm.First(&modMaster, "url = ?", t.Master.URL)
+		if result.Error != nil {
+			errutils.Epanic(result.Error)
+		}
+		modMaster.Name = t.Master.Name
+		modMaster.URL = t.Master.URL
+		modMaster.Desc = t.Master.Description
 
-	insertTemplate := `INSERT OR IGNORE INTO templates (masterid, name, url, desc) SELECT master.id, ?, ?, ? FROM master WHERE master.url = ?`
-	c.log.Debugf(utils.SQL2fmt(insertTemplate), t.Name, t.URL, t.Description, t.Master.URL)
-	insertParams := []interface{}{t.Name, t.URL, t.Description, t.Master.URL}
-	_, err = dbconn.Exec(insertTemplate, insertParams...)
-	errutils.Efatalf("error: inserting template metadata: %w", err)
+		orm.Model(&modMaster).Updates(&modMaster)
+	}
+
+	modTemplate := model.Template{
+		Name:   t.Name,
+		URL:    t.URL,
+		Desc:   t.Description,
+		Master: []model.Master{modMaster},
+	}
+	result = orm.Clauses(clause.Insert{Modifier: "OR IGNORE"}).Create(&modTemplate)
+	if result.RowsAffected != 1 {
+		result = orm.First(&modTemplate, "url = ?", t.URL)
+		if result.Error != nil {
+			errutils.Epanic(result.Error)
+		}
+		modTemplate.Name = t.Name
+		modTemplate.URL = t.URL
+		modTemplate.Desc = t.Description
+		modTemplate.Master = append(modTemplate.Master, modMaster)
+
+		orm.Model(&modTemplate).Updates(&modTemplate)
+	}
 }
 
 // Master is the master struct

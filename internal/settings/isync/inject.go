@@ -1,8 +1,6 @@
 package isync
 
 import (
-	"database/sql"
-
 	"github.com/jinzhu/copier"
 	"github.com/kick-project/kick/internal/resources/config"
 	"github.com/kick-project/kick/internal/resources/gitclient/plumbing"
@@ -14,7 +12,7 @@ import (
 
 // Inject creates settings for tablesync.New
 func Inject(s *settings.Settings) (opts struct {
-	DB                 *sql.DB
+	BasePath           string
 	ORM                *gorm.DB
 	Config             *config.File
 	ConfigTemplatePath string
@@ -23,10 +21,10 @@ func Inject(s *settings.Settings) (opts struct {
 	plumb := &plumbing.Plumbing{}
 	err := copier.Copy(plumb, iplumbing.Inject(s))
 	errutils.Epanic(err)
-	opts.DB = s.GetDB()
+	opts.BasePath = s.PathDownloadDir
 	opts.ORM = s.GetORM()
 	opts.Config = s.ConfigFile()
 	opts.ConfigTemplatePath = s.PathTemplateConf
 	opts.Plumb = plumb
-	return
+	return opts
 }

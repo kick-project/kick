@@ -1,14 +1,14 @@
 package search
 
 import (
-	"database/sql"
 	"fmt"
+	"os"
 	"path/filepath"
 	"regexp"
 	"testing"
 
 	"github.com/jinzhu/copier"
-	"github.com/kick-project/kick/internal/resources/db"
+	"github.com/kick-project/kick/internal/resources/model"
 	"github.com/kick-project/kick/internal/services/initialize"
 	"github.com/kick-project/kick/internal/settings"
 	"github.com/kick-project/kick/internal/settings/iinitialize"
@@ -16,16 +16,9 @@ import (
 	"github.com/kick-project/kick/internal/utils"
 	"github.com/kick-project/kick/internal/utils/errutils"
 	"github.com/stretchr/testify/assert"
+	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
-
-var insertMaster string = `---
-INSERT OR IGNORE INTO master (name, url, desc) VALUES (?, ?, ?)
-`
-
-var insertTemplate string = `---
-INSERT OR IGNORE INTO templates (masterid, name, url, desc)
-	SELECT master.id, ?, ?, ? FROM master WHERE master.url = ?
-`
 
 func TestSearch(t *testing.T) {
 	// Initialize database
@@ -34,9 +27,15 @@ func TestSearch(t *testing.T) {
 	i := &initialize.Initialize{}
 	err := copier.Copy(i, iinitialize.Inject(s))
 	errutils.Epanic(err)
+	if _, err = os.Stat(s.SqliteDB); err == nil {
+		err = os.Remove(s.SqliteDB)
+		if err != nil {
+			t.Error(err)
+		}
+	}
 	i.Init()
-	dbconn := s.GetDB()
-	buildSearchData(t, dbconn)
+	db := s.GetORM()
+	buildSearchDataORM(t, db)
 
 	// Target search term
 	searchTerm := "template"
@@ -60,6 +59,7 @@ func TestSearch(t *testing.T) {
 
 	totalTemplateRows := 0
 	for entry := range srch.Search("template") {
+		t.Logf("%v", entry)
 		totalTemplateRows++
 		if matchmaker["namePrefix"].MatchString(entry.Name) {
 			counts["namePrefix"]++
@@ -84,9 +84,9 @@ func TestSearch(t *testing.T) {
 
 	// Match expected counts
 	assert.Equal(t, 2, counts["namePrefix"])
-	assert.Equal(t, 2, counts["nameContains"])
-	assert.Equal(t, 3, counts["urlContains"])
-	assert.Equal(t, 5, totalTemplateRows)
+	assert.Equal(t, 4, counts["nameContains"])
+	assert.Equal(t, 5, counts["urlContains"])
+	assert.Equal(t, 7, totalTemplateRows)
 	assert.Equal(t, 5, totalTestMaster2Rows)
 	assert.Equal(t, 4, totalBoilerplate2Rows)
 }
@@ -94,103 +94,130 @@ func TestSearch(t *testing.T) {
 //
 // Utils
 //
+func buildSearchDataORM(t *testing.T, db *gorm.DB) {
+	m1 := model.Master{
+		Name: "testmaster",
+		URL:  "http://127.0.0.1:5000/master1.git",
+		Desc: "Master 1",
+	}
 
-func buildSearchData(t *testing.T, dbconn *sql.DB) {
-	masterURL1 := "http://127.0.0.1:5000/master1.git"
-	masterURL2 := "http://127.0.0.1:5000/master2.git"
-	masters := []map[string]string{
-		{
-			"Name": "testmaster",
-			"URL":  masterURL1,
-			"Desc": "My Master Description",
-		},
-		{
-			"Name": "testmaster2",
-			"URL":  masterURL2,
-			"Desc": "My Master Description",
-		},
+	insertClause := clause.Insert{Modifier: "OR IGNORE"}
+
+	result := db.Debug().Clauses(insertClause).Create(&m1)
+	if result.Error != nil {
+		t.Error(result.Error)
+		return
 	}
-	templates1 := []map[string]string{
+
+	t1 := []model.Template{
 		{
-			"Name": "firsttemplate",
-			"URL":  "http://127.0.0.1:5000/tmpl.git",
-			"Desc": "My First Template",
+			Name: "firsttemplate",
+			URL:  "http://127.0.0.1:5000/tmpl.git",
+			Desc: "My First Template",
 		},
 		{
-			"Name": "template1",
-			"URL":  "http://127.0.0.1:5000/tmpl1.git",
-			"Desc": "My Template Description",
+			Name: "template1",
+			URL:  "http://127.0.0.1:5000/tmpl1.git",
+			Desc: "My Template Description",
 		},
 		{
-			"Name": "template2",
-			"URL":  "http://127.0.0.1:5000/tmpl2.git",
-			"Desc": "My Template Description",
+			Name: "template2",
+			URL:  "http://127.0.0.1:5000/tmpl2.git",
+			Desc: "My Template Description",
 		},
 		{
-			"Name": "boilerplate3",
-			"URL":  "http://127.0.0.1:5000/template3.git",
-			"Desc": "My Template Description",
-		},
-	}
-	templates2 := []map[string]string{
-		{
-			"Name": "mytemplate1",
-			"URL":  "http://127.0.0.1:5000/tmpl3.git",
-			"Desc": "My Boiler Plate Description",
-		},
-		{
-			"Name": "mytemplate1",
-			"URL":  "http://127.0.0.1:5000/tmpl4.git",
-			"Desc": "My Boiler Plate Description",
-		},
-		{
-			"Name": "mytemplate1",
-			"URL":  "http://127.0.0.1:5000/tmpl4.git",
-			"Desc": "My Boiler Plate Description",
-		},
-		{
-			"Name": "boilerplate1",
-			"URL":  "http://127.0.0.1:5000/template1.git",
-			"Desc": "My Boiler Plate Description",
-		},
-		{
-			"Name": "boilerplate2",
-			"URL":  "http://127.0.0.1:5000/template2.git",
-			"Desc": "My Template Description",
-		},
-		{
-			"Name": "boilerplate3",
-			"URL":  "http://127.0.0.1:5000/boilerplate4.git",
-			"Desc": "My Template Description",
-		},
-		{
-			"Name": "boilerplate4",
-			"URL":  "http://127.0.0.1:5000/boilerplate4.git",
-			"Desc": "My Template Description",
+			Name: "boilerplate3",
+			URL:  "http://127.0.0.1:5000/template3.git",
+			Desc: "My Template Description",
 		},
 	}
 
-	db.Lock()
-	defer db.Unlock()
-
-	for _, m := range masters {
-		_, err := dbconn.Exec(insertMaster, m["Name"], m["URL"], m["Desc"])
-		if err != nil {
-			t.Errorf("%w", err)
+	for _, template := range t1 {
+		template.Master = []model.Master{m1}
+		db.Debug().Clauses(insertClause).Create(&template)
+		if result.Error != nil {
+			t.Error(result.Error)
+			return
 		}
 	}
 
-	for _, tpl := range templates1 {
-		_, err := dbconn.Exec(insertTemplate, tpl["Name"], tpl["URL"], tpl["Desc"], masterURL1)
-		if err != nil {
-			t.Errorf("%w", err)
+	m2 := model.Master{
+		Name: "testmaster2",
+		URL:  "http://127.0.0.1:5000/master2.git",
+		Desc: "Master 2",
+	}
+
+	result = db.Debug().Clauses(insertClause).Create(&m2)
+	if result.Error != nil {
+		t.Error(result)
+		return
+	}
+
+	t2 := []model.Template{
+		{
+			Name: "mytemplate1",
+			URL:  "http://127.0.0.1:5000/tmpl3.git",
+			Desc: "My Boiler Plate Description",
+		},
+		{
+			Name: "mytemplate1",
+			URL:  "http://127.0.0.1:5000/tmpl4.git",
+			Desc: "My Boiler Plate Description",
+		},
+		{
+			Name: "mytemplate1",
+			URL:  "http://127.0.0.1:5000/tmpl4.git",
+			Desc: "My Boiler Plate Description",
+		},
+		{
+			Name: "boilerplate1",
+			URL:  "http://127.0.0.1:5000/template1.git",
+			Desc: "My Boiler Plate Description",
+		},
+		{
+			Name: "boilerplate2",
+			URL:  "http://127.0.0.1:5000/template2.git",
+			Desc: "My Template Description",
+		},
+		{
+			Name: "boilerplate3",
+			URL:  "http://127.0.0.1:5000/boilerplate4.git",
+			Desc: "My Template Description",
+		},
+		{
+			Name: "boilerplate4",
+			URL:  "http://127.0.0.1:5000/boilerplate4.git",
+			Desc: "My Template Description",
+		},
+	}
+
+	for _, template := range t2 {
+		template.Master = []model.Master{m2}
+		db.Debug().Clauses(insertClause).Create(&template)
+		if result.Error != nil {
+			t.Error(result.Error)
+			return
 		}
 	}
 
-	for _, tpl := range templates2 {
-		_, err := dbconn.Exec(insertTemplate, tpl["Name"], tpl["URL"], tpl["Desc"], masterURL2)
-		if err != nil {
-			t.Errorf("%w", err)
+	t3 := []model.Template{
+		{
+			Name: "mytemplate4",
+			URL:  "http://127.0.0.1:5000/template4.git",
+			Desc: "My Boiler Plate Description",
+		},
+		{
+			Name: "mytemplate5",
+			URL:  "http://127.0.0.1:5000/template5.git",
+			Desc: "My Boiler Plate Description",
+		},
+	}
+
+	for _, template := range t3 {
+		db.Debug().Clauses(insertClause).Create(&template)
+		if result.Error != nil {
+			t.Error(result.Error)
+			return
 		}
 	}
 }

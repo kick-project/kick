@@ -23,7 +23,7 @@ func TestUpdate(t *testing.T) {
 	initcmd.InitCmd([]string{"init"}, s)
 
 	dbConn := s.GetDB()
-	_, err := dbConn.Exec(`DELETE FROM templates`)
+	_, err := dbConn.Exec(`DELETE FROM template`)
 	if err != nil {
 		t.Error(err)
 	}
@@ -31,7 +31,7 @@ func TestUpdate(t *testing.T) {
 	Update([]string{"update"}, s)
 
 	var count int
-	row := dbConn.QueryRow(`SELECT count(*) AS count FROM templates`)
+	row := dbConn.QueryRow(`SELECT count(*) AS count FROM template`)
 	err = row.Scan(&count)
 	if err != nil {
 		t.Error(err)

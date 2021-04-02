@@ -1,7 +1,6 @@
 package isearch
 
 import (
-	"database/sql"
 	"io"
 	"os"
 
@@ -12,7 +11,6 @@ import (
 
 // Inject creates settings for search.New
 func Inject(s *settings.Settings) (opts struct {
-	DB     *sql.DB
 	ORM    *gorm.DB
 	Format formatter.Format
 	Writer io.Writer
@@ -20,7 +18,6 @@ func Inject(s *settings.Settings) (opts struct {
 	format := &formatter.Standard{
 		NoANSICodes: s.NoColour,
 	}
-	opts.DB = s.GetDB()
 	opts.ORM = s.GetORM()
 	opts.Format = format
 	opts.Writer = os.Stdout

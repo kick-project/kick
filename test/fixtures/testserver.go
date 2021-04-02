@@ -19,7 +19,7 @@ var testServerUp bool
 
 func main() {
 	home, _ := filepath.Abs("tmp/home")
-	srvpath, _ := filepath.Abs("tmp/gitserv")
+	srvpath, _ := filepath.Abs("tmp/gitserve")
 	cntxt := &daemon.Context{
 		PidFileName: "tmp/server.pid",
 		PidFilePerm: 0644,
