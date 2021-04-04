@@ -9,11 +9,13 @@ import (
 	"github.com/kick-project/kick/internal/settings"
 	"github.com/kick-project/kick/internal/settings/iplumbing"
 	"github.com/kick-project/kick/internal/utils/errutils"
+	"gorm.io/gorm"
 )
 
 // Inject creates settings for tablesync.New
 func Inject(s *settings.Settings) (opts struct {
 	DB                 *sql.DB
+	ORM                *gorm.DB
 	Config             *config.File
 	ConfigTemplatePath string
 	Plumb              *plumbing.Plumbing
@@ -22,6 +24,7 @@ func Inject(s *settings.Settings) (opts struct {
 	err := copier.Copy(plumb, iplumbing.Inject(s))
 	errutils.Epanic(err)
 	opts.DB = s.GetDB()
+	opts.ORM = s.GetORM()
 	opts.Config = s.ConfigFile()
 	opts.ConfigTemplatePath = s.PathTemplateConf
 	opts.Plumb = plumb

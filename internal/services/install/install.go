@@ -17,12 +17,14 @@ import (
 	"github.com/kick-project/kick/internal/resources/sync"
 	"github.com/kick-project/kick/internal/utils"
 	"github.com/kick-project/kick/internal/utils/errutils"
+	"gorm.io/gorm"
 )
 
 // Install manage installation of templates
 type Install struct {
 	ConfigFile *config.File
 	DB         *sql.DB
+	ORM        *gorm.DB
 	Log        *log.Logger
 	Plumb      *plumbing.Plumbing
 	Stderr     io.Writer

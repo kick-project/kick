@@ -1,7 +1,6 @@
 package remove
 
 import (
-	"database/sql"
 	"fmt"
 	"io"
 
@@ -12,7 +11,6 @@ import (
 // Remove remove installed templates
 type Remove struct {
 	Conf             *config.File
-	DB               *sql.DB
 	PathTemplateConf string
 	PathUserConf     string
 	Stderr           io.Writer

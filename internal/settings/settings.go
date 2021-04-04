@@ -19,6 +19,9 @@ import (
 	"github.com/kick-project/kick/internal/resources/config"
 	"github.com/kick-project/kick/internal/utils/errutils"
 	_ "github.com/mattn/go-sqlite3" // Driver for database/sql
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
+	"gorm.io/gorm/schema"
 )
 
 //
@@ -42,6 +45,7 @@ type Settings struct {
 	PathTemplateDir  string
 	PathUserConf     string
 	SqliteDB         string
+	ModelDB          string
 	Stdin            io.Reader
 	Stderr           io.Writer
 	Stdout           io.Writer
@@ -128,6 +132,24 @@ func (s *Settings) GetDB() *sql.DB {
 	db, err := sql.Open(s.DBDriver, s.DBDsn)
 	if err != nil {
 		panic(err)
+	}
+	return db
+}
+
+// GetORM return ORM object.
+func (s *Settings) GetORM() *gorm.DB {
+	var (
+		db  *gorm.DB
+		err error
+	)
+	if _, err = os.Stat(s.SqliteDB); err != nil {
+		db, err = gorm.Open(sqlite.Open(s.SqliteDB), &gorm.Config{
+			NamingStrategy: &schema.NamingStrategy{
+				SingularTable: true,
+			},
+		})
+		errutils.Efatalf("Can not open ORM database %s: %v", s.SqliteDB, err)
+
 	}
 	return db
 }

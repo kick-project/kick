@@ -16,6 +16,7 @@ import (
 	"github.com/kick-project/kick/internal/resources/gitclient"
 	"github.com/kick-project/kick/internal/resources/gitclient/plumbing"
 	"github.com/kick-project/kick/internal/utils/errutils"
+	"gorm.io/gorm"
 )
 
 //
@@ -39,6 +40,7 @@ var deleteMissing = `DELETE FROM installed WHERE time < ?`
 // Sync synchronize database tables
 type Sync struct {
 	DB                 *sql.DB
+	ORM                *gorm.DB
 	Config             *config.File
 	ConfigTemplatePath string
 	Log                *log.Logger

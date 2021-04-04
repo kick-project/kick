@@ -9,6 +9,7 @@ import (
 	"github.com/kick-project/kick/internal/services/search/entry"
 	"github.com/kick-project/kick/internal/services/search/formatter"
 	"github.com/kick-project/kick/internal/utils/errutils"
+	"gorm.io/gorm"
 )
 
 var querySearch = `
@@ -52,6 +53,7 @@ FROM
 // Search search for templates
 type Search struct {
 	DB     *sql.DB
+	ORM    *gorm.DB
 	Format formatter.Format
 	Writer io.Writer
 }

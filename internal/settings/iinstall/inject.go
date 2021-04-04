@@ -13,12 +13,14 @@ import (
 	"github.com/kick-project/kick/internal/settings/iplumbing"
 	"github.com/kick-project/kick/internal/settings/isync"
 	"github.com/kick-project/kick/internal/utils/errutils"
+	"gorm.io/gorm"
 )
 
 // Inject inject options for install.Install
 func Inject(s *settings.Settings) (opts struct {
 	ConfigFile *config.File
 	DB         *sql.DB
+	ORM        *gorm.DB
 	Log        *log.Logger
 	Plumb      *plumbing.Plumbing
 	Stderr     io.Writer
@@ -34,6 +36,7 @@ func Inject(s *settings.Settings) (opts struct {
 	errutils.Epanic(err)
 	opts.ConfigFile = s.ConfigFile()
 	opts.DB = s.GetDB()
+	opts.ORM = s.GetORM()
 	opts.Log = s.GetLogger()
 	opts.Plumb = plumb
 	opts.Stderr = s.Stderr

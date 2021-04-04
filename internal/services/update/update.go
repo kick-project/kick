@@ -15,12 +15,14 @@ import (
 	"github.com/kick-project/kick/internal/utils/errutils"
 	"github.com/kick-project/kick/internal/utils/marshal"
 	_ "github.com/mattn/go-sqlite3" // Required by 'database/sql'
+	"gorm.io/gorm"
 )
 
 // Update build metadata
 type Update struct {
 	ConfigFile  *config.File
 	DB          *sql.DB
+	ORM         *gorm.DB
 	Log         *log.Logger
 	MetadataDir string
 }

@@ -5,6 +5,7 @@ import (
 	"os"
 	fp "path/filepath"
 
+	"github.com/kick-project/kick/internal/fflags"
 	"github.com/kick-project/kick/internal/resources/db"
 	"github.com/kick-project/kick/internal/utils/errutils"
 )
@@ -37,6 +38,21 @@ func (i *Initialize) InitPaths() {
 
 // InitMetadata initialize metadata.
 func (i *Initialize) InitMetadata() {
+	// Creating an ORM based model
+	if fflags.ORM() {
+		i.initMetadataNew()
+	} else {
+		i.initMetadataOld()
+	}
+}
+
+func (i *Initialize) initMetadataNew() {
+	db.CreateModel(&db.ModelOptions{
+		File: i.SQLiteFile,
+	})
+}
+
+func (i *Initialize) initMetadataOld() {
 	dbdir := fp.Dir(i.SQLiteFile)
 	mkDirs(dbdir)
 	dbconn, err := sql.Open(i.DBDriver, i.DSN)
