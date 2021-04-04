@@ -21,3 +21,8 @@ func Remote() bool {
 func GitClone() bool {
 	return enabled() && os.Getenv("FF_KICK_GIT_CLONE") == "true"
 }
+
+// ORM create ORM based schema instead of through SQL
+func ORM() bool {
+	return enabled() && os.Getenv("FF_KICK_ORM") == "true"
+}

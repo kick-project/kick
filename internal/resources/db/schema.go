@@ -3,7 +3,11 @@ package db
 import (
 	"database/sql"
 
+	"github.com/kick-project/kick/internal/resources/model"
 	"github.com/kick-project/kick/internal/utils/errutils"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
+	"gorm.io/gorm/schema"
 )
 
 var tblMaster = `
@@ -74,5 +78,33 @@ func CreateSchema(dbconn *sql.DB) {
 		if err != nil {
 			errutils.Efatalf("error creating database scheme: %v", err)
 		}
+	}
+}
+
+// ModelOptions options create model
+type ModelOptions struct {
+	File string
+}
+
+// CreateModel new way of creating a schema
+func CreateModel(opts *ModelOptions) {
+	db, err := gorm.Open(sqlite.Open(opts.File), &gorm.Config{
+		NamingStrategy: schema.NamingStrategy{
+			SingularTable: true,
+		},
+	})
+
+	errutils.Efatalf("Can not initialize an ORM database: %v", err)
+
+	for _, m := range []interface{}{
+		&model.Global{},
+		&model.Master{},
+		&model.Template{},
+		&model.Installed{},
+		&model.Sync{},
+		&model.Versions{},
+	} {
+		err := db.AutoMigrate(m)
+		errutils.Efatalf("Can not migrate database: %v", err)
 	}
 }

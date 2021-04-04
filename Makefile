@@ -227,6 +227,11 @@ cattest: ## Print the output of the last set of tests
 getversion:
 	VERSION=$(VERSION) bash -c 'echo $$VERSION'
 
+.PHONY: _schema
+_schema: ## Dump Schema to SQL. Used to inspect 
+	test -f tmp/schema_test.db && sqlite3 tmp/schema_test.db ".schema --indent" > tmp/schema_test.sql
+	test -f tmp/schema_model_test.db && sqlite3 tmp/schema_model_test.db ".schema --indent" > tmp/schema_model_test.sql
+
 #
 # Helper targets
 #

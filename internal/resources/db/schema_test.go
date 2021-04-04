@@ -34,6 +34,18 @@ func TestCreate(t *testing.T) {
 	assert.Equal(t, 1, count)
 }
 
+func TestCreateModel(t *testing.T) {
+	path := filepath.Join(utils.TempDir(), "schema_model_test.db")
+	_, err := os.Stat(path)
+	if err == nil {
+		os.Remove(path)
+	}
+
+	CreateModel(&ModelOptions{
+		File: path,
+	})
+}
+
 // tmpDb create a temporary db file
 // the cleanup function should be called to remove the database after exict
 func tmpDb() (db *sql.DB, path string) {
