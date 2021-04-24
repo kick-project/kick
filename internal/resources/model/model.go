@@ -85,8 +85,9 @@ type Options struct {
 }
 
 // CreateModel new way of creating a schema
-func CreateModel(opts *Options) {
-	db, err := gorm.Open(sqlite.Open(opts.File), &gorm.Config{
+func CreateModel(opts *Options) (db *gorm.DB) {
+	dia := sqlite.Open(opts.File)
+	db, err := gorm.Open(dia, &gorm.Config{
 		NamingStrategy: schema.NamingStrategy{
 			SingularTable: true,
 		},
@@ -112,4 +113,5 @@ func CreateModel(opts *Options) {
 	if result.Error != nil {
 		errutils.Efatalf("can not insert root record into database: %v", result.Error)
 	}
+	return db
 }
