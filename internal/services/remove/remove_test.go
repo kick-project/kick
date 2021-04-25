@@ -5,12 +5,12 @@ import (
 	"testing"
 
 	"github.com/jinzhu/copier"
+	"github.com/kick-project/kick/internal/di"
+	"github.com/kick-project/kick/internal/di/iinitialize"
+	"github.com/kick-project/kick/internal/di/iremove"
 	"github.com/kick-project/kick/internal/resources/config"
 	"github.com/kick-project/kick/internal/services/initialize"
 	"github.com/kick-project/kick/internal/services/remove"
-	"github.com/kick-project/kick/internal/settings"
-	"github.com/kick-project/kick/internal/settings/iinitialize"
-	"github.com/kick-project/kick/internal/settings/iremove"
 	"github.com/kick-project/kick/internal/utils"
 	"github.com/kick-project/kick/internal/utils/errutils"
 	"github.com/kick-project/kick/internal/utils/file"
@@ -50,16 +50,16 @@ func setup() (r *remove.Remove) {
 	if err != nil {
 		panic(err)
 	}
-	s := settings.GetSettings(home)
+	inject := di.Setup(home)
 
 	init := &initialize.Initialize{}
-	err = copier.Copy(init, iinitialize.Inject(s))
+	err = copier.Copy(init, iinitialize.Inject(inject))
 	if err != nil {
 		panic(err)
 	}
 
 	r = &remove.Remove{}
-	err = copier.Copy(r, iremove.Inject(s))
+	err = copier.Copy(r, iremove.Inject(inject))
 	errutils.Epanic(err)
 	return r
 }

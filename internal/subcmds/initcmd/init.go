@@ -4,9 +4,9 @@ import (
 	"log"
 
 	"github.com/jinzhu/copier"
+	"github.com/kick-project/kick/internal/di"
+	"github.com/kick-project/kick/internal/di/iinitialize"
 	"github.com/kick-project/kick/internal/services/initialize"
-	"github.com/kick-project/kick/internal/settings"
-	"github.com/kick-project/kick/internal/settings/iinitialize"
 	"github.com/kick-project/kick/internal/utils/errutils"
 	"github.com/kick-project/kick/internal/utils/options"
 )
@@ -26,7 +26,7 @@ type OptInit struct {
 }
 
 // InitCmd initialize configuration
-func InitCmd(args []string, s *settings.Settings) int {
+func InitCmd(args []string, inject *di.DI) int {
 	opts := &OptInit{}
 	options.Bind(usageDoc, args, opts)
 	if !opts.Init {
@@ -35,7 +35,7 @@ func InitCmd(args []string, s *settings.Settings) int {
 	}
 
 	i := &initialize.Initialize{}
-	err := copier.Copy(i, iinitialize.Inject(s))
+	err := copier.Copy(i, iinitialize.Inject(inject))
 	errutils.Epanic(err)
 	i.Init()
 

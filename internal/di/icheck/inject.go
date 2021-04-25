@@ -3,11 +3,11 @@ package icheck
 import (
 	"io"
 
-	"github.com/kick-project/kick/internal/settings"
+	"github.com/kick-project/kick/internal/di"
 )
 
-// Inject creates settings for check.New
-func Inject(s *settings.Settings) (opts struct {
+// Inject creates di for check.New
+func Inject(s *di.DI) (opts struct {
 	ConfigPath         string
 	ConfigTemplatePath string
 	HomeDir            string

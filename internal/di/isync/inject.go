@@ -8,14 +8,14 @@ import (
 	"github.com/jinzhu/copier"
 	"github.com/kick-project/kick/internal/resources/config"
 	"github.com/kick-project/kick/internal/resources/gitclient/plumbing"
-	"github.com/kick-project/kick/internal/settings"
-	"github.com/kick-project/kick/internal/settings/iplumbing"
+	"github.com/kick-project/kick/internal/di"
+	"github.com/kick-project/kick/internal/di/iplumbing"
 	"github.com/kick-project/kick/internal/utils/errutils"
 	"gorm.io/gorm"
 )
 
-// Inject creates settings for tablesync.New
-func Inject(s *settings.Settings) (opts struct {
+// Inject creates di for tablesync.New
+func Inject(s *di.DI) (opts struct {
 	ORM                *gorm.DB
 	Config             *config.File
 	ConfigTemplatePath string

@@ -8,10 +8,10 @@ import (
 	"testing"
 
 	"github.com/jinzhu/copier"
+	"github.com/kick-project/kick/internal/di"
+	"github.com/kick-project/kick/internal/di/iinitialize"
+	"github.com/kick-project/kick/internal/di/iupdate"
 	"github.com/kick-project/kick/internal/services/initialize"
-	"github.com/kick-project/kick/internal/settings"
-	"github.com/kick-project/kick/internal/settings/iinitialize"
-	"github.com/kick-project/kick/internal/settings/iupdate"
 	"github.com/kick-project/kick/internal/utils"
 	"github.com/kick-project/kick/internal/utils/errutils"
 	"syreclabs.com/go/faker"
@@ -19,7 +19,7 @@ import (
 
 func TestBuild(t *testing.T) {
 	home := fp.Join(utils.TempDir(), "home")
-	s := settings.GetSettings(home)
+	s := di.Setup(home)
 	initIt(s)
 	m := &Update{}
 	err := copier.Copy(m, iupdate.Inject(s))
@@ -32,9 +32,9 @@ func TestBuild(t *testing.T) {
 	}
 }
 
-func initIt(s *settings.Settings) {
+func initIt(inject *di.DI) {
 	i := &initialize.Initialize{}
-	err := copier.Copy(i, iinitialize.Inject(s))
+	err := copier.Copy(i, iinitialize.Inject(inject))
 	errutils.Epanic(err)
 	i.Init()
 }

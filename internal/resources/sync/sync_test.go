@@ -11,18 +11,18 @@ import (
 
 	fp "path/filepath"
 
+	"github.com/kick-project/kick/internal/di"
+	"github.com/kick-project/kick/internal/di/iinitialize"
+	"github.com/kick-project/kick/internal/di/isync"
 	"github.com/kick-project/kick/internal/resources/model"
 	"github.com/kick-project/kick/internal/services/initialize"
-	"github.com/kick-project/kick/internal/settings"
-	"github.com/kick-project/kick/internal/settings/iinitialize"
-	"github.com/kick-project/kick/internal/settings/isync"
 	"github.com/kick-project/kick/internal/utils"
 	"github.com/kick-project/kick/internal/utils/errutils"
 )
 
-func setup() (*settings.Settings, *gorm.DB) {
+func setup() (*di.DI, *gorm.DB) {
 	home := fp.Join(utils.TempDir(), "home")
-	s := settings.GetSettings(home)
+	s := di.Setup(home)
 	init := initialize.Initialize{}
 	err := copier.Copy(&init, iinitialize.Inject(s))
 	if err != nil {

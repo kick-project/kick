@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/kick-project/kick/internal/settings"
+	"github.com/kick-project/kick/internal/di"
 	"github.com/kick-project/kick/internal/utils"
 	"github.com/stretchr/testify/assert"
 )
@@ -21,7 +21,7 @@ func TestStart(t *testing.T) {
 	path, _ := ioutil.TempDir(tmpdir, "start-")
 	path = filepath.Join(path, "tmpl")
 	args := []string{"start", "tmpl", path}
-	s := settings.GetSettings(home)
-	Start(args, s)
+	inject := di.Setup(home)
+	Start(args, inject)
 	assert.DirExists(t, path)
 }

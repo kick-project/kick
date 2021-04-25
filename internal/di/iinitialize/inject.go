@@ -1,11 +1,11 @@
 package iinitialize
 
 import (
-	"github.com/kick-project/kick/internal/settings"
+	"github.com/kick-project/kick/internal/di"
 )
 
-// Inject creates settings for initialize.New
-func Inject(s *settings.Settings) (opts struct {
+// Inject creates di for initialize.New
+func Inject(s *di.DI) (opts struct {
 	ConfigPath         string // Path to configuration file
 	ConfigTemplatePath string // Path to template configuration file
 	DBDriver           string // SQL Driver to use

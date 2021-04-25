@@ -5,7 +5,7 @@ package env
 
 import "os"
 
-// Debug Turn debug logging on. See settings.Settings
+// Debug Turn debug logging on. See di.DI
 func Debug() bool {
 	return os.Getenv("KICK_DEBUG") == "true"
 }

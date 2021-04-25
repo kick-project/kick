@@ -4,11 +4,11 @@ import (
 	"io"
 
 	"github.com/kick-project/kick/internal/resources/config"
-	"github.com/kick-project/kick/internal/settings"
+	"github.com/kick-project/kick/internal/di"
 )
 
-// Inject create settings for list.List
-func Inject(s *settings.Settings) (opts struct {
+// Inject create di for list.List
+func Inject(s *di.DI) (opts struct {
 	Stderr io.Writer
 	Stdout io.Writer
 	Conf   *config.File

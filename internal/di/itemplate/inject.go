@@ -7,11 +7,11 @@ import (
 	"github.com/kick-project/kick/internal/resources/config"
 	"github.com/kick-project/kick/internal/resources/template/renderer"
 	"github.com/kick-project/kick/internal/resources/template/variables"
-	"github.com/kick-project/kick/internal/settings"
+	"github.com/kick-project/kick/internal/di"
 )
 
-// Inject creates settings for template.New
-func Inject(s *settings.Settings) (opts struct {
+// Inject creates di for template.New
+func Inject(s *di.DI) (opts struct {
 	Config         *config.File
 	Log            *log.Logger
 	ModeLineLen    uint8

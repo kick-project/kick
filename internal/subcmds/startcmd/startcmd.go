@@ -5,13 +5,13 @@ import (
 	"path/filepath"
 
 	"github.com/jinzhu/copier"
+	"github.com/kick-project/kick/internal/di"
+	"github.com/kick-project/kick/internal/di/icheck"
+	"github.com/kick-project/kick/internal/di/isync"
+	"github.com/kick-project/kick/internal/di/itemplate"
 	"github.com/kick-project/kick/internal/resources/check"
 	"github.com/kick-project/kick/internal/resources/sync"
 	"github.com/kick-project/kick/internal/resources/template"
-	"github.com/kick-project/kick/internal/settings"
-	"github.com/kick-project/kick/internal/settings/icheck"
-	"github.com/kick-project/kick/internal/settings/isync"
-	"github.com/kick-project/kick/internal/settings/itemplate"
 	"github.com/kick-project/kick/internal/utils"
 	"github.com/kick-project/kick/internal/utils/errutils"
 	"github.com/kick-project/kick/internal/utils/options"
@@ -36,29 +36,29 @@ type OptStart struct {
 }
 
 // Start start cli option
-func Start(args []string, s *settings.Settings) int {
+func Start(args []string, inject *di.DI) int {
 	opts := &OptStart{}
 	options.Bind(usageDoc, args, opts)
 
 	chk := &check.Check{}
-	err := copier.Copy(chk, icheck.Inject(s))
+	err := copier.Copy(chk, icheck.Inject(inject))
 	errutils.Epanic(err)
 
 	if err = chk.Init(); err != nil {
-		fmt.Fprintf(s.Stderr, "%s\n", err.Error())
+		fmt.Fprintf(inject.Stderr, "%s\n", err.Error())
 		utils.Exit(255)
 	}
 
 	// Sync DB table "installed" with configuration file
 	synchro := &sync.Sync{}
-	err = copier.Copy(synchro, isync.Inject(s))
+	err = copier.Copy(synchro, isync.Inject(inject))
 	errutils.Epanic(err)
 	synchro.Templates()
 
 	// Set project name
-	s.ProjectName = filepath.Base(opts.ProjectPath)
+	inject.ProjectName = filepath.Base(opts.ProjectPath)
 	t := &template.Template{}
-	err = copier.Copy(t, itemplate.Inject(s))
+	err = copier.Copy(t, itemplate.Inject(inject))
 	errutils.Epanic(err)
 	t.SetSrcDest(opts.Template, opts.ProjectPath)
 	ret := t.Run()

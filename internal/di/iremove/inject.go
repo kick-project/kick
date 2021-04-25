@@ -4,11 +4,11 @@ import (
 	"io"
 
 	"github.com/kick-project/kick/internal/resources/config"
-	"github.com/kick-project/kick/internal/settings"
+	"github.com/kick-project/kick/internal/di"
 )
 
-// Inject inject settings for remove.Remove
-func Inject(s *settings.Settings) (opts struct {
+// Inject inject di for remove.Remove
+func Inject(s *di.DI) (opts struct {
 	Conf             *config.File
 	PathTemplateConf string
 	PathUserConf     string

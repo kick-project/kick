@@ -1,10 +1,10 @@
-// Package settings is a package that implements Dependency Injection through
+// Package di is a package that implements Dependency Injection through
 // methods that create the options needed for structs to be created. See
-// GetSettings for more information.
+// GetDI for more information.
 //
 // This package uses anonymous structs as the injection options, this is to
-// avoid issues with import loops when importing settings into *_test.go files.
-package settings
+// avoid issues with import loops when importing di into *_test.go files.
+package di
 
 import (
 	"database/sql"
@@ -25,11 +25,11 @@ import (
 )
 
 //
-// Settings
+// DI
 //
 
-// Settings provides settings for resources & services.
-type Settings struct {
+// DI provides di for resources & services and is the injection container.
+type DI struct {
 	DBDriver string
 	DBDsn    string
 	db       *sql.DB
@@ -54,8 +54,8 @@ type Settings struct {
 	Stdout           io.Writer
 }
 
-// GetSettings get settings using the supplied "home" directory option. Any
-// Dependency Injection (DI) configuration created by settings is then
+// Setup get di using the supplied "home" directory option. Any
+// Dependency Injection (DI) configuration created by di is then
 // contextualized by the home variable. For instance when home is
 // set the paths...
 //
@@ -70,14 +70,14 @@ type Settings struct {
 // If initialization is needed for testing then the initialize package can be
 // used. For example
 //
-//   set := GetSettings("/tmp/tmp_home");
+//   set := Setup("/tmp/tmp_home");
 //   init := initialize.New(iinitialize.Inject(s));
 //   init.Init()
 //
 // will create the structures under "/tmp/tmp_home"
 //
 // "home" must be explicitly set or a panic will ensue.
-func GetSettings(home string) *Settings {
+func Setup(home string) *DI {
 	if home == "" {
 		panic("home is set to an empty string")
 	}
@@ -94,7 +94,7 @@ func GetSettings(home string) *Settings {
 	if env.Debug() {
 		logLvl = log.DebugLevel
 	}
-	s := &Settings{
+	s := &DI{
 		DBDriver:         dbdriver,
 		DBDsn:            dbdsn,
 		SqliteDB:         sqlitedb,
@@ -114,7 +114,7 @@ func GetSettings(home string) *Settings {
 }
 
 // LogLevel Sets the log level
-func (s *Settings) LogLevel(lvl log.Level) {
+func (s *DI) LogLevel(lvl log.Level) {
 	s.logLevel = lvl
 }
 
@@ -123,8 +123,8 @@ func (s *Settings) LogLevel(lvl log.Level) {
 // testing purposes.
 //
 
-// ConfigFile load settings from configuration file
-func (s *Settings) ConfigFile() *config.File {
+// ConfigFile load di from configuration file
+func (s *DI) ConfigFile() *config.File {
 	conf := &config.File{
 		PathUserConf:     s.PathUserConf,
 		PathTemplateConf: s.PathTemplateConf,
@@ -135,7 +135,7 @@ func (s *Settings) ConfigFile() *config.File {
 }
 
 // GetDB return DB object.
-func (s *Settings) GetDB() *sql.DB {
+func (s *DI) GetDB() *sql.DB {
 	if s.db != nil {
 		return s.db
 	}
@@ -148,7 +148,7 @@ func (s *Settings) GetDB() *sql.DB {
 }
 
 // GetORM return ORM object.
-func (s *Settings) GetORM() *gorm.DB {
+func (s *DI) GetORM() *gorm.DB {
 	var (
 		db  *gorm.DB
 		err error
@@ -166,7 +166,7 @@ func (s *Settings) GetORM() *gorm.DB {
 }
 
 // GetLogger inject logger object.
-func (s *Settings) GetLogger() *log.Logger {
+func (s *DI) GetLogger() *log.Logger {
 	logger := &log.Logger{
 		Handler: text.New(s.Stderr),
 		Level:   s.logLevel,

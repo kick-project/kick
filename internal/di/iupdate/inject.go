@@ -5,12 +5,12 @@ import (
 
 	"github.com/apex/log"
 	"github.com/kick-project/kick/internal/resources/config"
-	"github.com/kick-project/kick/internal/settings"
+	"github.com/kick-project/kick/internal/di"
 	"gorm.io/gorm"
 )
 
-// Inject creates settings for metadata.New
-func Inject(s *settings.Settings) (opts struct {
+// Inject creates di for metadata.New
+func Inject(s *di.DI) (opts struct {
 	ConfigFile  *config.File
 	DB          *sql.DB
 	ORM         *gorm.DB

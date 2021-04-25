@@ -8,15 +8,15 @@ import (
 	"github.com/kick-project/kick/internal/resources/config"
 	"github.com/kick-project/kick/internal/resources/gitclient/plumbing"
 	"github.com/kick-project/kick/internal/resources/sync"
-	"github.com/kick-project/kick/internal/settings"
-	"github.com/kick-project/kick/internal/settings/iplumbing"
-	"github.com/kick-project/kick/internal/settings/isync"
+	"github.com/kick-project/kick/internal/di"
+	"github.com/kick-project/kick/internal/di/iplumbing"
+	"github.com/kick-project/kick/internal/di/isync"
 	"github.com/kick-project/kick/internal/utils/errutils"
 	"gorm.io/gorm"
 )
 
 // Inject inject options for install.Install
-func Inject(s *settings.Settings) (opts struct {
+func Inject(s *di.DI) (opts struct {
 	ConfigFile *config.File
 	ORM        *gorm.DB
 	Log        *log.Logger

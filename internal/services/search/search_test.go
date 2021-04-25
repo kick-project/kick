@@ -8,11 +8,11 @@ import (
 	"testing"
 
 	"github.com/jinzhu/copier"
+	"github.com/kick-project/kick/internal/di"
+	"github.com/kick-project/kick/internal/di/iinitialize"
+	"github.com/kick-project/kick/internal/di/isearch"
 	"github.com/kick-project/kick/internal/resources/model"
 	"github.com/kick-project/kick/internal/services/initialize"
-	"github.com/kick-project/kick/internal/settings"
-	"github.com/kick-project/kick/internal/settings/iinitialize"
-	"github.com/kick-project/kick/internal/settings/isearch"
 	"github.com/kick-project/kick/internal/utils"
 	"github.com/kick-project/kick/internal/utils/errutils"
 	"github.com/stretchr/testify/assert"
@@ -23,25 +23,25 @@ import (
 func TestSearch(t *testing.T) {
 	// Initialize database
 	home := filepath.Join(utils.TempDir(), "TestSearch")
-	s := settings.GetSettings(home)
+	inject := di.Setup(home)
 	i := &initialize.Initialize{}
-	err := copier.Copy(i, iinitialize.Inject(s))
+	err := copier.Copy(i, iinitialize.Inject(inject))
 	errutils.Epanic(err)
-	if _, err = os.Stat(s.SqliteDB); err == nil {
-		err = os.Remove(s.SqliteDB)
+	if _, err = os.Stat(inject.SqliteDB); err == nil {
+		err = os.Remove(inject.SqliteDB)
 		if err != nil {
 			t.Error(err)
 		}
 	}
 	i.Init()
-	db := s.GetORM()
+	db := inject.GetORM()
 	buildSearchDataORM(t, db)
 
 	// Target search term
 	searchTerm := "template"
 
 	srch := &Search{}
-	err = copier.Copy(srch, isearch.Inject(s))
+	err = copier.Copy(srch, isearch.Inject(inject))
 	errutils.Epanic(err)
 
 	// Parallel arrays to count regexp

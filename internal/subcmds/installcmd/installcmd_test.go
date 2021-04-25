@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/apex/log"
-	"github.com/kick-project/kick/internal/settings"
+	"github.com/kick-project/kick/internal/di"
 	"github.com/kick-project/kick/internal/subcmds/initcmd"
 	"github.com/kick-project/kick/internal/subcmds/startcmd"
 	"github.com/kick-project/kick/internal/subcmds/updatecmd"
@@ -54,16 +54,16 @@ func installTest(t *testing.T, handle, template string) {
 	}
 
 	home := filepath.Join(utils.TempDir(), id)
-	s := settings.GetSettings(home)
-	s.LogLevel(log.DebugLevel)
+	inject := di.Setup(home)
+	inject.LogLevel(log.DebugLevel)
 
-	ec := initcmd.InitCmd([]string{"init"}, s)
+	ec := initcmd.InitCmd([]string{"init"}, inject)
 	assert.Equal(t, 0, ec)
 
-	ec = updatecmd.Update([]string{"update"}, s)
+	ec = updatecmd.Update([]string{"update"}, inject)
 	assert.Equal(t, 0, ec)
 
-	ec = Install([]string{"install", handle, template}, s)
+	ec = Install([]string{"install", handle, template}, inject)
 	assert.Equal(t, 0, ec)
 
 	td, err := ioutil.TempDir(utils.TempDir(), id+"-*")
@@ -71,5 +71,5 @@ func installTest(t *testing.T, handle, template string) {
 		t.Error(err)
 	}
 	p := filepath.Clean(filepath.Join(td, handle))
-	startcmd.Start([]string{"start", handle, p}, s)
+	startcmd.Start([]string{"start", handle, p}, inject)
 }

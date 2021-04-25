@@ -5,13 +5,13 @@ import (
 	"fmt"
 
 	"github.com/jinzhu/copier"
+	"github.com/kick-project/kick/internal/di"
+	"github.com/kick-project/kick/internal/di/icheck"
+	"github.com/kick-project/kick/internal/di/iinstall"
+	"github.com/kick-project/kick/internal/di/iupdate"
 	"github.com/kick-project/kick/internal/resources/check"
 	"github.com/kick-project/kick/internal/services/install"
 	"github.com/kick-project/kick/internal/services/update"
-	"github.com/kick-project/kick/internal/settings"
-	"github.com/kick-project/kick/internal/settings/icheck"
-	"github.com/kick-project/kick/internal/settings/iinstall"
-	"github.com/kick-project/kick/internal/settings/iupdate"
 	"github.com/kick-project/kick/internal/utils"
 	"github.com/kick-project/kick/internal/utils/errutils"
 	"github.com/kick-project/kick/internal/utils/options"
@@ -36,7 +36,7 @@ type OptInstall struct {
 }
 
 // Install install a template
-func Install(args []string, s *settings.Settings) int {
+func Install(args []string, inject *di.DI) int {
 	opts := &OptInstall{}
 	options.Bind(usageDoc, args, opts)
 	if !opts.Install {
@@ -45,23 +45,23 @@ func Install(args []string, s *settings.Settings) int {
 	}
 
 	chk := &check.Check{}
-	err := copier.Copy(chk, icheck.Inject(s))
+	err := copier.Copy(chk, icheck.Inject(inject))
 	errutils.Epanic(err)
 
 	if err = chk.Init(); err != nil {
-		fmt.Fprintf(s.Stderr, "%s\n", err.Error())
+		fmt.Fprintf(inject.Stderr, "%s\n", err.Error())
 		utils.Exit(255)
 	}
 
 	m := &update.Update{}
-	err = copier.Copy(m, iupdate.Inject(s))
+	err = copier.Copy(m, iupdate.Inject(inject))
 	errutils.Epanic(err)
 
 	err = m.Build()
 	errutils.Epanic(err)
 
 	inst := &install.Install{}
-	err = copier.Copy(inst, iinstall.Inject(s))
+	err = copier.Copy(inst, iinstall.Inject(inject))
 	errutils.Epanic(err)
 	return inst.Install(opts.Handle, opts.Template)
 }
