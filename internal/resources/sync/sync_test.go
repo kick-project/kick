@@ -66,17 +66,29 @@ func setup(t *testing.T, home string, models ...interface{}) (*Sync, *di.DI, *go
 }
 
 func TestGlobal(t *testing.T) {
-	// TODO: Create a global URL
 	m := model.Global{
 		Name: "master",
-		URL:  "http://127.0.0.1:5000/master2.git",
+		URL:  "http://127.0.0.1:5000/global1.git",
 		Desc: "master 2",
 	}
-	syncobj, _, _ := setup(t, "TestGlobal", &m)
+	syncobj, inject, _ := setup(t, "TestGlobal", &m)
 	syncobj.Global()
+	assert.DirExists(t, filepath.Clean(fmt.Sprintf(`%s/%s`, inject.PathGlobalDir, `127.0.0.1/global1`)))
 }
 
 func TestGlobalNoURL(t *testing.T) {
+}
+
+func TestMaster(t *testing.T) {
+	m := model.Master{
+		Name: "master1",
+		URL:  "http://127.0.0.1:5000/master2.git",
+		Desc: "master 1",
+	}
+
+	syncobj, inject, _ := setup(t, "TestMaster", &m)
+	syncobj.Master()
+	assert.DirExists(t, filepath.Clean(fmt.Sprintf(`%s/%s`, inject.PathMasterDir, `127.0.0.1/master2`)))
 }
 
 func TestTemplates(t *testing.T) {

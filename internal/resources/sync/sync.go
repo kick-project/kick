@@ -54,6 +54,23 @@ func (s *Sync) Global() {
 
 // Master syncs master data
 func (s *Sync) Master() {
+	rows, err := s.ORM.Model(&model.Master{}).Rows()
+	errutils.Epanic(err)
+
+	defer rows.Close()
+	for rows.Next() {
+		var master model.Master
+		err := s.ORM.ScanRows(rows, &master)
+		if err != nil {
+			fmt.Fprintf(s.Stderr, "warning. can not scan table row from `global`: %v\n", err)
+		}
+
+		_, err = gitclient.Get(master.URL, s.PlumbMaster)
+		if err != nil {
+			fmt.Fprintf(s.Stderr, "warning. can not download %s: %s\n", master.URL, err.Error())
+			continue
+		}
+	}
 }
 
 // Templates synchronizes templates between the YAML configuration, database
