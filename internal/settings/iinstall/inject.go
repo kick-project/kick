@@ -30,7 +30,7 @@ func Inject(s *settings.Settings) (opts struct {
 	err := copier.Copy(synchro, isync.Inject(s))
 	errutils.Epanic(err)
 	plumb := &plumbing.Plumbing{}
-	err = copier.Copy(plumb, iplumbing.Inject(s))
+	err = copier.Copy(plumb, iplumbing.InjectTemplate(s))
 	errutils.Epanic(err)
 	opts.ConfigFile = s.ConfigFile()
 	opts.ORM = s.GetORM()

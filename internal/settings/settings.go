@@ -43,6 +43,8 @@ type Settings struct {
 	ProjectName      string
 	PathMetadataDir  string
 	PathTemplateConf string
+	PathGlobalDir    string
+	PathMasterDir    string
 	PathTemplateDir  string
 	PathDownloadDir  string
 	PathUserConf     string
@@ -85,6 +87,8 @@ func GetSettings(home string) *Settings {
 	dbdsn := fmt.Sprintf("file:%s?_foreign_key=on", sqlitedb)
 	pathUserConf := fp.Clean(fmt.Sprintf("%s/.kick/config.yml", home))
 	pathTemplateConf := fp.Clean(fmt.Sprintf("%s/.kick/templates.yml", home))
+	pathGlobalDir := fp.Clean(fmt.Sprintf("%s/.kick/globals", home))
+	pathMasterDir := fp.Clean(fmt.Sprintf("%s/.kick/masters", home))
 	pathTemplateDir := fp.Clean(fmt.Sprintf("%s/.kick/templates", home))
 	pathDownloadDir := fp.Clean(fmt.Sprintf("%s/.kick", home))
 	pathMetadataDir := fp.Clean(fmt.Sprintf("%s/.kick/metadata", home))
@@ -99,6 +103,8 @@ func GetSettings(home string) *Settings {
 		Home:             home,
 		PathMetadataDir:  pathMetadataDir,
 		PathTemplateConf: pathTemplateConf,
+		PathGlobalDir:    pathGlobalDir,
+		PathMasterDir:    pathMasterDir,
 		PathTemplateDir:  pathTemplateDir,
 		PathDownloadDir:  pathDownloadDir,
 		PathUserConf:     pathUserConf,

@@ -5,7 +5,6 @@ package sync
 import (
 	"fmt"
 	"io"
-	"path/filepath"
 	"time"
 
 	"github.com/apex/log"
@@ -22,13 +21,15 @@ import (
 // Sync synchronize database tables
 type Sync struct {
 	BasePath           string
-	ORM                *gorm.DB
-	Config             *config.File
-	ConfigTemplatePath string
-	Log                *log.Logger
-	Plumb              *plumbing.Plumbing
-	Stderr             io.Writer
-	Stdout             io.Writer
+	ORM                *gorm.DB           `copier:"must"`
+	Config             *config.File       `copier:"must"`
+	ConfigTemplatePath string             `copier:"must"`
+	Log                *log.Logger        `copier:"must"`
+	PlumbTemplates     *plumbing.Plumbing `copier:"must"`
+	PlumbGlobal        *plumbing.Plumbing `copier:"must"`
+	PlumbMaster        *plumbing.Plumbing `copier:"must"`
+	Stderr             io.Writer          `copier:"must"`
+	Stdout             io.Writer          `copier:"must"`
 }
 
 // Global syncs global data
@@ -44,8 +45,7 @@ func (s *Sync) Global() {
 			fmt.Fprintf(s.Stderr, "warning. can not scan table row from `global`: %v\n", err)
 		}
 
-		plumb := plumbing.New(filepath.Join(s.BasePath, "global"))
-		_, err = gitclient.Get(global.URL, plumb)
+		_, err = gitclient.Get(global.URL, s.PlumbGlobal)
 		if err != nil {
 			fmt.Fprintf(s.Stderr, "warning. can not download %s: %s\n", global.URL, err.Error())
 			continue
@@ -68,9 +68,8 @@ func (s *Sync) Templates() {
 	errutils.Epanic(err)
 	t := time.Now()
 	ts := t.Format("2006-01-02T15:04:05")
-	plu := plumbing.New(filepath.Join(s.BasePath, "templates"))
 	for _, item := range s.Config.Templates {
-		_, err := gitclient.Get(item.URL, plu)
+		_, err := gitclient.Get(item.URL, s.PlumbTemplates)
 		if err != nil {
 			fmt.Fprintf(s.Stderr, "warning. can not download %s: %s\n", item.URL, err.Error())
 		}
