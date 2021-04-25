@@ -28,7 +28,8 @@ import (
 // DI
 //
 
-// DI provides di for resources & services and is the injection container.
+// DI provides Dependency Injection Container for resources & services. Injectors are in secperate pacages below this package
+// to get around dependency loops when injecting into unit tests.
 type DI struct {
 	DBDriver string
 	DBDsn    string
