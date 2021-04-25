@@ -12,8 +12,6 @@ import (
 type Initialize struct {
 	ConfigPath         string `copier:"must"`
 	ConfigTemplatePath string `copier:"must"`
-	DBDriver           string `copier:"must"`
-	DSN                string `copier:"must"`
 	HomeDir            string `copier:"must"`
 	MetadataDir        string `copier:"must"`
 	SQLiteFile         string `copier:"must"`

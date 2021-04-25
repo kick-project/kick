@@ -7,7 +7,6 @@
 package di
 
 import (
-	"database/sql"
 	"fmt"
 	"io"
 	"os"
@@ -31,10 +30,7 @@ import (
 // DI provides Dependency Injection Container for resources & services. Injectors are in secperate pacages below this package
 // to get around dependency loops when injecting into unit tests.
 type DI struct {
-	DBDriver string
-	DBDsn    string
-	db       *sql.DB
-	Home     string
+	Home string
 	// See https://pkg.go.dev/github.com/apex/log#InfoLevel for
 	// available levels.
 	logLevel log.Level
@@ -82,9 +78,7 @@ func Setup(home string) *DI {
 	if home == "" {
 		panic("home is set to an empty string")
 	}
-	dbdriver := "sqlite3"
 	sqlitedb := fp.Clean(fmt.Sprintf("%s/.kick/metadata/metadata.db", home))
-	dbdsn := fmt.Sprintf("file:%s?_foreign_key=on", sqlitedb)
 	pathUserConf := fp.Clean(fmt.Sprintf("%s/.kick/config.yml", home))
 	pathTemplateConf := fp.Clean(fmt.Sprintf("%s/.kick/templates.yml", home))
 	pathGlobalDir := fp.Clean(fmt.Sprintf("%s/.kick/globals", home))
@@ -96,8 +90,6 @@ func Setup(home string) *DI {
 		logLvl = log.DebugLevel
 	}
 	s := &DI{
-		DBDriver:         dbdriver,
-		DBDsn:            dbdsn,
 		SqliteDB:         sqlitedb,
 		Home:             home,
 		PathMetadataDir:  pathMetadataDir,
@@ -133,19 +125,6 @@ func (s *DI) ConfigFile() *config.File {
 	err := conf.Load()
 	errutils.Epanic(err)
 	return conf
-}
-
-// GetDB return DB object.
-func (s *DI) GetDB() *sql.DB {
-	if s.db != nil {
-		return s.db
-	}
-	db, err := sql.Open(s.DBDriver, s.DBDsn)
-	if err != nil {
-		panic(err)
-	}
-	s.db = db
-	return s.db
 }
 
 // GetORM return ORM object.

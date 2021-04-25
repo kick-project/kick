@@ -1,7 +1,6 @@
 package update
 
 import (
-	"database/sql"
 	"fmt"
 	"path/filepath"
 	"sync"
@@ -21,7 +20,6 @@ import (
 // Update build metadata
 type Update struct {
 	ConfigFile  *config.File `copier:"must"`
-	DB          *sql.DB      `copier:"must"`
 	ORM         *gorm.DB     `copier:"must"`
 	Log         *log.Logger  `copier:"must"`
 	MetadataDir string       `copier:"must"`

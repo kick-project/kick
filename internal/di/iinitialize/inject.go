@@ -8,8 +8,6 @@ import (
 func Inject(s *di.DI) (opts struct {
 	ConfigPath         string // Path to configuration file
 	ConfigTemplatePath string // Path to template configuration file
-	DBDriver           string // SQL Driver to use
-	DSN                string // SQL DSN
 	HomeDir            string // Path to home directory
 	MetadataDir        string // Path to metadata directory
 	SQLiteFile         string // Path to DB file
@@ -17,8 +15,6 @@ func Inject(s *di.DI) (opts struct {
 }) {
 	opts.ConfigPath = s.PathUserConf
 	opts.ConfigTemplatePath = s.PathTemplateConf
-	opts.DBDriver = s.DBDriver
-	opts.DSN = s.DBDsn
 	opts.HomeDir = s.Home
 	opts.MetadataDir = s.PathMetadataDir
 	opts.SQLiteFile = s.SqliteDB

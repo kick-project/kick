@@ -27,15 +27,10 @@ func TestInit(t *testing.T) {
 	assert.FileExists(t, dbfile)
 	assert.DirExists(t, fp.Clean(fmt.Sprintf("%s/.kick/templates", home)))
 
-	db := inject.GetDB()
-	defer db.Close()
-	stmt, err := db.Prepare(`SELECT count(*) as count FROM master WHERE url="none"`)
-	if err != nil {
-		t.Error(err)
-	}
-	defer stmt.Close()
+	db := inject.GetORM()
+	row := db.Raw(`SELECT count(*) as count FROM master WHERE url="none"`).Row()
 	var count int
-	err = stmt.QueryRow().Scan(&count)
+	err := row.Scan(&count)
 	if err != nil {
 		t.Error(err)
 	}

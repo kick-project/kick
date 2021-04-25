@@ -22,17 +22,17 @@ func TestUpdate(t *testing.T) {
 
 	initcmd.InitCmd([]string{"init"}, inject)
 
-	dbConn := inject.GetDB()
-	_, err := dbConn.Exec(`DELETE FROM template`)
-	if err != nil {
-		t.Error(err)
+	dbConn := inject.GetORM()
+	result := dbConn.Raw(`DELETE FROM template`)
+	if result.Error != nil {
+		t.Error(result.Error)
 	}
 
 	Update([]string{"update"}, inject)
 
 	var count int
-	row := dbConn.QueryRow(`SELECT count(*) AS count FROM template`)
-	err = row.Scan(&count)
+	row := dbConn.Raw(`SELECT count(*) AS count FROM template`).Row()
+	err := row.Scan(&count)
 	if err != nil {
 		t.Error(err)
 	}
