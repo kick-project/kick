@@ -17,7 +17,6 @@ require (
 	github.com/kevinburke/ssh_config v1.1.0 // indirect
 	github.com/mattn/go-isatty v0.0.12
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible
-	github.com/pkg/errors v0.9.1 // indirect
 	github.com/satori/go.uuid v1.2.0 // indirect
 	github.com/sergi/go-diff v1.2.0 // indirect
 	github.com/sevlyar/go-daemon v0.1.5

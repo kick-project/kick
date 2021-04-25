@@ -1,14 +1,18 @@
 package sync
 
 import (
+	"fmt"
+	"io/ioutil"
 	"testing"
 	"time"
 
 	"github.com/jinzhu/copier"
 	_ "github.com/mattn/go-sqlite3" // Required by 'database/sql'
+	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 
+	"path/filepath"
 	fp "path/filepath"
 
 	"github.com/kick-project/kick/internal/di"
@@ -20,55 +24,78 @@ import (
 	"github.com/kick-project/kick/internal/utils/errutils"
 )
 
-func setup() (*di.DI, *gorm.DB) {
-	home := fp.Join(utils.TempDir(), "home")
-	s := di.Setup(home)
+func setup(t *testing.T, home string, models ...interface{}) (*Sync, *di.DI, *gorm.DB) {
+	home = fp.Join(utils.TempDir(), home)
+	inject := di.Setup(home)
 	init := initialize.Initialize{}
-	err := copier.Copy(&init, iinitialize.Inject(s))
+	err := copier.Copy(&init, iinitialize.Inject(inject))
 	if err != nil {
 		errutils.Epanic(err)
 	}
-	db := s.GetORM()
-	return s, db
-}
+	init.Init()
 
-func TestGlobal(t *testing.T) {
-	s, db := setup()
+	db := inject.GetORM()
 
-	// TODO: Create a global URL
-	g := model.Global{
-		Name: "master",
-		URL:  "http://127.0.0.1:5000/master2.git",
-		Desc: "master 2",
-	}
+	for _, m := range models {
+		inserted := false
+		var err error
+		for i := 0; i < 10; i++ {
+			result := db.Clauses(clause.Insert{Modifier: "OR IGNORE"}).Create(m)
 
-	inserted := false
-	var err error
-	for i := 0; i < 10; i++ {
-		result := db.Clauses(clause.Insert{Modifier: "OR IGNORE"}).Create(&g)
-
-		// TODO: Find internal race condition within gorm or sqlite3 library.
-		if result.Error == nil {
-			inserted = true
-			break
-		} else {
-			err = result.Error
-			time.Sleep(time.Duration(i) * 100 * time.Millisecond)
+			// TODO: Find internal race condition within gorm or sqlite3 library.
+			if result.Error == nil {
+				inserted = true
+				break
+			} else {
+				err = result.Error
+				time.Sleep(time.Duration(i) * 100 * time.Millisecond)
+			}
+		}
+		if !inserted {
+			t.Errorf("Could not insert into database: %v\n", err)
 		}
 	}
-	if !inserted {
-		t.Errorf("Could not insert into database: %v\n", err)
-	}
 
-	syncobj := &Sync{}
-	err = copier.Copy(syncobj, isync.Inject(s))
+	sync := &Sync{}
+	err = copier.Copy(sync, isync.Inject(inject))
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
 	}
+	return sync, inject, db
+}
 
+func TestGlobal(t *testing.T) {
+	// TODO: Create a global URL
+	m := model.Global{
+		Name: "master",
+		URL:  "http://127.0.0.1:5000/master2.git",
+		Desc: "master 2",
+	}
+	syncobj, _, _ := setup(t, "TestGlobal", &m)
 	syncobj.Global()
 }
 
 func TestGlobalNoURL(t *testing.T) {
+}
+
+func TestTemplates(t *testing.T) {
+	syncobj, inject, _ := setup(t, "TestTemplates")
+
+	contents := []byte(`
+- handle: tmpl1	
+  url: http://127.0.0.1:5000/tmpl1.git
+  desc: Template 1
+- handle: tmpl2
+  url: http://127.0.0.1:5000/tmpl2.git
+  desc: Template 2
+`)
+	err := ioutil.WriteFile(inject.PathTemplateConf, contents, 0644)
+	if err != nil {
+		t.Error(err)
+	}
+
+	syncobj.Templates()
+	assert.DirExists(t, filepath.Clean(fmt.Sprintf(`%s/%s`, inject.PathTemplateDir, `127.0.0.1/tmpl1`)))
+	assert.DirExists(t, filepath.Clean(fmt.Sprintf(`%s/%s`, inject.PathTemplateDir, `127.0.0.1/tmpl2`)))
 }
