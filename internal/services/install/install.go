@@ -22,14 +22,14 @@ import (
 
 // Install manage installation of templates
 type Install struct {
-	ConfigFile *config.File
-	ORM        *gorm.DB
-	Log        *log.Logger
-	Plumb      *plumbing.Plumbing
-	Stderr     io.Writer
-	Stdin      io.Reader
-	Stdout     io.Writer
-	Sync       *sync.Sync
+	ConfigFile *config.File       `copier:"must"`
+	ORM        *gorm.DB           `copier:"must"`
+	Log        *log.Logger        `copier:"must"`
+	Plumb      *plumbing.Plumbing `copier:"must"`
+	Stderr     io.Writer          `copier:"must"`
+	Stdin      io.Reader          `copier:"must"`
+	Stdout     io.Writer          `copier:"must"`
+	Sync       *sync.Sync         `copier:"must"`
 }
 
 var selectWithOrigin = `

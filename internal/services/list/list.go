@@ -15,9 +15,9 @@ import (
 
 // List manage listing of installed templates
 type List struct {
-	Stderr io.Writer
-	Stdout io.Writer
-	Conf   *config.File
+	Stderr io.Writer    `copier:"must"`
+	Stdout io.Writer    `copier:"must"`
+	Conf   *config.File `copier:"must"`
 }
 
 // List lists the output

@@ -10,11 +10,11 @@ import (
 
 // Remove remove installed templates
 type Remove struct {
-	Conf             *config.File
-	PathTemplateConf string
-	PathUserConf     string
-	Stderr           io.Writer
-	Stdout           io.Writer
+	Conf             *config.File `copier:"must"`
+	PathTemplateConf string       `copier:"must"`
+	PathUserConf     string       `copier:"must"`
+	Stderr           io.Writer    `copier:"must"`
+	Stdout           io.Writer    `copier:"must"`
 }
 
 // Remove removes a handle from installed templates

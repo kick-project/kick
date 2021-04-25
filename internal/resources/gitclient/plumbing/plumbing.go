@@ -16,7 +16,7 @@ const (
 
 // Plumbing Manages downloading of metadata
 type Plumbing struct {
-	Base string
+	Base string `copier:"must"`
 	mb   *plumb
 }
 

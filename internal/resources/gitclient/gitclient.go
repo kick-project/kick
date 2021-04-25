@@ -32,10 +32,10 @@ func Get(url string, g *plumb.Plumbing) (path string, err error) {
 
 // Gitclient gitclient
 type Gitclient struct {
-	URL    string
-	Local  string
-	Output *os.File
-	Ref    string
+	URL    string   `copier:"must"`
+	Local  string   `copier:"must"`
+	Output *os.File `copier:"must"`
+	Ref    string   `copier:"must"`
 }
 
 // Sync will download/synchronize with the upstream git repo

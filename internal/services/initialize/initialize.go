@@ -10,14 +10,14 @@ import (
 
 // Initialize is responsible for initializing all disk paths
 type Initialize struct {
-	ConfigPath         string
-	ConfigTemplatePath string
-	DBDriver           string
-	DSN                string
-	HomeDir            string
-	MetadataDir        string
-	SQLiteFile         string
-	TemplateDir        string
+	ConfigPath         string `copier:"must"`
+	ConfigTemplatePath string `copier:"must"`
+	DBDriver           string `copier:"must"`
+	DSN                string `copier:"must"`
+	HomeDir            string `copier:"must"`
+	MetadataDir        string `copier:"must"`
+	SQLiteFile         string `copier:"must"`
+	TemplateDir        string `copier:"must"`
 }
 
 // Init initialize everything.
