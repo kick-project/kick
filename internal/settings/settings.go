@@ -46,7 +46,6 @@ type Settings struct {
 	PathGlobalDir    string
 	PathMasterDir    string
 	PathTemplateDir  string
-	PathDownloadDir  string
 	PathUserConf     string
 	SqliteDB         string
 	ModelDB          string
@@ -90,7 +89,6 @@ func GetSettings(home string) *Settings {
 	pathGlobalDir := fp.Clean(fmt.Sprintf("%s/.kick/globals", home))
 	pathMasterDir := fp.Clean(fmt.Sprintf("%s/.kick/masters", home))
 	pathTemplateDir := fp.Clean(fmt.Sprintf("%s/.kick/templates", home))
-	pathDownloadDir := fp.Clean(fmt.Sprintf("%s/.kick", home))
 	pathMetadataDir := fp.Clean(fmt.Sprintf("%s/.kick/metadata", home))
 	logLvl := log.ErrorLevel
 	if env.Debug() {
@@ -106,7 +104,6 @@ func GetSettings(home string) *Settings {
 		PathGlobalDir:    pathGlobalDir,
 		PathMasterDir:    pathMasterDir,
 		PathTemplateDir:  pathTemplateDir,
-		PathDownloadDir:  pathDownloadDir,
 		PathUserConf:     pathUserConf,
 		Stderr:           os.Stderr,
 		Stdin:            os.Stdin,

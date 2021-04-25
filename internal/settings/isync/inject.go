@@ -16,7 +16,6 @@ import (
 
 // Inject creates settings for tablesync.New
 func Inject(s *settings.Settings) (opts struct {
-	BasePath           string
 	ORM                *gorm.DB
 	Config             *config.File
 	ConfigTemplatePath string
@@ -37,7 +36,6 @@ func Inject(s *settings.Settings) (opts struct {
 	err = copier.Copy(plumbTemplate, iplumbing.InjectTemplate(s))
 	errutils.Epanic(err)
 
-	opts.BasePath = s.PathDownloadDir
 	opts.ORM = s.GetORM()
 	opts.Config = s.ConfigFile()
 	opts.ConfigTemplatePath = s.PathTemplateConf

@@ -20,7 +20,6 @@ import (
 
 // Sync synchronize database tables
 type Sync struct {
-	BasePath           string
 	ORM                *gorm.DB           `copier:"must"`
 	Config             *config.File       `copier:"must"`
 	ConfigTemplatePath string             `copier:"must"`
