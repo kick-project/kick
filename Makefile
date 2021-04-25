@@ -231,7 +231,7 @@ getversion:
 
 .PHONY: _schema
 _schema: ## Dump Schema to SQL. Used to inspect 
-	test -f tmp/schema_test.db && sqlite3 tmp/model_test.db ".schema --indent" > tmp/model_test.sql
+	test -f tmp/model_test.db && sqlite3 tmp/model_test.db ".schema --indent"
 
 #
 # Helper targets
