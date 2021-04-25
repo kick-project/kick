@@ -93,7 +93,7 @@ _unit: test_setup ## Unit testing
 	@$(MAKE) _test_setup_gitserver
 	### Unit Tests
 	gotestsum --jsonfile reports/unit.json --junitfile reports/junit.xml -- -timeout 5s -covermode atomic -coverprofile=./reports/coverage.out -v ./...; echo $$? > reports/exitcode.txt
-	@go-test-report -o reports/html/unit.html < reports/unit.json > /dev/null
+	@go-test-report -t "kick unit tests" -o reports/html/unit.html < reports/unit.json > /dev/null
 
 _cc: _unit ## Code coverage
 	### Code Coverage
