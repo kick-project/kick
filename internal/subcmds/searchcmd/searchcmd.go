@@ -52,7 +52,7 @@ func Search(args []string, inject *di.DI) int {
 	synchro := &sync.Sync{}
 	err = copier.Copy(synchro, isync.Inject(inject))
 	errutils.Epanic(err)
-	synchro.Templates()
+	synchro.Files()
 	srch := &search.Search{}
 	err = copier.Copy(srch, isearch.Inject(inject))
 	errutils.Epanic(err)

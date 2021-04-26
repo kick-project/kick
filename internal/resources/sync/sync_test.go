@@ -91,7 +91,7 @@ func TestMaster(t *testing.T) {
 	assert.DirExists(t, filepath.Clean(fmt.Sprintf(`%s/%s`, inject.PathMasterDir, `127.0.0.1/master2`)))
 }
 
-func TestTemplates(t *testing.T) {
+func TestFiles(t *testing.T) {
 	syncobj, inject, _ := setup(t, "TestTemplates")
 
 	contents := []byte(`
@@ -107,7 +107,7 @@ func TestTemplates(t *testing.T) {
 		t.Error(err)
 	}
 
-	syncobj.Templates()
+	syncobj.Files()
 	assert.DirExists(t, filepath.Clean(fmt.Sprintf(`%s/%s`, inject.PathTemplateDir, `127.0.0.1/tmpl1`)))
 	assert.DirExists(t, filepath.Clean(fmt.Sprintf(`%s/%s`, inject.PathTemplateDir, `127.0.0.1/tmpl2`)))
 }

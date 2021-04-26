@@ -53,7 +53,7 @@ func Start(args []string, inject *di.DI) int {
 	synchro := &sync.Sync{}
 	err = copier.Copy(synchro, isync.Inject(inject))
 	errutils.Epanic(err)
-	synchro.Templates()
+	synchro.Files()
 
 	// Set project name
 	inject.ProjectName = filepath.Base(opts.ProjectPath)

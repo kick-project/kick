@@ -250,7 +250,7 @@ func (i *Install) createEntry(handle string, entry config.Template) {
 		fmt.Fprintf(i.Stderr, "%s\n", err.Error())
 		utils.Exit(255)
 	}
-	i.Sync.Templates()
+	i.Sync.Files()
 	switch {
 	case entry.Template == "":
 		fmt.Fprintf(i.Stdout, "Installed %s -> %s\n", entry.Handle, entry.URL)

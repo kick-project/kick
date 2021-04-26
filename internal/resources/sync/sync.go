@@ -72,9 +72,9 @@ func (s *Sync) Master() {
 	}
 }
 
-// Templates synchronizes templates between the YAML configuration, database
+// Files synchronizes templates between the YAML configuration, database
 // and its upstream version control repository.
-func (s *Sync) Templates() {
+func (s *Sync) Files() {
 	key := "installed"
 	// Reload configuration incase the file changed after creation of self.
 	err := s.Config.Load()
