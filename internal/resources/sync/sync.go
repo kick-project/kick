@@ -9,7 +9,6 @@ import (
 
 	"github.com/apex/log"
 	"github.com/kick-project/kick/internal/resources/config"
-	"github.com/kick-project/kick/internal/resources/db"
 	"github.com/kick-project/kick/internal/resources/gitclient"
 	"github.com/kick-project/kick/internal/resources/gitclient/plumbing"
 	"github.com/kick-project/kick/internal/resources/model"
@@ -77,8 +76,6 @@ func (s *Sync) Master() {
 // and its upstream version control repository.
 func (s *Sync) Templates() {
 	key := "installed"
-	db.Lock()
-	defer db.Unlock()
 	// Reload configuration incase the file changed after creation of self.
 	err := s.Config.Load()
 	errutils.Epanic(err)
