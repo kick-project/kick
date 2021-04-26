@@ -229,8 +229,8 @@ cattest: ## Print the output of the last set of tests
 getversion:
 	VERSION=$(VERSION) bash -c 'echo $$VERSION'
 
-.PHONY: _schema
-_schema: ## Dump Schema to SQL. Used to inspect 
+.PHONY: _catschema
+_catschema: ## Dump Schema to SQL. Used to inspect 
 	test -f tmp/model_test.db && sqlite3 tmp/model_test.db ".schema --indent"
 
 #

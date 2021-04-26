@@ -31,6 +31,7 @@ type Master struct {
 	Name     string
 	URL      string `gorm:"index:,unique"`
 	Desc     string
+	Global   []Global   `gorm:"many2many:global_master"`
 	Template []Template `gorm:"many2many:master_template"`
 }
 
@@ -104,14 +105,29 @@ func CreateModel(opts *Options) (db *gorm.DB) {
 		&Sync{},
 	)
 	errutils.Efatalf("can not migrate database: %v", err)
-	result := db.Clauses(clause.Insert{Modifier: "OR IGNORE"}).Create(&Master{
+
+	// Insert base global
+	g := &Global{
 		Name: "local",
 		URL:  "none",
-		Desc: "This template is generated locally",
-	})
-
+		Desc: "Locally defined masters",
+	}
+	result := db.Clauses(clause.Insert{Modifier: "OR IGNORE"}).Create(g)
 	if result.Error != nil {
 		errutils.Efatalf("can not insert root record into database: %v", result.Error)
 	}
+
+	// Insert base master
+	m := &Master{
+		Name:   "local",
+		URL:    "none",
+		Desc:   "Locally defined templates",
+		Global: []Global{*g},
+	}
+	result = db.Clauses(clause.Insert{Modifier: "OR IGNORE"}).Create(m)
+	if result.Error != nil {
+		errutils.Efatalf("can not insert root record into database: %v", result.Error)
+	}
+
 	return db
 }
