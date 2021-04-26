@@ -109,7 +109,7 @@ func (t *Template) SetSrc(name string) {
 	localpath, err := gitclient.Get(tmpl.URL, g)
 
 	// Set renderer from conf
-	confPath := filepath.Join(localpath, ".kicktemplate.yml")
+	confPath := filepath.Join(localpath, ".kick.yml")
 	t.loadTempateConf(confPath)
 
 	errutils.Efatalf(`template "%s" not found: %v`, name, err)
