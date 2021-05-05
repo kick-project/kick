@@ -260,11 +260,7 @@ func (fp *filePair) route() error {
 func (fp *filePair) skipFile() bool {
 	rvalue := false
 	switch {
-	case strings.HasSuffix(fp.srcPath, ".kickglobal.yml"):
-		rvalue = true
-	case strings.HasSuffix(fp.srcPath, ".kickmaster.yml"):
-		rvalue = true
-	case strings.HasSuffix(fp.srcPath, ".kicktemplate.yml"):
+	case strings.HasSuffix(fp.srcPath, ".kick.yml"):
 		rvalue = true
 	}
 	return rvalue

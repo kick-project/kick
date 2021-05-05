@@ -1,0 +1,3 @@
+# kick:render
+project: ${PROJECT_NAME}
+home: ${HOME}

@@ -5,14 +5,18 @@ package sync
 import (
 	"fmt"
 	"io"
+	"path/filepath"
 	"time"
 
 	"github.com/apex/log"
+	"github.com/jinzhu/copier"
 	"github.com/kick-project/kick/internal/resources/config"
 	"github.com/kick-project/kick/internal/resources/gitclient"
 	"github.com/kick-project/kick/internal/resources/gitclient/plumbing"
 	"github.com/kick-project/kick/internal/resources/model"
+	"github.com/kick-project/kick/internal/resources/serialize"
 	"github.com/kick-project/kick/internal/utils/errutils"
+	"github.com/kick-project/kick/internal/utils/marshal"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
@@ -24,31 +28,9 @@ type Sync struct {
 	ConfigTemplatePath string             `copier:"must"`
 	Log                *log.Logger        `copier:"must"`
 	PlumbTemplates     *plumbing.Plumbing `copier:"must"`
-	PlumbGlobal        *plumbing.Plumbing `copier:"must"`
 	PlumbMaster        *plumbing.Plumbing `copier:"must"`
 	Stderr             io.Writer          `copier:"must"`
 	Stdout             io.Writer          `copier:"must"`
-}
-
-// Global syncs global data
-func (s *Sync) Global() {
-	rows, err := s.ORM.Model(&model.Global{}).Rows()
-	errutils.Epanic(err)
-
-	defer rows.Close()
-	for rows.Next() {
-		var global model.Global
-		err := s.ORM.ScanRows(rows, &global)
-		if err != nil {
-			fmt.Fprintf(s.Stderr, "warning. can not scan table row from `global`: %v\n", err)
-		}
-
-		_, err = gitclient.Get(global.URL, s.PlumbGlobal)
-		if err != nil {
-			fmt.Fprintf(s.Stderr, "warning. can not download %s: %s\n", global.URL, err.Error())
-			continue
-		}
-	}
 }
 
 // Master syncs master data
@@ -64,12 +46,42 @@ func (s *Sync) Master() {
 			fmt.Fprintf(s.Stderr, "warning. can not scan table row from `global`: %v\n", err)
 		}
 
-		_, err = gitclient.Get(master.URL, s.PlumbMaster)
-		if err != nil {
-			fmt.Fprintf(s.Stderr, "warning. can not download %s: %s\n", master.URL, err.Error())
+		if master.URL == "none" {
 			continue
 		}
+
+		path, err := s.downloadMaster(master.URL)
+		if err != nil {
+			continue
+		}
+
+		masterPath := filepath.Clean(fmt.Sprintf("%s/%s", path, "master.yml"))
+		masterSerialize, err := s.loadMaster(masterPath)
+		if err != nil {
+			continue
+		}
+		_ = copier.Copy(&master, &masterSerialize)
+		s.ORM.Model(&model.Master{}).Updates(&master)
 	}
+}
+
+// downloadMaster downloads master repo
+func (s *Sync) downloadMaster(url string) (path string, err error) {
+	path, err = gitclient.Get(url, s.PlumbMaster)
+	if errutils.Elogf("warning. can not download %s: %v\n", url, err) {
+		return
+	}
+
+	return
+}
+
+// loadMaster loads global file
+func (s *Sync) loadMaster(path string) (master serialize.Master, err error) {
+	err = marshal.UnmarshalFromFile(&master, path)
+	if errutils.Elogf("warning. unable to unmarshal file \"%s\": %v", path, err) {
+		return
+	}
+	return
 }
 
 // Files synchronizes templates between the YAML configuration, database

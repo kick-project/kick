@@ -14,16 +14,6 @@ import (
 // Models
 //
 
-// Global global template defintion
-type Global struct {
-	gorm.Model
-	ID     uint `gorm:"primaryKey;not null"`
-	Name   string
-	URL    string `gorm:"index:,unique"`
-	Desc   string
-	Master []Master `gorm:"many2many:global_master"`
-}
-
 // Master a set of templates
 type Master struct {
 	gorm.Model
@@ -31,7 +21,6 @@ type Master struct {
 	Name     string
 	URL      string `gorm:"index:,unique"`
 	Desc     string
-	Global   []Global   `gorm:"many2many:global_master"`
 	Template []Template `gorm:"many2many:master_template"`
 }
 
@@ -97,7 +86,6 @@ func CreateModel(opts *Options) (db *gorm.DB) {
 	errutils.Efatalf("Can not initialize an ORM database: %v", err)
 
 	err = db.AutoMigrate(
-		&Global{},
 		&Master{},
 		&Versions{},
 		&Template{},
@@ -106,25 +94,13 @@ func CreateModel(opts *Options) (db *gorm.DB) {
 	)
 	errutils.Efatalf("can not migrate database: %v", err)
 
-	// Insert base global
-	g := &Global{
-		Name: "local",
-		URL:  "none",
-		Desc: "Locally defined masters",
-	}
-	result := db.Clauses(clause.Insert{Modifier: "OR IGNORE"}).Create(g)
-	if result.Error != nil {
-		errutils.Efatalf("can not insert root record into database: %v", result.Error)
-	}
-
 	// Insert base master
 	m := &Master{
-		Name:   "local",
-		URL:    "none",
-		Desc:   "Locally defined templates",
-		Global: []Global{*g},
+		Name: "local",
+		URL:  "none",
+		Desc: "Locally defined templates",
 	}
-	result = db.Clauses(clause.Insert{Modifier: "OR IGNORE"}).Create(m)
+	result := db.Clauses(clause.Insert{Modifier: "OR IGNORE"}).Create(m)
 	if result.Error != nil {
 		errutils.Efatalf("can not insert root record into database: %v", result.Error)
 	}

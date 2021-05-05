@@ -1,4 +1,4 @@
-package sync
+package sync_test
 
 import (
 	"fmt"
@@ -10,7 +10,6 @@ import (
 	_ "github.com/mattn/go-sqlite3" // Required by 'database/sql'
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 
 	"path/filepath"
 	fp "path/filepath"
@@ -19,12 +18,14 @@ import (
 	"github.com/kick-project/kick/internal/di/iinitialize"
 	"github.com/kick-project/kick/internal/di/isync"
 	"github.com/kick-project/kick/internal/resources/model"
+	"github.com/kick-project/kick/internal/resources/model/clauses"
+	"github.com/kick-project/kick/internal/resources/sync"
 	"github.com/kick-project/kick/internal/services/initialize"
 	"github.com/kick-project/kick/internal/utils"
 	"github.com/kick-project/kick/internal/utils/errutils"
 )
 
-func setup(t *testing.T, home string, models ...interface{}) (*Sync, *di.DI, *gorm.DB) {
+func setup(t *testing.T, home string, models ...interface{}) (*sync.Sync, *di.DI, *gorm.DB) {
 	home = fp.Join(utils.TempDir(), home)
 	inject := di.Setup(home)
 	init := initialize.Initialize{}
@@ -40,7 +41,7 @@ func setup(t *testing.T, home string, models ...interface{}) (*Sync, *di.DI, *go
 		inserted := false
 		var err error
 		for i := 0; i < 10; i++ {
-			result := db.Clauses(clause.Insert{Modifier: "OR IGNORE"}).Create(m)
+			result := db.Clauses(clauses.OrIgnore).Create(m)
 
 			// TODO: Find internal race condition within gorm or sqlite3 library.
 			if result.Error == nil {
@@ -56,27 +57,13 @@ func setup(t *testing.T, home string, models ...interface{}) (*Sync, *di.DI, *go
 		}
 	}
 
-	sync := &Sync{}
+	sync := &sync.Sync{}
 	err = copier.Copy(sync, isync.Inject(inject))
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
 	}
 	return sync, inject, db
-}
-
-func TestGlobal(t *testing.T) {
-	m := model.Global{
-		Name: "master",
-		URL:  "http://127.0.0.1:5000/global1.git",
-		Desc: "master 2",
-	}
-	syncobj, inject, _ := setup(t, "TestGlobal", &m)
-	syncobj.Global()
-	assert.DirExists(t, filepath.Clean(fmt.Sprintf(`%s/%s`, inject.PathGlobalDir, `127.0.0.1/global1`)))
-}
-
-func TestGlobalNoURL(t *testing.T) {
 }
 
 func TestMaster(t *testing.T) {
