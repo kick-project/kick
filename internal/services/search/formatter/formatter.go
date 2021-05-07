@@ -62,9 +62,9 @@ func (s *Standard) Writer(w io.Writer, ch <-chan *entry.Entry) {
 
 		// Body
 		if s.NoANSICodes || s.noTTY() {
-			fmt.Fprintf(tabwr, "%s/%s\t%s\n", e.Name, e.MasterName, e.URL)
+			fmt.Fprintf(tabwr, "%s/%s\t%s\n", e.Name, e.RepoName, e.URL)
 		} else {
-			fmt.Fprintf(tabwr, "%v%s%v/%s\t%s%v\n", ansicodes.GreenText, e.Name, ansicodes.None, e.MasterName, e.URL, ansicodes.None)
+			fmt.Fprintf(tabwr, "%v%s%v/%s\t%s%v\n", ansicodes.GreenText, e.Name, ansicodes.None, e.RepoName, e.URL, ansicodes.None)
 		}
 
 		// Re-print header

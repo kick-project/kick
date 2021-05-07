@@ -28,7 +28,7 @@ func TestInit(t *testing.T) {
 	assert.DirExists(t, fp.Clean(fmt.Sprintf("%s/.kick/templates", home)))
 
 	db := inject.GetORM()
-	row := db.Raw(`SELECT count(*) as count FROM master WHERE url="none"`).Row()
+	row := db.Raw(`SELECT count(*) as count FROM repo WHERE url="none"`).Row()
 	var count int
 	err := row.Scan(&count)
 	if err != nil {

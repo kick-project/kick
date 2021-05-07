@@ -72,9 +72,9 @@ func TestSearch(t *testing.T) {
 		}
 	}
 
-	totalTestMaster2Rows := 0
-	for range srch.Search("testmaster2") {
-		totalTestMaster2Rows++
+	totalTestRepo2Rows := 0
+	for range srch.Search("testrepo2") {
+		totalTestRepo2Rows++
 	}
 
 	totalBoilerplate2Rows := 0
@@ -87,7 +87,7 @@ func TestSearch(t *testing.T) {
 	assert.Equal(t, 4, counts["nameContains"])
 	assert.Equal(t, 5, counts["urlContains"])
 	assert.Equal(t, 7, totalTemplateRows)
-	assert.Equal(t, 5, totalTestMaster2Rows)
+	assert.Equal(t, 5, totalTestRepo2Rows)
 	assert.Equal(t, 4, totalBoilerplate2Rows)
 }
 
@@ -95,10 +95,10 @@ func TestSearch(t *testing.T) {
 // Utils
 //
 func buildSearchDataORM(t *testing.T, db *gorm.DB) {
-	m1 := model.Master{
-		Name: "testmaster",
-		URL:  "http://127.0.0.1:5000/master1.git",
-		Desc: "Master 1",
+	m1 := model.Repo{
+		Name: "testrepo",
+		URL:  "http://127.0.0.1:5000/repo1.git",
+		Desc: "Repo 1",
 	}
 
 	insertClause := clause.Insert{Modifier: "OR IGNORE"}
@@ -133,7 +133,7 @@ func buildSearchDataORM(t *testing.T, db *gorm.DB) {
 	}
 
 	for _, template := range t1 {
-		template.Master = []model.Master{m1}
+		template.Repo = []model.Repo{m1}
 		db.Debug().Clauses(insertClause).Create(&template)
 		if result.Error != nil {
 			t.Error(result.Error)
@@ -141,10 +141,10 @@ func buildSearchDataORM(t *testing.T, db *gorm.DB) {
 		}
 	}
 
-	m2 := model.Master{
-		Name: "testmaster2",
-		URL:  "http://127.0.0.1:5000/master2.git",
-		Desc: "Master 2",
+	m2 := model.Repo{
+		Name: "testrepo2",
+		URL:  "http://127.0.0.1:5000/repo2.git",
+		Desc: "Repo 2",
 	}
 
 	result = db.Debug().Clauses(insertClause).Create(&m2)
@@ -192,7 +192,7 @@ func buildSearchDataORM(t *testing.T, db *gorm.DB) {
 	}
 
 	for _, template := range t2 {
-		template.Master = []model.Master{m2}
+		template.Repo = []model.Repo{m2}
 		db.Debug().Clauses(insertClause).Create(&template)
 		if result.Error != nil {
 			t.Error(result.Error)

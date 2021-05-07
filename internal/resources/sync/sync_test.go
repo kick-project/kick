@@ -66,16 +66,16 @@ func setup(t *testing.T, home string, models ...interface{}) (*sync.Sync, *di.DI
 	return sync, inject, db
 }
 
-func TestMaster(t *testing.T) {
-	m := model.Master{
-		Name: "master1",
-		URL:  "http://127.0.0.1:5000/master2.git",
-		Desc: "master 1",
+func TestRepo(t *testing.T) {
+	m := model.Repo{
+		Name: "repo2",
+		URL:  "http://127.0.0.1:5000/repo2.git",
+		Desc: "repo 2",
 	}
 
-	syncobj, inject, _ := setup(t, "TestMaster", &m)
-	syncobj.Master()
-	assert.DirExists(t, filepath.Clean(fmt.Sprintf(`%s/%s`, inject.PathMasterDir, `127.0.0.1/master2`)))
+	syncobj, inject, _ := setup(t, "TestRepo", &m)
+	syncobj.Repo()
+	assert.DirExists(t, filepath.Clean(fmt.Sprintf(`%s/%s`, inject.PathRepoDir, `127.0.0.1/repo2`)))
 }
 
 func TestFiles(t *testing.T) {

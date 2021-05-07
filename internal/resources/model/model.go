@@ -14,14 +14,14 @@ import (
 // Models
 //
 
-// Master a set of templates
-type Master struct {
+// Repo a set of templates
+type Repo struct {
 	gorm.Model
 	ID       uint `gorm:"primaryKey;not null"`
 	Name     string
 	URL      string `gorm:"index:,unique"`
 	Desc     string
-	Template []Template `gorm:"many2many:master_template"`
+	Template []Template `gorm:"many2many:repo_template"`
 }
 
 // Template a template definition
@@ -31,7 +31,7 @@ type Template struct {
 	Name     string
 	URL      string `gorm:"index:,unique"`
 	Desc     string
-	Master   []Master `gorm:"many2many:master_template"`
+	Repo   []Repo `gorm:"many2many:repo_template"`
 	Versions []Versions
 }
 
@@ -86,7 +86,7 @@ func CreateModel(opts *Options) (db *gorm.DB) {
 	errutils.Efatalf("Can not initialize an ORM database: %v", err)
 
 	err = db.AutoMigrate(
-		&Master{},
+		&Repo{},
 		&Versions{},
 		&Template{},
 		&Installed{},
@@ -94,8 +94,8 @@ func CreateModel(opts *Options) (db *gorm.DB) {
 	)
 	errutils.Efatalf("can not migrate database: %v", err)
 
-	// Insert base master
-	m := &Master{
+	// Insert base repo
+	m := &Repo{
 		Name: "local",
 		URL:  "none",
 		Desc: "Locally defined templates",

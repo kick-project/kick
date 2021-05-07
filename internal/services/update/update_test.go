@@ -39,11 +39,11 @@ func initIt(inject *di.DI) {
 	i.Init()
 }
 
-func TestMaster_Load(t *testing.T) {
+func TestRepo_Load(t *testing.T) {
 	path, fname, furl, fdesc := fakeJSON(t)
 	defer os.Remove(path)
 	notEmpty(t, path)
-	m := Master{}
+	m := Repo{}
 	err := m.Load(path)
 	if err != nil {
 		errutils.Epanic(err)
@@ -59,10 +59,10 @@ func TestMaster_Load(t *testing.T) {
 	}
 }
 
-func TestMaster_Save(t *testing.T) {
+func TestRepo_Save(t *testing.T) {
 	path, _, _, _ := fakeJSON(t)
 	defer os.Remove(path)
-	m := Master{}
+	m := Repo{}
 	err := m.Load(path)
 	errutils.Epanic(err)
 	tmpfile, err := ioutil.TempFile("", "*.json")

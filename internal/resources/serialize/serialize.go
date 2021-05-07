@@ -1,7 +1,7 @@
 package serialize
 
-// Master yaml file
-type Master struct {
+// Repo yaml file
+type Repo struct {
 	Name         string   `yaml:"name"`
 	Desc         string   `yaml:"description"`
 	TemplateURLs []string `yaml:"templates"`
@@ -13,8 +13,8 @@ type Kick struct {
 	Desc string `yaml:"description"`
 }
 
-// MasterElement file
-type MasterElement struct {
+// RepoElement file
+type RepoElement struct {
 	Name string `yaml:"name"`
 	Desc string `yaml:"description"`
 	URL  string `yaml:"url"`

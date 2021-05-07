@@ -14,6 +14,7 @@ import (
 	"github.com/kick-project/kick/internal/resources/gitclient"
 	"github.com/kick-project/kick/internal/resources/gitclient/plumbing"
 	"github.com/kick-project/kick/internal/resources/model"
+	"github.com/kick-project/kick/internal/resources/model/clauses"
 	"github.com/kick-project/kick/internal/resources/serialize"
 	"github.com/kick-project/kick/internal/utils/errutils"
 	"github.com/kick-project/kick/internal/utils/marshal"
@@ -28,46 +29,75 @@ type Sync struct {
 	ConfigTemplatePath string             `copier:"must"`
 	Log                *log.Logger        `copier:"must"`
 	PlumbTemplates     *plumbing.Plumbing `copier:"must"`
-	PlumbMaster        *plumbing.Plumbing `copier:"must"`
+	PlumbRepo          *plumbing.Plumbing `copier:"must"`
 	Stderr             io.Writer          `copier:"must"`
 	Stdout             io.Writer          `copier:"must"`
 }
 
-// Master syncs master data
-func (s *Sync) Master() {
-	rows, err := s.ORM.Model(&model.Master{}).Rows()
+// Repo syncs repo data
+func (s *Sync) Repo() {
+	repos := s.processRepos()
+	s.processTemplates(repos)
+}
+
+func (s *Sync) processRepos() (repos []*model.Repo) {
+	rows, err := s.ORM.Model(&model.Repo{}).Rows()
 	errutils.Epanic(err)
 
 	defer rows.Close()
 	for rows.Next() {
-		var master model.Master
-		err := s.ORM.ScanRows(rows, &master)
+		var repo model.Repo
+		err := s.ORM.ScanRows(rows, &repo)
 		if err != nil {
 			fmt.Fprintf(s.Stderr, "warning. can not scan table row from `global`: %v\n", err)
 		}
 
-		if master.URL == "none" {
+		if repo.URL == "none" {
 			continue
 		}
 
-		path, err := s.downloadMaster(master.URL)
+		repos = append(repos, &repo)
+	}
+	return
+}
+
+func (s *Sync) processTemplates(repos []*model.Repo) {
+	for _, repo := range repos {
+		path, err := s.downloadRepo(repo.URL)
 		if err != nil {
 			continue
 		}
 
-		masterPath := filepath.Clean(fmt.Sprintf("%s/%s", path, "master.yml"))
-		masterSerialize, err := s.loadMaster(masterPath)
+		repoPath := filepath.Clean(fmt.Sprintf("%s/%s", path, "repo.yml"))
+		repoSerialize, err := s.loadRepo(repoPath)
 		if err != nil {
 			continue
 		}
-		_ = copier.Copy(&master, &masterSerialize)
-		s.ORM.Model(&model.Master{}).Updates(&master)
+
+		err = copier.Copy(&repo, &repoSerialize)
+		if errutils.Elogf("Can not copy object: %v", err) {
+			continue
+		}
+		result := s.ORM.Clauses(clauses.OrIgnore).Create(&repo)
+		if errutils.Elogf("Can not insert into repo: %v", result.Error) {
+			continue
+		} else if result.RowsAffected == 0 {
+			result2 := s.ORM.Model(&model.Repo{}).Updates(&repo)
+			if errutils.Elogf("Can not update repo table: %v", result2.Error) {
+				continue
+			} else if result2.RowsAffected == 0 {
+				errutils.Elogf("%v", fmt.Errorf("Can not update repo table"))
+				continue
+			}
+		}
+
+		s.loadTemplates(repo, filepath.Join(path, "templates"))
 	}
 }
 
-// downloadMaster downloads master repo
-func (s *Sync) downloadMaster(url string) (path string, err error) {
-	path, err = gitclient.Get(url, s.PlumbMaster)
+// downloadRepo downloads repo repo
+func (s *Sync) downloadRepo(url string) (path string, err error) {
+	path, err = gitclient.Get(url, s.PlumbRepo)
 	if errutils.Elogf("warning. can not download %s: %v\n", url, err) {
 		return
 	}
@@ -75,13 +105,44 @@ func (s *Sync) downloadMaster(url string) (path string, err error) {
 	return
 }
 
-// loadMaster loads global file
-func (s *Sync) loadMaster(path string) (master serialize.Master, err error) {
-	err = marshal.UnmarshalFromFile(&master, path)
+// loadRepo loads from a repo YAML file
+func (s *Sync) loadRepo(path string) (repo serialize.Repo, err error) {
+	err = marshal.UnmarshalFromFile(&repo, path)
 	if errutils.Elogf("warning. unable to unmarshal file \"%s\": %v", path, err) {
 		return
 	}
 	return
+}
+
+// loadTemplates loads templates from a repo file
+func (s *Sync) loadTemplates(repo *model.Repo, templatedir string) {
+	matches, err := filepath.Glob(templatedir + "/*.yml")
+	if errutils.Elogf("Can not load templates from \"%s\": %v", templatedir, err) {
+		return
+	}
+	for _, match := range matches {
+		var (
+			templateElement serialize.TemplateElement
+			templateModel   model.Template
+		)
+
+		err := marshal.UnmarshalFromFile(&templateElement, match)
+		if errutils.Elogf("Can not load template file \"%s\": %v", match, err) {
+			continue
+		}
+
+		err = copier.Copy(&templateModel, &templateElement)
+		if errutils.Elogf("Can not copy object: %v", err) {
+			continue
+		}
+
+		templateModel.Repo = append(templateModel.Repo, *repo)
+
+		result := s.ORM.Clauses(clauses.OrReplace).Create(&templateModel)
+		if errutils.Elogf("Can not load template file \"%s\" into database: %v", match, result.Error) {
+			continue
+		}
+	}
 }
 
 // Files synchronizes templates between the YAML configuration, database

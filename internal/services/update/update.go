@@ -40,7 +40,7 @@ func (m *Update) Build() error {
 	c.concurClones(6, p, churl, chtemplates)
 	c.concurInserts(m.ORM, chtemplates)
 
-	for _, url := range conf.MasterURLs {
+	for _, url := range conf.RepoURLs {
 		c.wait.Add(1)
 		churl <- url
 	}
@@ -81,13 +81,13 @@ func (c *workers) processURL(url string, p *plumbing.Plumbing, chtemplate chan<-
 		return
 	}
 
-	mpath := filepath.Clean(fmt.Sprintf("%s/master.yml", localpath))
+	mpath := filepath.Clean(fmt.Sprintf("%s/repo.yml", localpath))
 	if errutils.Elogf("error: can not open %s: %w: skipping %s", mpath, err, url) {
 		return
 	}
 
-	master := &Master{URL: url}
-	err = master.Load(mpath)
+	repo := &Repo{URL: url}
+	err = repo.Load(mpath)
 	if errutils.Elogf("error: %w: skipping %s\n", err, url) {
 		return
 	}
@@ -103,7 +103,7 @@ func (c *workers) processURL(url string, p *plumbing.Plumbing, chtemplate chan<-
 		if errutils.Elogf("error: loading template metadata from %s: %w: skipping", curpath, err) {
 			continue
 		}
-		t.Master = *master
+		t.Repo = *repo
 		c.wait.Add(1)
 		chtemplate <- t
 	}
@@ -128,29 +128,29 @@ func (c *workers) concurInserts(orm *gorm.DB, ch <-chan *Template) {
 }
 
 func (c *workers) insert(orm *gorm.DB, t *Template) {
-	modMaster := model.Master{
-		Name: t.Master.Name,
-		URL:  t.Master.URL,
-		Desc: t.Master.Description,
+	modRepo := model.Repo{
+		Name: t.Repo.Name,
+		URL:  t.Repo.URL,
+		Desc: t.Repo.Description,
 	}
-	result := orm.Clauses(clause.Insert{Modifier: "OR IGNORE"}).Create(&modMaster)
+	result := orm.Clauses(clause.Insert{Modifier: "OR IGNORE"}).Create(&modRepo)
 	if result.RowsAffected != 1 {
-		result = orm.First(&modMaster, "url = ?", t.Master.URL)
+		result = orm.First(&modRepo, "url = ?", t.Repo.URL)
 		if result.Error != nil {
 			errutils.Epanic(result.Error)
 		}
-		modMaster.Name = t.Master.Name
-		modMaster.URL = t.Master.URL
-		modMaster.Desc = t.Master.Description
+		modRepo.Name = t.Repo.Name
+		modRepo.URL = t.Repo.URL
+		modRepo.Desc = t.Repo.Description
 
-		orm.Model(&modMaster).Updates(&modMaster)
+		orm.Model(&modRepo).Updates(&modRepo)
 	}
 
 	modTemplate := model.Template{
 		Name:   t.Name,
 		URL:    t.URL,
 		Desc:   t.Description,
-		Master: []model.Master{modMaster},
+		Repo: []model.Repo{modRepo},
 	}
 	result = orm.Clauses(clause.Insert{Modifier: "OR IGNORE"}).Create(&modTemplate)
 	if result.RowsAffected != 1 {
@@ -161,26 +161,26 @@ func (c *workers) insert(orm *gorm.DB, t *Template) {
 		modTemplate.Name = t.Name
 		modTemplate.URL = t.URL
 		modTemplate.Desc = t.Description
-		modTemplate.Master = append(modTemplate.Master, modMaster)
+		modTemplate.Repo = append(modTemplate.Repo, modRepo)
 
 		orm.Model(&modTemplate).Updates(&modTemplate)
 	}
 }
 
-// Master is the master struct
-type Master struct {
+// Repo is the repo struct
+type Repo struct {
 	Name        string `json:"name" yaml:"name"`
 	URL         string `json:"url" yaml:"url"`
 	Description string `json:"description" yaml:"description"`
 }
 
 // Load loads from a json or yaml file, depending on the file suffix.
-func (m *Master) Load(path string) error {
+func (m *Repo) Load(path string) error {
 	return marshal.UnmarshalFromFile(m, path)
 }
 
 // Save saves to json or yaml file, depending on the file suffix.
-func (m *Master) Save(path string) error {
+func (m *Repo) Save(path string) error {
 	return marshal.Marshal2File(m, path)
 }
 
@@ -189,7 +189,7 @@ type Template struct {
 	Name        string `json:"name" yaml:"name"`
 	URL         string `json:"url" yaml:"url"`
 	Description string `json:"description" yaml:"description"`
-	Master      Master
+	Repo      Repo
 }
 
 // Load loads from a json or yaml file

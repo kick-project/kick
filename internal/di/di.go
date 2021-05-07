@@ -40,7 +40,7 @@ type DI struct {
 	ProjectName      string
 	PathMetadataDir  string
 	PathTemplateConf string
-	PathMasterDir    string
+	PathRepoDir    string
 	PathTemplateDir  string
 	PathUserConf     string
 	SqliteDB         string
@@ -80,7 +80,7 @@ func Setup(home string) *DI {
 	sqlitedb := fp.Clean(fmt.Sprintf("%s/.kick/metadata/metadata.db", home))
 	pathUserConf := fp.Clean(fmt.Sprintf("%s/.kick/config.yml", home))
 	pathTemplateConf := fp.Clean(fmt.Sprintf("%s/.kick/templates.yml", home))
-	pathMasterDir := fp.Clean(fmt.Sprintf("%s/.kick/masters", home))
+	pathRepoDir := fp.Clean(fmt.Sprintf("%s/.kick/repos", home))
 	pathTemplateDir := fp.Clean(fmt.Sprintf("%s/.kick/templates", home))
 	pathMetadataDir := fp.Clean(fmt.Sprintf("%s/.kick/metadata", home))
 	logLvl := log.ErrorLevel
@@ -92,7 +92,7 @@ func Setup(home string) *DI {
 		Home:             home,
 		PathMetadataDir:  pathMetadataDir,
 		PathTemplateConf: pathTemplateConf,
-		PathMasterDir:    pathMasterDir,
+		PathRepoDir:    pathRepoDir,
 		PathTemplateDir:  pathTemplateDir,
 		PathUserConf:     pathUserConf,
 		Stderr:           os.Stderr,

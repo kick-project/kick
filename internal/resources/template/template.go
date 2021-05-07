@@ -108,11 +108,11 @@ func (t *Template) SetSrc(name string) {
 	g := plumb.New(t.TemplateDir)
 	localpath, err := gitclient.Get(tmpl.URL, g)
 
+	errutils.Efatalf(`template "%s" not found: %v`, name, err)
+
 	// Set renderer from conf
 	confPath := filepath.Join(localpath, ".kick.yml")
 	t.loadTempateConf(confPath)
-
-	errutils.Efatalf(`template "%s" not found: %v`, name, err)
 
 	stat, err := os.Stat(localpath)
 	errutils.Efatalf(`error: %w`, err)

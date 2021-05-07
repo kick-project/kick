@@ -36,21 +36,21 @@ var selectWithOrigin = `
 SELECT
 	template.name AS templateName,
 	template.url AS templateURL,
-	master.name AS origin,
+	repo.name AS origin,
 	template.desc AS desc
-FROM template LEFT JOIN master_template ON (template.id = master_template.template_id)
-LEFT JOIN master ON (master_template.master_id = master.id)
-WHERE template.name = ? AND master.name = ?
+FROM template LEFT JOIN repo_template ON (template.id = repo_template.template_id)
+LEFT JOIN repo ON (repo_template.repo_id = repo.id)
+WHERE template.name = ? AND repo.name = ?
 `
 
 var selectWithoutOrigin = `
 SELECT
 	template.name AS templateName,
 	template.url AS templateURL,
-	master.name AS origin,
+	repo.name AS origin,
 	template.desc AS desc
-FROM template LEFT JOIN master_template ON (template.id = master_template.template_id)
-LEFT JOIN master ON (master_template.master_id = master.id)
+FROM template LEFT JOIN repo_template ON (template.id = repo_template.template_id)
+LEFT JOIN repo ON (repo_template.repo_id = repo.id)
 WHERE template.name = ?
 `
 

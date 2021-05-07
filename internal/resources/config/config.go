@@ -14,8 +14,8 @@ type File struct {
 	PathTemplateConf string     `yaml:"-"`
 	PathUserConf     string     `yaml:"-"` // Path to configuration file
 	Stderr           io.Writer  `yaml:"-"`
-	MasterURLs       []string   `yaml:"masters,omitempty"` // URLs to master git repositories
-	Templates        []Template `yaml:"-"`                 // Template definitions
+	RepoURLs         []string   `yaml:"repos,omitempty"` // URLs to repo git repositories
+	Templates        []Template `yaml:"-"`               // Template definitions
 }
 
 // SortByName sort template alphabetically by name

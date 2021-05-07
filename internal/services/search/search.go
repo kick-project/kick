@@ -13,16 +13,16 @@ import (
 )
 
 var querySearch = `
-SELECT templateName, templateURL, templateDesc, masterName, masterURL, masterDesc
+SELECT templateName, templateURL, templateDesc, repoName, repoURL, repoDesc
 FROM
 (
 	SELECT
 		template.name AS templateName,
 		template.url AS templateURL,
 		template.desc AS templateDesc,
-		master.name AS masterName,
-		master.url AS masterURL,
-		master.desc AS masterDesc,
+		repo.name AS repoName,
+		repo.url AS repoURL,
+		repo.desc AS repoDesc,
 		CASE WHEN LOWER(template.name) LIKE LOWER(?)
 			THEN
 				template.name
@@ -35,14 +35,14 @@ FROM
 			ELSE
 				NULL
 		END AS match2,
-		CASE WHEN LOWER(master.name) LIKE LOWER(?)
+		CASE WHEN LOWER(repo.name) LIKE LOWER(?)
 		THEN
 			template.name
 		ELSE
 			NULL
 		END AS match3
-	FROM template LEFT JOIN master_template ON (template.id = master_template.template_id)
-	LEFT JOIN master ON (master_template.master_id = master.id)
+	FROM template LEFT JOIN repo_template ON (template.id = repo_template.template_id)
+	LEFT JOIN repo ON (repo_template.repo_id = repo.id)
 	WHERE match1 IS NOT NULL OR match2 IS NOT NULL OR match3 IS NOT NULL
 	ORDER BY
 		match1 ASC NULLS LAST,
@@ -77,13 +77,13 @@ func (s *Search) Search(term string) <-chan *entry.Entry {
 				name       sql.NullString
 				URL        sql.NullString
 				desc       sql.NullString
-				masterName sql.NullString
-				masterURL  sql.NullString
-				masterDesc sql.NullString
+				repoName sql.NullString
+				repoURL  sql.NullString
+				repoDesc sql.NullString
 			)
 			err := rows.Scan(
 				&name, &URL, &desc,
-				&masterName, &masterURL, &masterDesc,
+				&repoName, &repoURL, &repoDesc,
 			)
 			errutils.Efatalf("%v", err)
 
@@ -91,9 +91,9 @@ func (s *Search) Search(term string) <-chan *entry.Entry {
 				Name:       name.String,
 				URL:        URL.String,
 				Desc:       desc.String,
-				MasterName: masterName.String,
-				MasterURL:  masterURL.String,
-				MasterDesc: masterDesc.String,
+				RepoName: repoName.String,
+				RepoURL:  repoURL.String,
+				RepoDesc: repoDesc.String,
 			}
 		}
 		close(ch)

@@ -11,9 +11,9 @@ import (
 	"github.com/kick-project/kick/internal/utils"
 )
 
-func TestRepoBuildMaster(t *testing.T) {
+func TestRepoBuildRepo(t *testing.T) {
 	// Make directory
-	dirPath := filepath.Clean(utils.TempDir() + "/TestRepoBuildMaster")
+	dirPath := filepath.Clean(utils.TempDir() + "/TestRepoBuildRepo")
 	err := os.MkdirAll(dirPath, 0755)
 	if err != nil {
 		t.Errorf("Can not create directory %s: %v", dirPath, err)
@@ -21,10 +21,10 @@ func TestRepoBuildMaster(t *testing.T) {
 	}
 
 	// Make file
-	filePath := filepath.Clean(dirPath + "/master.yml")
+	filePath := filepath.Clean(dirPath + "/repo.yml")
 	data := []byte(
-		`name: master1
-description: master1 master
+		`name: repo1
+description: repo1 repo
 templates:
     - http://127.0.0.1:5000/tmpl.git
     - http://127.0.0.1:5000/tmpl1.git
@@ -39,7 +39,7 @@ templates:
 		return
 	}
 
-	m := repobuild.Master{
+	m := repobuild.Repo{
 		WD: dirPath,
 		Plumb: plumbing.Plumbing{
 			Base: filepath.Join(utils.TempDir(), "home", ".kick", "metadata"),

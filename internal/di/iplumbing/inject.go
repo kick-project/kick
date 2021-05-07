@@ -2,11 +2,11 @@ package iplumbing
 
 import "github.com/kick-project/kick/internal/di"
 
-// InjectMaster injects di for plumbing.Plumb
-func InjectMaster(s *di.DI) (opts struct {
+// InjectRepo injects di for plumbing.Plumb
+func InjectRepo(s *di.DI) (opts struct {
 	Base string
 }) {
-	opts.Base = s.PathMasterDir
+	opts.Base = s.PathRepoDir
 	return
 }
 

@@ -2,6 +2,7 @@ package installcmd
 
 import (
 	"io/ioutil"
+	"os"
 	"path/filepath"
 	"testing"
 
@@ -22,38 +23,56 @@ func TestUsageDoc(t *testing.T) {
 func TestInstallTemplate(t *testing.T) {
 	handle := "handle1"
 	template := "tmpl"
-	installTest(t, handle, template)
+	installTest(t, "TestInstallTemplate", handle, template)
 }
 
 func TestInstallTemplateOrigin(t *testing.T) {
 	handle := "handle2"
-	template := "tmpl1/master1"
-	installTest(t, handle, template)
+	template := "tmpl1/repo1"
+	installTest(t, "TestInstallTemplateOrigin", handle, template)
 }
 
 func TestInstallTemplateURL(t *testing.T) {
 	handle := "handle3"
 	template := "http://localhost:5000/tmpl2.git"
-	installTest(t, handle, template)
+	installTest(t, "TestInstallTemplateURL", handle, template)
 }
 
 func TestInstallPath(t *testing.T) {
 	handle := "handle4"
-	template := filepath.Clean(utils.TempDir() + "/TestInstall/kicks/go")
-	installTest(t, handle, template)
+	template := filepath.Clean(utils.TempDir() + "/installcmd/kicks/go")
+	installTest(t, "TestInstallPath", handle, template)
 }
 
-func installTest(t *testing.T, handle, template string) {
+func installTest(t *testing.T, id, handle, template string) {
 	utils.ExitMode(utils.MPanic)
-	id := "TestInstall"
-	src := filepath.Join(utils.TempDir(), id, ".kick", "templates.yml.save")
-	dest := filepath.Join(utils.TempDir(), id, ".kick", "templates.yml")
-	_, err := file.Copy(src, dest)
+	// Home Directory
+	home := filepath.Join(utils.TempDir(), id)
+
+	// Make kick config dir
+	kickDir := filepath.Join(home, ".kick")
+	err := os.MkdirAll(kickDir, 0755)
+	if err != nil {
+		t.Errorf("Can not create directory \"%s\": %v", kickDir, err)
+		return
+	}
+
+	// Copy template
+	srcTemplate := filepath.Join(utils.FixtureDir(), "installcmd", ".kick", "templates.yml.save")
+	destTemplate := filepath.Join(kickDir, "templates.yml")
+	_, err = file.Copy(srcTemplate, destTemplate)
 	if err != nil {
 		t.Error(err)
 	}
 
-	home := filepath.Join(utils.TempDir(), id)
+	// Copy config
+	srcConfig := filepath.Join(utils.FixtureDir(), "installcmd", ".kick", "config.yml")
+	destConfig := filepath.Join(kickDir, "config.yml")
+	_, err = file.Copy(srcConfig, destConfig)
+	if err != nil {
+		t.Error(err)
+	}
+
 	inject := di.Setup(home)
 	inject.LogLevel(log.DebugLevel)
 
@@ -71,5 +90,6 @@ func installTest(t *testing.T, handle, template string) {
 		t.Error(err)
 	}
 	p := filepath.Clean(filepath.Join(td, handle))
-	startcmd.Start([]string{"start", handle, p}, inject)
+	ec = startcmd.Start([]string{"start", handle, p}, inject)
+	assert.Equal(t, 0, ec)
 }
