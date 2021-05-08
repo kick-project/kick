@@ -5,12 +5,12 @@ import (
 
 	"github.com/apex/log"
 	"github.com/jinzhu/copier"
-	"github.com/kick-project/kick/internal/resources/config"
-	"github.com/kick-project/kick/internal/resources/gitclient/plumbing"
-	"github.com/kick-project/kick/internal/resources/sync"
 	"github.com/kick-project/kick/internal/di"
 	"github.com/kick-project/kick/internal/di/iplumbing"
 	"github.com/kick-project/kick/internal/di/isync"
+	"github.com/kick-project/kick/internal/resources/config"
+	"github.com/kick-project/kick/internal/resources/gitclient/plumbing"
+	"github.com/kick-project/kick/internal/resources/sync"
 	"github.com/kick-project/kick/internal/utils/errutils"
 	"gorm.io/gorm"
 )
@@ -33,8 +33,8 @@ func Inject(s *di.DI) (opts struct {
 	err = copier.Copy(plumb, iplumbing.InjectTemplate(s))
 	errutils.Epanic(err)
 	opts.ConfigFile = s.ConfigFile()
-	opts.ORM = s.GetORM()
-	opts.Log = s.GetLogger()
+	opts.ORM = s.MakeORM()
+	opts.Log = s.MakeLogger()
 	opts.Plumb = plumb
 	opts.Stderr = s.Stderr
 	opts.Stdin = s.Stdin

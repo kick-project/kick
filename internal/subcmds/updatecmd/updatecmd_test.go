@@ -23,7 +23,7 @@ func TestUpdate(t *testing.T) {
 
 	initcmd.InitCmd([]string{"init"}, inject)
 
-	dbConn := inject.GetORM()
+	dbConn := inject.MakeORM()
 	result := dbConn.Raw(`DELETE FROM template`)
 	if result.Error != nil {
 		t.Error(result.Error)

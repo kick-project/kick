@@ -137,8 +137,8 @@ func (s *DI) ConfigFile() *config.File {
 	return conf
 }
 
-// GetORM return ORM object.
-func (s *DI) GetORM() *gorm.DB {
+// MakeORM return ORM object.
+func (s *DI) MakeORM() *gorm.DB {
 	var (
 		db  *gorm.DB
 		err error
@@ -155,8 +155,8 @@ func (s *DI) GetORM() *gorm.DB {
 	return db
 }
 
-// GetLogger inject logger object.
-func (s *DI) GetLogger() *apexlog.Logger {
+// MakeLogger inject logger object.
+func (s *DI) MakeLogger() *apexlog.Logger {
 	logger := &apexlog.Logger{
 		Handler: text.New(s.Stderr),
 		Level:   s.logLevel,
@@ -164,8 +164,8 @@ func (s *DI) GetLogger() *apexlog.Logger {
 	return logger
 }
 
-// GetStdLogger inject Go's standard logging library
-func (s *DI) GetStdLogger() *log.Logger {
+// MakeStdLogger inject Go's standard logging library
+func (s *DI) MakeStdLogger() *log.Logger {
 	logger := log.New(
 		s.Stderr,
 		"",
@@ -175,17 +175,17 @@ func (s *DI) GetStdLogger() *log.Logger {
 	return logger
 }
 
-// GetErrorHandler inject error handler
-func (s *DI) GetErrorHandler() *errs.Errors {
+// MakeErrorHandler inject error handler
+func (s *DI) MakeErrorHandler() *errs.Errors {
 	handler := errs.Errors{
-		Logger: s.GetStdLogger(),
-		Ex:     s.GetExitHandler(),
+		Logger: s.MakeStdLogger(),
+		Ex:     s.MakeExitHandler(),
 	}
 	return &handler
 }
 
-// GetExitHandler inject exit handler
-func (s *DI) GetExitHandler() *exit.Handler {
+// MakeExitHandler inject exit handler
+func (s *DI) MakeExitHandler() *exit.Handler {
 	handler := exit.Handler{
 		Mode: s.ExitMode,
 	}

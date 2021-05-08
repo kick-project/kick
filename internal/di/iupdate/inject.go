@@ -15,8 +15,8 @@ func Inject(s *di.DI) (opts struct {
 	MetadataDir string
 }) {
 	opts.ConfigFile = s.ConfigFile()
-	opts.ORM = s.GetORM()
-	opts.Log = s.GetLogger()
+	opts.ORM = s.MakeORM()
+	opts.Log = s.MakeLogger()
 	opts.MetadataDir = s.PathMetadataDir
 	return opts
 }

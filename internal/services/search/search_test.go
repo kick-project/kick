@@ -34,7 +34,7 @@ func TestSearch(t *testing.T) {
 		}
 	}
 	i.Init()
-	db := inject.GetORM()
+	db := inject.MakeORM()
 	buildSearchDataORM(t, db)
 
 	// Target search term

@@ -4,10 +4,10 @@ import (
 	"io"
 
 	"github.com/apex/log"
+	"github.com/kick-project/kick/internal/di"
 	"github.com/kick-project/kick/internal/resources/config"
 	"github.com/kick-project/kick/internal/resources/template/renderer"
 	"github.com/kick-project/kick/internal/resources/template/variables"
-	"github.com/kick-project/kick/internal/di"
 )
 
 // Inject creates di for template.New
@@ -26,7 +26,7 @@ func Inject(s *di.DI) (opts struct {
 	vars := variables.New()
 	vars.ProjectVariable("NAME", s.ProjectName)
 	opts.Config = configFile
-	opts.Log = s.GetLogger()
+	opts.Log = s.MakeLogger()
 	opts.Stderr = s.Stderr
 	opts.Stdout = s.Stdout
 	opts.TemplateDir = s.PathTemplateDir

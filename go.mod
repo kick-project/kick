@@ -10,11 +10,14 @@ require (
 	github.com/docopt/docopt-go v0.0.0-20180111231733-ee0de3bc6815
 	github.com/gliderlabs/ssh v0.3.2 // indirect
 	github.com/go-git/go-git/v5 v5.3.0
+	github.com/go-playground/universal-translator v0.17.0 // indirect
+	github.com/go-playground/validator v9.31.0+incompatible // indirect
 	github.com/google/go-cmp v0.5.5 // indirect
 	github.com/jinzhu/copier v0.2.9
 	github.com/joho/godotenv v1.3.0
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0 // indirect
 	github.com/kevinburke/ssh_config v1.1.0 // indirect
+	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/mattn/go-isatty v0.0.12
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible
 	github.com/satori/go.uuid v1.2.0 // indirect

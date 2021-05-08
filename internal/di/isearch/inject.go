@@ -4,8 +4,8 @@ import (
 	"io"
 	"os"
 
-	"github.com/kick-project/kick/internal/services/search/formatter"
 	"github.com/kick-project/kick/internal/di"
+	"github.com/kick-project/kick/internal/services/search/formatter"
 	"gorm.io/gorm"
 )
 
@@ -18,7 +18,7 @@ func Inject(s *di.DI) (opts struct {
 	format := &formatter.Standard{
 		NoANSICodes: s.NoColour,
 	}
-	opts.ORM = s.GetORM()
+	opts.ORM = s.MakeORM()
 	opts.Format = format
 	opts.Writer = os.Stdout
 	return opts

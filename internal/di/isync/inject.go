@@ -21,7 +21,7 @@ func Inject(s *di.DI) (opts struct {
 	ConfigTemplatePath string
 	Log                *log.Logger
 	PlumbTemplates     *plumbing.Plumbing
-	PlumbRepo        *plumbing.Plumbing
+	PlumbRepo          *plumbing.Plumbing
 	Stderr             io.Writer
 	Stdout             io.Writer
 }) {
@@ -32,10 +32,10 @@ func Inject(s *di.DI) (opts struct {
 	err = copier.Copy(plumbTemplate, iplumbing.InjectTemplate(s))
 	errutils.Epanic(err)
 
-	opts.ORM = s.GetORM()
+	opts.ORM = s.MakeORM()
 	opts.Config = s.ConfigFile()
 	opts.ConfigTemplatePath = s.PathTemplateConf
-	opts.Log = s.GetLogger()
+	opts.Log = s.MakeLogger()
 	opts.PlumbRepo = plumbRepo
 	opts.PlumbTemplates = plumbTemplate
 	opts.Stderr = s.Stderr

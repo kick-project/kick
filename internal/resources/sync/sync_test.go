@@ -35,7 +35,7 @@ func setup(t *testing.T, home string, models ...interface{}) (*sync.Sync, *di.DI
 	}
 	init.Init()
 
-	db := inject.GetORM()
+	db := inject.MakeORM()
 
 	for _, m := range models {
 		inserted := false
