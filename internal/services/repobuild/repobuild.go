@@ -27,7 +27,7 @@ func (m *RepoBuild) Make() {
 
 func (m *RepoBuild) load() {
 	fp := filepath.Join(m.WD, "repo.yml")
-	err := marshal.UnmarshalFromFile(&m.Serialized, fp)
+	err := marshal.FromFile(&m.Serialized, fp)
 	errutils.Efatalf("Can not load file \"%s\": %v", fp, err)
 }
 
@@ -46,7 +46,7 @@ func (m *RepoBuild) download() {
 		// Load repo.yml
 		var templateMain serialize.TemplateMain
 		srcTemplate := filepath.Join(srcDir, ".kick.yml")
-		err = marshal.UnmarshalFromFile(&templateMain, srcTemplate)
+		err = marshal.FromFile(&templateMain, srcTemplate)
 		if errutils.Elogf("Can not load file \"%s\": %v", srcTemplate, err) {
 			continue
 		}
@@ -61,7 +61,7 @@ func (m *RepoBuild) download() {
 		// Save element.yml
 		templateElement.URL = url
 		destRepoYAML := filepath.Join(destDir, templateElement.Name+".yml")
-		err = marshal.Marshal2File(&templateElement, destRepoYAML)
+		err = marshal.ToFile(&templateElement, destRepoYAML)
 		if errutils.Elogf("Can not save file \"%s\": %v", destRepoYAML, err) {
 			continue
 		}

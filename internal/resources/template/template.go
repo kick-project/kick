@@ -210,7 +210,7 @@ func (t *Template) loadTempateConf(path string) {
 		utils.Exit(255)
 	}
 	t.Log.Debugf("Unmarshal file %s\n", path)
-	err := marshal.UnmarshalFromFile(c, path)
+	err := marshal.FromFile(c, path)
 	if err != nil {
 		fmt.Fprintf(t.Stderr, "Can not unmarshal file %s: %s\n", path, err.Error())
 		utils.Exit(255)

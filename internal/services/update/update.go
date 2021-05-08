@@ -147,9 +147,9 @@ func (c *workers) insert(orm *gorm.DB, t *Template) {
 	}
 
 	modTemplate := model.Template{
-		Name:   t.Name,
-		URL:    t.URL,
-		Desc:   t.Description,
+		Name: t.Name,
+		URL:  t.URL,
+		Desc: t.Description,
 		Repo: []model.Repo{modRepo},
 	}
 	result = orm.Clauses(clause.Insert{Modifier: "OR IGNORE"}).Create(&modTemplate)
@@ -176,12 +176,12 @@ type Repo struct {
 
 // Load loads from a json or yaml file, depending on the file suffix.
 func (m *Repo) Load(path string) error {
-	return marshal.UnmarshalFromFile(m, path)
+	return marshal.FromFile(m, path)
 }
 
 // Save saves to json or yaml file, depending on the file suffix.
 func (m *Repo) Save(path string) error {
-	return marshal.Marshal2File(m, path)
+	return marshal.ToFile(m, path)
 }
 
 // Template is a template creator
@@ -189,15 +189,15 @@ type Template struct {
 	Name        string `json:"name" yaml:"name"`
 	URL         string `json:"url" yaml:"url"`
 	Description string `json:"description" yaml:"description"`
-	Repo      Repo
+	Repo        Repo
 }
 
 // Load loads from a json or yaml file
 func (g *Template) Load(path string) error {
-	return marshal.UnmarshalFromFile(g, path)
+	return marshal.FromFile(g, path)
 }
 
 // Save saves to json or yaml file.
 func (g *Template) Save(path string) error {
-	return marshal.Marshal2File(g, path)
+	return marshal.ToFile(g, path)
 }
