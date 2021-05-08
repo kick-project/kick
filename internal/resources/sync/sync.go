@@ -106,7 +106,7 @@ func (s *Sync) downloadRepo(url string) (path string, err error) {
 }
 
 // loadRepo loads from a repo YAML file
-func (s *Sync) loadRepo(path string) (repo serialize.Repo, err error) {
+func (s *Sync) loadRepo(path string) (repo serialize.RepoMain, err error) {
 	err = marshal.UnmarshalFromFile(&repo, path)
 	if errutils.Elogf("warning. unable to unmarshal file \"%s\": %v", path, err) {
 		return
@@ -122,7 +122,7 @@ func (s *Sync) loadTemplates(repo *model.Repo, templatedir string) {
 	}
 	for _, match := range matches {
 		var (
-			templateElement serialize.TemplateElement
+			templateElement serialize.Template
 			templateModel   model.Template
 		)
 

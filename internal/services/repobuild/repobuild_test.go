@@ -39,11 +39,11 @@ templates:
 		return
 	}
 
-	m := repobuild.Repo{
+	m := repobuild.RepoBuild{
 		WD: dirPath,
 		Plumb: plumbing.Plumbing{
 			Base: filepath.Join(utils.TempDir(), "home", ".kick", "metadata"),
 		},
 	}
-	m.Build()
+	m.Make()
 }

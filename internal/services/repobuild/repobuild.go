@@ -12,26 +12,26 @@ import (
 	"github.com/kick-project/kick/internal/utils/marshal"
 )
 
-// Repo build repo repo
-type Repo struct {
-	WD         string            // Working Directory
-	Plumb      plumbing.Plumbing // Plumbing object
-	Serialized serialize.Repo  // Serialized config
+// RepoBuild build a repository repo
+type RepoBuild struct {
+	WD         string             // Working Directory
+	Plumb      plumbing.Plumbing  // Plumbing object
+	Serialized serialize.RepoMain // Serialized config
 }
 
-// Build build repo
-func (m *Repo) Build() {
+// Make build repo
+func (m *RepoBuild) Make() {
 	m.load()
 	m.download()
 }
 
-func (m *Repo) load() {
+func (m *RepoBuild) load() {
 	fp := filepath.Join(m.WD, "repo.yml")
 	err := marshal.UnmarshalFromFile(&m.Serialized, fp)
 	errutils.Efatalf("Can not load file \"%s\": %v", fp, err)
 }
 
-func (m *Repo) download() {
+func (m *RepoBuild) download() {
 	destDir := filepath.Join(m.WD, "templates")
 	err := os.MkdirAll(destDir, 0755)
 	errutils.Efatalf("Can create directory \"%s\": %v", destDir, err)
@@ -44,24 +44,24 @@ func (m *Repo) download() {
 		}
 
 		// Load repo.yml
-		var templateSerialize serialize.Kick
-		srcRepo := filepath.Join(srcDir, ".kick.yml")
-		err = marshal.UnmarshalFromFile(&templateSerialize, srcRepo)
-		if errutils.Elogf("Can not load file \"%s\": %v", srcRepo, err) {
+		var templateMain serialize.TemplateMain
+		srcTemplate := filepath.Join(srcDir, ".kick.yml")
+		err = marshal.UnmarshalFromFile(&templateMain, srcTemplate)
+		if errutils.Elogf("Can not load file \"%s\": %v", srcTemplate, err) {
 			continue
 		}
 
 		// Copy object
-		var repoElement serialize.RepoElement
-		err = copier.Copy(&repoElement, &templateSerialize)
+		var templateElement serialize.Template
+		err = copier.Copy(&templateElement, &templateMain)
 		if errutils.Elogf("Can not copy objects: %v", err) {
 			continue
 		}
 
 		// Save element.yml
-		repoElement.URL = url
-		destRepoYAML := filepath.Join(destDir, repoElement.Name+".yml")
-		err = marshal.Marshal2File(&repoElement, destRepoYAML)
+		templateElement.URL = url
+		destRepoYAML := filepath.Join(destDir, templateElement.Name+".yml")
+		err = marshal.Marshal2File(&templateElement, destRepoYAML)
 		if errutils.Elogf("Can not save file \"%s\": %v", destRepoYAML, err) {
 			continue
 		}
