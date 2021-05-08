@@ -11,7 +11,7 @@ require (
 	github.com/gliderlabs/ssh v0.3.2 // indirect
 	github.com/go-git/go-git/v5 v5.3.0
 	github.com/go-playground/universal-translator v0.17.0 // indirect
-	github.com/go-playground/validator v9.31.0+incompatible // indirect
+	github.com/go-playground/validator v9.31.0+incompatible
 	github.com/google/go-cmp v0.5.5 // indirect
 	github.com/jinzhu/copier v0.2.9
 	github.com/joho/godotenv v1.3.0

@@ -122,7 +122,7 @@ func (s *Sync) loadTemplates(repo *model.Repo, templatedir string) {
 	}
 	for _, match := range matches {
 		var (
-			templateElement serialize.Template
+			templateElement serialize.RepoTemplateFile
 			templateModel   model.Template
 		)
 

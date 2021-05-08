@@ -6,14 +6,17 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/go-playground/validator"
+	"github.com/kick-project/kick/internal/resources/errs"
+	"github.com/kick-project/kick/internal/resources/exit"
 	"github.com/kick-project/kick/internal/resources/gitclient/plumbing"
 	"github.com/kick-project/kick/internal/services/repobuild"
 	"github.com/kick-project/kick/internal/utils"
 )
 
-func TestRepoBuildRepo(t *testing.T) {
+func TestRepoBuild_Make(t *testing.T) {
 	// Make directory
-	dirPath := filepath.Clean(utils.TempDir() + "/TestRepoBuildRepo")
+	dirPath := filepath.Clean(utils.TempDir() + "/TestRepoBuild_Make")
 	err := os.MkdirAll(dirPath, 0755)
 	if err != nil {
 		t.Errorf("Can not create directory %s: %v", dirPath, err)
@@ -43,6 +46,12 @@ templates:
 		WD: dirPath,
 		Plumb: plumbing.Plumbing{
 			Base: filepath.Join(utils.TempDir(), "home", ".kick", "metadata"),
+		},
+		Validate: validator.New(),
+		ErrHandler: &errs.Errors{
+			Ex: &exit.Handler{
+				Mode: exit.MPanic,
+			},
 		},
 	}
 	m.Make()
