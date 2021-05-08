@@ -9,13 +9,16 @@ package di
 import (
 	"fmt"
 	"io"
+	"log"
 	"os"
 	fp "path/filepath"
 
-	"github.com/apex/log"
+	apexlog "github.com/apex/log"
 	"github.com/apex/log/handlers/text"
 	"github.com/kick-project/kick/internal/env"
 	"github.com/kick-project/kick/internal/resources/config"
+	"github.com/kick-project/kick/internal/resources/errs"
+	"github.com/kick-project/kick/internal/resources/exit"
 	"github.com/kick-project/kick/internal/utils/errutils"
 	_ "github.com/mattn/go-sqlite3" // Driver for database/sql
 	"gorm.io/driver/sqlite"
@@ -33,14 +36,21 @@ type DI struct {
 	Home string
 	// See https://pkg.go.dev/github.com/apex/log#InfoLevel for
 	// available levels.
-	logLevel log.Level
+	logLevel apexlog.Level
+
+	// Standard logging
+	StdLogFlags  int    // Go standard logging flags
+	StdLogPrefix string // Go standard logging prefix
+
+	ExitMode int // Exit mode either exit.None or exit.Panic. See package exit for context
+
 	// No Colour output when running commands.
 	NoColour bool
 	// Project name, normally supplied by the start sub command.
 	ProjectName      string
 	PathMetadataDir  string
 	PathTemplateConf string
-	PathRepoDir    string
+	PathRepoDir      string
 	PathTemplateDir  string
 	PathUserConf     string
 	SqliteDB         string
@@ -83,28 +93,31 @@ func Setup(home string) *DI {
 	pathRepoDir := fp.Clean(fmt.Sprintf("%s/.kick/repos", home))
 	pathTemplateDir := fp.Clean(fmt.Sprintf("%s/.kick/templates", home))
 	pathMetadataDir := fp.Clean(fmt.Sprintf("%s/.kick/metadata", home))
-	logLvl := log.ErrorLevel
+	logLvl := apexlog.ErrorLevel
 	if env.Debug() {
-		logLvl = log.DebugLevel
+		logLvl = apexlog.DebugLevel
 	}
 	s := &DI{
 		SqliteDB:         sqlitedb,
 		Home:             home,
 		PathMetadataDir:  pathMetadataDir,
 		PathTemplateConf: pathTemplateConf,
-		PathRepoDir:    pathRepoDir,
+		PathRepoDir:      pathRepoDir,
 		PathTemplateDir:  pathTemplateDir,
 		PathUserConf:     pathUserConf,
 		Stderr:           os.Stderr,
 		Stdin:            os.Stdin,
 		Stdout:           os.Stdout,
 		logLevel:         logLvl,
+		StdLogFlags:      log.LstdFlags,
+		StdLogPrefix:     "",
+		ExitMode:         exit.MNone,
 	}
 	return s
 }
 
 // LogLevel Sets the log level
-func (s *DI) LogLevel(lvl log.Level) {
+func (s *DI) LogLevel(lvl apexlog.Level) {
 	s.logLevel = lvl
 }
 
@@ -143,10 +156,38 @@ func (s *DI) GetORM() *gorm.DB {
 }
 
 // GetLogger inject logger object.
-func (s *DI) GetLogger() *log.Logger {
-	logger := &log.Logger{
+func (s *DI) GetLogger() *apexlog.Logger {
+	logger := &apexlog.Logger{
 		Handler: text.New(s.Stderr),
 		Level:   s.logLevel,
 	}
 	return logger
+}
+
+// GetStdLogger inject Go's standard logging library
+func (s *DI) GetStdLogger() *log.Logger {
+	logger := log.New(
+		s.Stderr,
+		"",
+		s.StdLogFlags,
+	)
+
+	return logger
+}
+
+// GetErrorHandler inject error handler
+func (s *DI) GetErrorHandler() *errs.Errors {
+	handler := errs.Errors{
+		Logger: s.GetStdLogger(),
+		Ex:     s.GetExitHandler(),
+	}
+	return &handler
+}
+
+// GetExitHandler inject exit handler
+func (s *DI) GetExitHandler() *exit.Handler {
+	handler := exit.Handler{
+		Mode: s.ExitMode,
+	}
+	return &handler
 }
