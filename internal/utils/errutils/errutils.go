@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/kick-project/kick/internal/utils"
+	"github.com/kick-project/kick/internal/resources/exit"
 )
 
 func hasErrPrint(err error) bool {
@@ -67,7 +67,7 @@ func Efatal(err error) {
 	if !has {
 		return
 	}
-	utils.Exit(255)
+	exit.Exit(255)
 }
 
 // Efatalf will log an error and exit if any argument passed to fatal is an error
@@ -76,5 +76,5 @@ func Efatalf(format string, v ...interface{}) { // nolint
 	if !hasErr {
 		return
 	}
-	utils.Exit(255)
+	exit.Exit(255)
 }

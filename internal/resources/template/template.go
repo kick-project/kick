@@ -15,11 +15,11 @@ import (
 
 	"github.com/apex/log"
 	"github.com/kick-project/kick/internal/resources/config"
+	"github.com/kick-project/kick/internal/resources/exit"
 	"github.com/kick-project/kick/internal/resources/gitclient"
 	plumb "github.com/kick-project/kick/internal/resources/gitclient/plumbing"
 	"github.com/kick-project/kick/internal/resources/template/renderer"
 	"github.com/kick-project/kick/internal/resources/template/variables"
-	"github.com/kick-project/kick/internal/utils"
 	"github.com/kick-project/kick/internal/utils/errutils"
 	"github.com/kick-project/kick/internal/utils/marshal"
 )
@@ -54,7 +54,7 @@ type Template struct {
 func (t *Template) SetRender(renderer string) {
 	if renderer == "" {
 		t.Log.Error("No renderer provided\n")
-		utils.Exit(255)
+		exit.Exit(255)
 	}
 
 	if _, ok := t.RenderersAvail[t.RenderCurrent]; !ok {
@@ -62,7 +62,7 @@ func (t *Template) SetRender(renderer string) {
 		for r := range t.RenderersAvail {
 			fmt.Println(r)
 		}
-		utils.Exit(255)
+		exit.Exit(255)
 	}
 	t.RenderCurrent = renderer
 }
@@ -77,7 +77,7 @@ func (t *Template) renderer() renderer.Renderer {
 		return render
 	}
 	fmt.Fprintf(t.Stderr, "No such renderer %s\n", t.RenderCurrent)
-	utils.Exit(255)
+	exit.Exit(255)
 	return nil
 }
 
@@ -119,7 +119,7 @@ func (t *Template) SetSrc(name string) {
 
 	if !stat.IsDir() {
 		fmt.Fprintf(os.Stderr, `%s is not a directory`, localpath)
-		utils.Exit(-1)
+		exit.Exit(-1)
 	}
 
 	t.src = name
@@ -181,7 +181,7 @@ func (t *Template) checkDstExists() {
 	}
 	if stat != nil {
 		fmt.Printf("Path '%s' exists. Aborting.\n", t.dest) // nolint
-		utils.Exit(255)
+		exit.Exit(255)
 	}
 }
 
@@ -207,13 +207,13 @@ func (t *Template) loadTempateConf(path string) {
 	c := &templateConf{}
 	if !strings.HasSuffix(path, ".yml") {
 		fmt.Fprintf(t.Stderr, "Invalid file %s\n", path)
-		utils.Exit(255)
+		exit.Exit(255)
 	}
 	t.Log.Debugf("Unmarshal file %s\n", path)
 	err := marshal.FromFile(c, path)
 	if err != nil {
 		fmt.Fprintf(t.Stderr, "Can not unmarshal file %s: %s\n", path, err.Error())
-		utils.Exit(255)
+		exit.Exit(255)
 	}
 	t.Log.Debugf("%#v", c)
 

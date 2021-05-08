@@ -9,8 +9,8 @@ import (
 	"github.com/kick-project/kick/internal/di/icheck"
 	"github.com/kick-project/kick/internal/di/iremove"
 	"github.com/kick-project/kick/internal/resources/check"
+	"github.com/kick-project/kick/internal/resources/exit"
 	"github.com/kick-project/kick/internal/services/remove"
-	"github.com/kick-project/kick/internal/utils"
 	"github.com/kick-project/kick/internal/utils/errutils"
 	"github.com/kick-project/kick/internal/utils/options"
 )
@@ -45,7 +45,7 @@ func Remove(args []string, inject *di.DI) int {
 	errutils.Epanic(err)
 	if err = chk.Init(); err != nil {
 		fmt.Fprintf(inject.Stderr, "%s\n", err.Error())
-		utils.Exit(255)
+		exit.Exit(255)
 	}
 
 	rm := &remove.Remove{}

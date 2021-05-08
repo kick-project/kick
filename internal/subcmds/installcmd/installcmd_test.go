@@ -8,6 +8,7 @@ import (
 
 	"github.com/apex/log"
 	"github.com/kick-project/kick/internal/di"
+	"github.com/kick-project/kick/internal/resources/exit"
 	"github.com/kick-project/kick/internal/subcmds/initcmd"
 	"github.com/kick-project/kick/internal/subcmds/startcmd"
 	"github.com/kick-project/kick/internal/subcmds/updatecmd"
@@ -45,7 +46,7 @@ func TestInstallPath(t *testing.T) {
 }
 
 func installTest(t *testing.T, id, handle, template string) {
-	utils.ExitMode(utils.MPanic)
+	exit.Mode(exit.MPanic)
 	// Home Directory
 	home := filepath.Join(utils.TempDir(), id)
 

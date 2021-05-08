@@ -8,6 +8,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/kick-project/kick/internal"
 	"github.com/kick-project/kick/internal/di"
+	"github.com/kick-project/kick/internal/resources/exit"
 	"github.com/kick-project/kick/internal/subcmds/initcmd"
 	"github.com/kick-project/kick/internal/subcmds/installcmd"
 	"github.com/kick-project/kick/internal/subcmds/listcmd"
@@ -15,7 +16,6 @@ import (
 	"github.com/kick-project/kick/internal/subcmds/searchcmd"
 	"github.com/kick-project/kick/internal/subcmds/startcmd"
 	"github.com/kick-project/kick/internal/subcmds/updatecmd"
-	"github.com/kick-project/kick/internal/utils"
 	"github.com/kick-project/kick/internal/utils/errutils"
 )
 
@@ -33,21 +33,21 @@ func main() {
 	o := internal.GetOptMain(args)
 	switch {
 	case o.Start:
-		utils.Exit(startcmd.Start(args[1:], inject))
+		exit.Exit(startcmd.Start(args[1:], inject))
 	case o.List:
-		utils.Exit(listcmd.List(args[1:], inject))
+		exit.Exit(listcmd.List(args[1:], inject))
 	case o.Search:
-		utils.Exit(searchcmd.Search(args[1:], inject))
+		exit.Exit(searchcmd.Search(args[1:], inject))
 	case o.Init:
-		utils.Exit(initcmd.InitCmd(args[1:], inject))
+		exit.Exit(initcmd.InitCmd(args[1:], inject))
 	case o.Update:
-		utils.Exit(updatecmd.Update(args[1:], inject))
+		exit.Exit(updatecmd.Update(args[1:], inject))
 	case o.Install:
-		utils.Exit(installcmd.Install(args[1:], inject))
+		exit.Exit(installcmd.Install(args[1:], inject))
 	case o.Remove:
-		utils.Exit(removecmd.Remove(args[1:], inject))
+		exit.Exit(removecmd.Remove(args[1:], inject))
 	}
-	utils.Exit(255)
+	exit.Exit(255)
 }
 
 func loadDotenv() {

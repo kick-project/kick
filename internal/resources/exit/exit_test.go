@@ -8,7 +8,7 @@ import (
 )
 
 func Test_Exit(t *testing.T) {
-	exit.Mode(exit.Panic)
+	exit.Mode(exit.MPanic)
 
 	defer func() {
 		r := recover()
@@ -21,7 +21,7 @@ func Test_Exit(t *testing.T) {
 
 func TestExit_Exit_Panic(t *testing.T) {
 	e := exit.Handler{
-		Mode: exit.Panic,
+		Mode: exit.MPanic,
 	}
 
 	defer func() {

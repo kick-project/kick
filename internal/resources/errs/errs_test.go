@@ -17,7 +17,7 @@ func setup() (*errs.Errors, *bytes.Buffer) {
 	buf := bytes.NewBufferString(str)
 	e := errs.Errors{
 		Ex: &exit.Handler{
-			Mode: exit.Panic,
+			Mode: exit.MPanic,
 		},
 		Logger: log.New(buf, "", log.LstdFlags),
 	}

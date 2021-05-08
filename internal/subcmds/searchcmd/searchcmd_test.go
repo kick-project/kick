@@ -7,6 +7,7 @@ import (
 	"github.com/jinzhu/copier"
 	"github.com/kick-project/kick/internal/di"
 	"github.com/kick-project/kick/internal/di/iinitialize"
+	"github.com/kick-project/kick/internal/resources/exit"
 	"github.com/kick-project/kick/internal/services/initialize"
 	"github.com/kick-project/kick/internal/utils"
 	"github.com/kick-project/kick/internal/utils/errutils"
@@ -18,7 +19,7 @@ func TestUsageDoc(t *testing.T) {
 }
 
 func TestSearch(t *testing.T) {
-	utils.ExitMode(utils.MPanic)
+	exit.Mode(exit.MPanic)
 	args := []string{"search", "keyword"}
 	home := filepath.Join(utils.TempDir(), "home")
 	inject := di.Setup(home)

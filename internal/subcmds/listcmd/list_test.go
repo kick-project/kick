@@ -7,6 +7,7 @@ import (
 	"github.com/jinzhu/copier"
 	"github.com/kick-project/kick/internal/di"
 	"github.com/kick-project/kick/internal/di/iinitialize"
+	"github.com/kick-project/kick/internal/resources/exit"
 	"github.com/kick-project/kick/internal/services/initialize"
 	"github.com/kick-project/kick/internal/subcmds/updatecmd"
 	"github.com/kick-project/kick/internal/utils"
@@ -18,7 +19,7 @@ func TestUsageDoc(t *testing.T) {
 }
 
 func TestList(t *testing.T) {
-	utils.ExitMode(utils.MPanic)
+	exit.Mode(exit.MPanic)
 	home := filepath.Join(utils.TempDir(), "home")
 	s := di.Setup(home)
 	i := &initialize.Initialize{}
@@ -37,7 +38,7 @@ func TestList(t *testing.T) {
 }
 
 func TestListLong(t *testing.T) {
-	utils.ExitMode(utils.MPanic)
+	exit.Mode(exit.MPanic)
 	home := filepath.Join(utils.TempDir(), "home")
 	inject := di.Setup(home)
 	i := &initialize.Initialize{}

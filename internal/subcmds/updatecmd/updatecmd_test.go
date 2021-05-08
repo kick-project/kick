@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/kick-project/kick/internal/di"
+	"github.com/kick-project/kick/internal/resources/exit"
 	"github.com/kick-project/kick/internal/subcmds/initcmd"
 	"github.com/kick-project/kick/internal/utils"
 	"github.com/stretchr/testify/assert"
@@ -15,7 +16,7 @@ func TestUsageDoc(t *testing.T) {
 }
 
 func TestUpdate(t *testing.T) {
-	utils.ExitMode(utils.MPanic)
+	exit.Mode(exit.MPanic)
 
 	home := filepath.Join(utils.TempDir(), "home")
 	inject := di.Setup(home)

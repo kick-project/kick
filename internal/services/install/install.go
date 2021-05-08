@@ -12,6 +12,7 @@ import (
 
 	"github.com/apex/log"
 	"github.com/kick-project/kick/internal/resources/config"
+	"github.com/kick-project/kick/internal/resources/exit"
 	"github.com/kick-project/kick/internal/resources/gitclient"
 	"github.com/kick-project/kick/internal/resources/gitclient/plumbing"
 	"github.com/kick-project/kick/internal/resources/sync"
@@ -236,19 +237,19 @@ func (i *Install) createEntry(handle string, entry config.Template) {
 	_, err := i.getRepo(entry.URL)
 	if err != nil {
 		fmt.Fprintf(i.Stderr, "Error installing %s: %s\n", entry.Handle, err.Error())
-		utils.Exit(255)
+		exit.Exit(255)
 	}
 
 	entry.Handle = handle
 	err = i.ConfigFile.AppendTemplate(entry)
 	if err != nil {
 		fmt.Fprintf(i.Stderr, "%s\n", err.Error())
-		utils.Exit(255)
+		exit.Exit(255)
 	}
 	err = i.ConfigFile.SaveTemplates()
 	if err != nil {
 		fmt.Fprintf(i.Stderr, "%s\n", err.Error())
-		utils.Exit(255)
+		exit.Exit(255)
 	}
 	i.Sync.Files()
 	switch {
