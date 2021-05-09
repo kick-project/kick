@@ -19,10 +19,10 @@ import (
 
 // Update build metadata
 type Update struct {
-	ConfigFile  *config.File `copier:"must"`
-	ORM         *gorm.DB     `copier:"must"`
-	Log         *log.Logger  `copier:"must"`
-	MetadataDir string       `copier:"must"`
+	ConfigFile  *config.File `validate:"required"`
+	ORM         *gorm.DB     `validate:"required"`
+	Log         *log.Logger  `validate:"required"`
+	MetadataDir string       `validate:"required"`
 }
 
 // Build metadata. Conf defaults to globals.Config if Conf is nil.

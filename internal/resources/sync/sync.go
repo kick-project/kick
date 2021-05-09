@@ -24,14 +24,14 @@ import (
 
 // Sync synchronize database tables
 type Sync struct {
-	ORM                *gorm.DB           `copier:"must"`
-	Config             *config.File       `copier:"must"`
-	ConfigTemplatePath string             `copier:"must"`
-	Log                *log.Logger        `copier:"must"`
-	PlumbTemplates     *plumbing.Plumbing `copier:"must"`
-	PlumbRepo          *plumbing.Plumbing `copier:"must"`
-	Stderr             io.Writer          `copier:"must"`
-	Stdout             io.Writer          `copier:"must"`
+	ORM                *gorm.DB           `validate:"required"`
+	Config             *config.File       `validate:"required"`
+	ConfigTemplatePath string             `validate:"required"`
+	Log                *log.Logger        `validate:"required"`
+	PlumbTemplates     *plumbing.Plumbing `validate:"required"`
+	PlumbRepo          *plumbing.Plumbing `validate:"required"`
+	Stderr             io.Writer          `validate:"required"`
+	Stdout             io.Writer          `validate:"required"`
 }
 
 // Repo syncs repo data

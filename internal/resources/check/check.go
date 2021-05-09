@@ -12,14 +12,14 @@ import (
 
 // Check runs a series of checks
 type Check struct {
-	ConfigPath         string
-	ConfigTemplatePath string
-	HomeDir            string
-	MetadataDir        string
-	SQLiteFile         string
-	Stderr             io.Writer
-	Stdout             io.Writer
-	TemplateDir        string
+	ConfigPath         string    `validate:"required,file"`
+	ConfigTemplatePath string    `validate:"required,file"`
+	HomeDir            string    `validate:"required,dir"`
+	MetadataDir        string    `validate:"required,dir"`
+	SQLiteFile         string    `validate:"required,file"`
+	Stderr             io.Writer `validate:"required"`
+	Stdout             io.Writer `validate:"required"`
+	TemplateDir        string    `validate:"required,dir"`
 }
 
 // Init checks to see if an initialization has been performed. This function

@@ -54,8 +54,8 @@ FROM
 // Search search for templates
 type Search struct {
 	Format formatter.Format
-	ORM    *gorm.DB  `copier:"must"`
-	Writer io.Writer `copier:"must"`
+	ORM    *gorm.DB  `validate:"required"`
+	Writer io.Writer `validate:"required"`
 }
 
 // Search searches database for term and returns the results through *Entry channel.

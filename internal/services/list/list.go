@@ -15,9 +15,9 @@ import (
 
 // List manage listing of installed templates
 type List struct {
-	Stderr io.Writer    `copier:"must"`
-	Stdout io.Writer    `copier:"must"`
-	Conf   *config.File `copier:"must"`
+	Stderr io.Writer    `validate:"required"`
+	Stdout io.Writer    `validate:"required"`
+	Conf   *config.File `validate:"required"`
 }
 
 // List lists the output

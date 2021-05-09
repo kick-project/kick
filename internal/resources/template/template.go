@@ -35,15 +35,15 @@ const (
 
 // Template the template itself
 type Template struct {
-	Config         *config.File                 `copier:"must"`
-	Log            *log.Logger                  `copier:"must"`
-	ModeLineLen    uint8                        `copier:"must"`
-	RenderCurrent  string                       `copier:"must"`
-	RenderersAvail map[string]renderer.Renderer `copier:"must"`
-	Stderr         io.Writer                    `copier:"must"`
-	Stdout         io.Writer                    `copier:"must"`
-	TemplateDir    string                       `copier:"must"`
-	Variables      *variables.Variables         `copier:"must"`
+	Config         *config.File                 `validate:"required"`
+	Log            *log.Logger                  `validate:"required"`
+	ModeLineLen    uint8                        `validate:"required"`
+	RenderCurrent  string                       `validate:"required"`
+	RenderersAvail map[string]renderer.Renderer `validate:"required"`
+	Stderr         io.Writer                    `validate:"required"`
+	Stdout         io.Writer                    `validate:"required"`
+	TemplateDir    string                       `validate:"required"`
+	Variables      *variables.Variables         `validate:"required"`
 	builddir       string
 	dest           string
 	localpath      string

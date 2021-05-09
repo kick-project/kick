@@ -10,11 +10,11 @@ import (
 
 // Remove remove installed templates
 type Remove struct {
-	Conf             *config.File `copier:"must"`
-	PathTemplateConf string       `copier:"must"`
-	PathUserConf     string       `copier:"must"`
-	Stderr           io.Writer    `copier:"must"`
-	Stdout           io.Writer    `copier:"must"`
+	Conf             *config.File `validate:"required"`
+	PathTemplateConf string       `validate:"required"`
+	PathUserConf     string       `validate:"required"`
+	Stderr           io.Writer    `validate:"required"`
+	Stdout           io.Writer    `validate:"required"`
 }
 
 // Remove removes a handle from installed templates

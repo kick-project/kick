@@ -11,6 +11,7 @@ import (
 
 	apexlog "github.com/apex/log"
 	"github.com/apex/log/handlers/text"
+	"github.com/go-playground/validator"
 	"github.com/kick-project/kick/internal/env"
 	"github.com/kick-project/kick/internal/resources/check"
 	"github.com/kick-project/kick/internal/resources/config"
@@ -160,12 +161,25 @@ func (s *DI) ConfigFile() *config.File {
 	conf := &config.File{
 		PathUserConf:     s.PathUserConf,
 		PathTemplateConf: s.PathTemplateConf,
+		Stderr:           s.Stderr,
 	}
+	s.validate(conf)
 	err := conf.Load()
 	errs.Panic(err)
 	s.cacheConfigFile = conf
 	return conf
 }
+
+// validate validate objects. Panics on failure
+func (s *DI) validate(item interface{}) {
+	validate := s.MakeValidate()
+	err := validate.Struct(item)
+	errs.PanicF("Validation Error: %v", err)
+}
+
+//
+// Dependency Injectors
+//
 
 // MakeORM return ORM object.
 func (s *DI) MakeORM() *gorm.DB {
@@ -225,6 +239,7 @@ func (s *DI) MakeErrorHandler() *errs.Handler {
 		Logger: s.MakeStdLogger(),
 		Ex:     s.MakeExitHandler(),
 	}
+	s.validate(handler)
 	s.cacheErrHandler = handler
 	return handler
 }
@@ -237,6 +252,7 @@ func (s *DI) MakeExitHandler() *exit.Handler {
 	handler := &exit.Handler{
 		Mode: s.ExitMode,
 	}
+	s.validate(handler)
 	s.cacheExitHandler = handler
 	return handler
 }
@@ -256,6 +272,7 @@ func (s *DI) MakeCheck() *check.Check {
 		Stdout:             s.Stdout,
 		TemplateDir:        s.PathTemplateDir,
 	}
+	s.validate(chk)
 	s.cacheCheck = chk
 	return chk
 }
@@ -273,6 +290,7 @@ func (s *DI) MakeInitialize() *initialize.Initialize {
 		SQLiteFile:         s.SqliteDB,
 		TemplateDir:        s.PathTemplateDir,
 	}
+	s.validate(i)
 	s.cacheInitialize = i
 	return i
 }
@@ -306,6 +324,7 @@ func (s *DI) MakeList() *list.List {
 		Stdout: s.Stdout,
 		Conf:   s.ConfigFile(),
 	}
+	s.validate(l)
 	s.cacheList = l
 	return l
 }
@@ -423,4 +442,10 @@ func (s *DI) MakeUpdate() *update.Update {
 	}
 	s.cacheUpdate = u
 	return u
+}
+
+// MakeValidate dependency injector
+func (s *DI) MakeValidate() *validator.Validate {
+	v := validator.New()
+	return v
 }

@@ -22,7 +22,7 @@ var (
 
 // Handler exit handling
 type Handler struct {
-	Mode int
+	Mode int `validate:"gte=0|lte=1"`
 }
 
 // Exit exit function with exit code. 0 is success
@@ -56,6 +56,8 @@ func Mode(mode int) (ok bool) {
 	case MPanic:
 		ExitMode = MPanic
 		ok = true
+	default:
+		panic(fmt.Sprintf("Unknown exit mode: %d", mode))
 	}
 	return
 }

@@ -11,9 +11,9 @@ import (
 
 // File configuration as loaded from the configuration file
 type File struct {
-	PathTemplateConf string     `yaml:"-"`
-	PathUserConf     string     `yaml:"-"` // Path to configuration file
-	Stderr           io.Writer  `yaml:"-"`
+	PathTemplateConf string     `yaml:"-" validate:"required,file"`
+	PathUserConf     string     `yaml:"-" validate:"required,file"` // Path to configuration file
+	Stderr           io.Writer  `yaml:"-" validate:"required"`
 	RepoURLs         []string   `yaml:"repos,omitempty"` // URLs to repo git repositories
 	Templates        []Template `yaml:"-"`               // Template definitions
 }
