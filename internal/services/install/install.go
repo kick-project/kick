@@ -14,6 +14,7 @@ import (
 	"github.com/kick-project/kick/internal/resources/config"
 	"github.com/kick-project/kick/internal/resources/errs"
 	"github.com/kick-project/kick/internal/resources/exit"
+	"github.com/kick-project/kick/internal/resources/file"
 	"github.com/kick-project/kick/internal/resources/gitclient"
 	"github.com/kick-project/kick/internal/resources/gitclient/plumbing"
 	"github.com/kick-project/kick/internal/resources/sync"
@@ -84,7 +85,7 @@ func (i *Install) Install(handle, template string) (ret int) {
 func (i *Install) processLocation(handle, location string) (found bool) {
 	i.Log.Debugf("processLocation(%s, %s)", handle, location)
 
-	p, err := filepath.Abs(utils.ExpandPath(location))
+	p, err := filepath.Abs(file.ExpandPath(location))
 	errs.Panic(err)
 	// Check if its a path on the local file system
 	if info, err := os.Stat(p); err == nil && info.IsDir() {

@@ -4,6 +4,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/kick-project/kick/internal/resources/file"
 	"github.com/kick-project/kick/internal/utils"
 )
 
@@ -37,7 +38,7 @@ func New(basedir string) *Plumbing {
 
 // Handler Set the item to get
 func (plu *Plumbing) Handler(url string) error {
-	urlexp := utils.ExpandPath(url)
+	urlexp := file.ExpandPath(url)
 	gt := &plumb{}
 
 	// Local filesystem path do nothing
