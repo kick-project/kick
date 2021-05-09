@@ -26,9 +26,9 @@ Options:
     start         start a project
     init          initialize configuration
     install       install a template
-    list          list available project options
+    list          list installed templates
     remove        remove an installed template
-    search        search for available templates
+    search        search repositories for available templates
     update        update repository data
 `
 
