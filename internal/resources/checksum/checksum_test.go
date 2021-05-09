@@ -4,8 +4,8 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/kick-project/kick/internal/resources/checksum"
 	"github.com/kick-project/kick/internal/utils"
-	"github.com/kick-project/kick/internal/utils/checksum"
 	"github.com/kick-project/kick/internal/utils/errutils"
 )
 
