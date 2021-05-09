@@ -9,9 +9,9 @@ import (
 	"github.com/kick-project/kick/internal/resources/config"
 	"github.com/kick-project/kick/internal/resources/gitclient"
 	"github.com/kick-project/kick/internal/resources/gitclient/plumbing"
+	"github.com/kick-project/kick/internal/resources/marshal"
 	"github.com/kick-project/kick/internal/resources/model"
 	"github.com/kick-project/kick/internal/utils/errutils"
-	"github.com/kick-project/kick/internal/utils/marshal"
 	_ "github.com/mattn/go-sqlite3" // Required by 'database/sql'
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"

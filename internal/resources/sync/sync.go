@@ -13,11 +13,11 @@ import (
 	"github.com/kick-project/kick/internal/resources/config"
 	"github.com/kick-project/kick/internal/resources/gitclient"
 	"github.com/kick-project/kick/internal/resources/gitclient/plumbing"
+	"github.com/kick-project/kick/internal/resources/marshal"
 	"github.com/kick-project/kick/internal/resources/model"
 	"github.com/kick-project/kick/internal/resources/model/clauses"
 	"github.com/kick-project/kick/internal/resources/serialize"
 	"github.com/kick-project/kick/internal/utils/errutils"
-	"github.com/kick-project/kick/internal/utils/marshal"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )

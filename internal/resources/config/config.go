@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/kick-project/kick/internal/utils/marshal"
+	"github.com/kick-project/kick/internal/resources/marshal"
 )
 
 // File configuration as loaded from the configuration file

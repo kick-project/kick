@@ -11,9 +11,9 @@ import (
 	"github.com/kick-project/kick/internal/resources/errs"
 	"github.com/kick-project/kick/internal/resources/gitclient"
 	"github.com/kick-project/kick/internal/resources/gitclient/plumbing"
+	"github.com/kick-project/kick/internal/resources/marshal"
 	"github.com/kick-project/kick/internal/resources/serialize"
 	"github.com/kick-project/kick/internal/utils/errutils"
-	"github.com/kick-project/kick/internal/utils/marshal"
 )
 
 // RepoBuild build a repository repo

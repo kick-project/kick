@@ -18,10 +18,10 @@ import (
 	"github.com/kick-project/kick/internal/resources/exit"
 	"github.com/kick-project/kick/internal/resources/gitclient"
 	plumb "github.com/kick-project/kick/internal/resources/gitclient/plumbing"
+	"github.com/kick-project/kick/internal/resources/marshal"
 	"github.com/kick-project/kick/internal/resources/template/renderer"
 	"github.com/kick-project/kick/internal/resources/template/variables"
 	"github.com/kick-project/kick/internal/utils/errutils"
-	"github.com/kick-project/kick/internal/utils/marshal"
 )
 
 const (
