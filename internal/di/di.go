@@ -16,9 +16,22 @@ import (
 	apexlog "github.com/apex/log"
 	"github.com/apex/log/handlers/text"
 	"github.com/kick-project/kick/internal/env"
+	"github.com/kick-project/kick/internal/resources/check"
 	"github.com/kick-project/kick/internal/resources/config"
 	"github.com/kick-project/kick/internal/resources/errs"
 	"github.com/kick-project/kick/internal/resources/exit"
+	"github.com/kick-project/kick/internal/resources/gitclient/plumbing"
+	"github.com/kick-project/kick/internal/resources/sync"
+	"github.com/kick-project/kick/internal/resources/template"
+	"github.com/kick-project/kick/internal/resources/template/renderer"
+	"github.com/kick-project/kick/internal/resources/template/variables"
+	"github.com/kick-project/kick/internal/services/initialize"
+	"github.com/kick-project/kick/internal/services/install"
+	"github.com/kick-project/kick/internal/services/list"
+	"github.com/kick-project/kick/internal/services/remove"
+	"github.com/kick-project/kick/internal/services/search"
+	"github.com/kick-project/kick/internal/services/search/formatter"
+	"github.com/kick-project/kick/internal/services/update"
 	"github.com/kick-project/kick/internal/utils/errutils"
 	_ "github.com/mattn/go-sqlite3" // Driver for database/sql
 	"gorm.io/driver/sqlite"
@@ -58,6 +71,25 @@ type DI struct {
 	Stdin            io.Reader
 	Stderr           io.Writer
 	Stdout           io.Writer
+
+	// Cached objects
+	cacheConfigFile       *config.File
+	cacheORM              *gorm.DB
+	cacheLogger           *apexlog.Logger
+	cacheStdLogger        *log.Logger
+	cacheErrHandler       *errs.Errors
+	cacheExitHandler      *exit.Handler
+	cacheCheck            *check.Check
+	cacheInitialize       *initialize.Initialize
+	cacheList             *list.List
+	cacheInstall          *install.Install
+	cachePlumbingRepo     *plumbing.Plumbing
+	cachePlumbingTemplate *plumbing.Plumbing
+	cacheRemove           *remove.Remove
+	cacheSearch           *search.Search
+	cacheSync             *sync.Sync
+	cacheTemplate         *template.Template
+	cacheUpdate           *update.Update
 }
 
 // Setup get di using the supplied "home" directory option. Any
@@ -77,7 +109,7 @@ type DI struct {
 // used. For example
 //
 //   set := Setup("/tmp/tmp_home");
-//   init := initialize.New(iinitialize.Inject(s));
+//   init := set.MakeInitialize()
 //   init.Init()
 //
 // will create the structures under "/tmp/tmp_home"
@@ -128,12 +160,16 @@ func (s *DI) LogLevel(lvl apexlog.Level) {
 
 // ConfigFile load di from configuration file
 func (s *DI) ConfigFile() *config.File {
+	if s.cacheConfigFile != nil {
+		return s.cacheConfigFile
+	}
 	conf := &config.File{
 		PathUserConf:     s.PathUserConf,
 		PathTemplateConf: s.PathTemplateConf,
 	}
 	err := conf.Load()
 	errutils.Epanic(err)
+	s.cacheConfigFile = conf
 	return conf
 }
 
@@ -143,6 +179,9 @@ func (s *DI) MakeORM() *gorm.DB {
 		db  *gorm.DB
 		err error
 	)
+	if s.cacheORM != nil {
+		return s.cacheORM
+	}
 	if _, err = os.Stat(s.SqliteDB); err == nil {
 		db, err = gorm.Open(sqlite.Open(s.SqliteDB), &gorm.Config{
 			NamingStrategy: &schema.NamingStrategy{
@@ -152,42 +191,242 @@ func (s *DI) MakeORM() *gorm.DB {
 		errutils.Efatalf("Can not open ORM database %s: %v", s.SqliteDB, err)
 
 	}
+	s.cacheORM = db
 	return db
 }
 
 // MakeLogger inject logger object.
 func (s *DI) MakeLogger() *apexlog.Logger {
+	if s.cacheLogger != nil {
+		return s.cacheLogger
+	}
 	logger := &apexlog.Logger{
 		Handler: text.New(s.Stderr),
 		Level:   s.logLevel,
 	}
+	s.cacheLogger = logger
 	return logger
 }
 
 // MakeStdLogger inject Go's standard logging library
 func (s *DI) MakeStdLogger() *log.Logger {
+	if s.cacheStdLogger != nil {
+		return s.cacheStdLogger
+	}
 	logger := log.New(
 		s.Stderr,
 		"",
 		s.StdLogFlags,
 	)
-
+	s.cacheStdLogger = logger
 	return logger
 }
 
-// MakeErrorHandler inject error handler
+// MakeErrorHandler dependency injector
 func (s *DI) MakeErrorHandler() *errs.Errors {
-	handler := errs.Errors{
+	if s.cacheErrHandler != nil {
+		return s.cacheErrHandler
+	}
+	handler := &errs.Errors{
 		Logger: s.MakeStdLogger(),
 		Ex:     s.MakeExitHandler(),
 	}
-	return &handler
+	s.cacheErrHandler = handler
+	return handler
 }
 
-// MakeExitHandler inject exit handler
+// MakeExitHandler dependency injector
 func (s *DI) MakeExitHandler() *exit.Handler {
-	handler := exit.Handler{
+	if s.cacheExitHandler != nil {
+		return s.cacheExitHandler
+	}
+	handler := &exit.Handler{
 		Mode: s.ExitMode,
 	}
-	return &handler
+	s.cacheExitHandler = handler
+	return handler
+}
+
+// MakeCheck dependency injector
+func (s *DI) MakeCheck() *check.Check {
+	if s.cacheCheck != nil {
+		return s.cacheCheck
+	}
+	chk := &check.Check{
+		ConfigPath:         s.PathUserConf,
+		ConfigTemplatePath: s.PathTemplateConf,
+		HomeDir:            s.Home,
+		MetadataDir:        s.PathMetadataDir,
+		SQLiteFile:         s.SqliteDB,
+		Stderr:             s.Stderr,
+		Stdout:             s.Stdout,
+		TemplateDir:        s.PathTemplateDir,
+	}
+	s.cacheCheck = chk
+	return chk
+}
+
+// MakeInitialize dependency injector
+func (s *DI) MakeInitialize() *initialize.Initialize {
+	if s.cacheInitialize != nil {
+		return s.cacheInitialize
+	}
+	i := &initialize.Initialize{
+		ConfigPath:         s.PathUserConf,
+		ConfigTemplatePath: s.PathTemplateConf,
+		HomeDir:            s.Home,
+		MetadataDir:        s.PathMetadataDir,
+		SQLiteFile:         s.SqliteDB,
+		TemplateDir:        s.PathTemplateDir,
+	}
+	s.cacheInitialize = i
+	return i
+}
+
+// MakeInstall dependency injector
+func (s *DI) MakeInstall() *install.Install {
+	if s.cacheInstall != nil {
+		return s.cacheInstall
+	}
+	i := &install.Install{
+		ConfigFile: s.ConfigFile(),
+		ORM:        s.MakeORM(),
+		Log:        s.MakeLogger(),
+		Plumb:      s.MakePlumbingTemplate(),
+		Stderr:     s.Stderr,
+		Stdin:      s.Stdin,
+		Stdout:     s.Stdout,
+		Sync:       s.MakeSync(),
+	}
+	s.cacheInstall = i
+	return i
+}
+
+// MakeList dependency injector
+func (s *DI) MakeList() *list.List {
+	if s.cacheList != nil {
+		return s.cacheList
+	}
+	l := &list.List{
+		Stderr: s.Stderr,
+		Stdout: s.Stdout,
+		Conf:   s.ConfigFile(),
+	}
+	s.cacheList = l
+	return l
+}
+
+// MakePlumbingRepo injects di for plumbing.Plumb
+func (s *DI) MakePlumbingRepo() *plumbing.Plumbing {
+	if s.cachePlumbingRepo != nil {
+		return s.cachePlumbingRepo
+	}
+	p := &plumbing.Plumbing{
+		Base: s.PathRepoDir,
+	}
+	s.cachePlumbingRepo = p
+	return p
+}
+
+// MakePlumbingTemplate injects di for plumbing.Plumb
+func (s *DI) MakePlumbingTemplate() *plumbing.Plumbing {
+	if s.cachePlumbingTemplate != nil {
+		return s.cachePlumbingTemplate
+	}
+	p := &plumbing.Plumbing{
+		Base: s.PathTemplateDir,
+	}
+	s.cachePlumbingTemplate = p
+	return p
+}
+
+// MakeRemove dependency injector
+func (s *DI) MakeRemove() *remove.Remove {
+	if s.cacheRemove != nil {
+		return s.cacheRemove
+	}
+	r := &remove.Remove{
+		Conf:             s.ConfigFile(),
+		PathTemplateConf: s.PathTemplateConf,
+		PathUserConf:     s.PathUserConf,
+		Stderr:           s.Stderr,
+		Stdout:           s.Stdout,
+	}
+	s.cacheRemove = r
+	return r
+}
+
+// MakeSearch dependency injector
+func (s *DI) MakeSearch() *search.Search {
+	if s.cacheSearch != nil {
+		return s.cacheSearch
+	}
+	format := &formatter.Standard{
+		NoANSICodes: s.NoColour,
+	}
+	srch := &search.Search{
+		ORM:    s.MakeORM(),
+		Format: format,
+		Writer: os.Stdout,
+	}
+	s.cacheSearch = srch
+	return srch
+}
+
+// MakeSync dependency injector
+func (s *DI) MakeSync() *sync.Sync {
+	if s.cacheSync != nil {
+		return s.cacheSync
+	}
+	syn := &sync.Sync{
+		ORM:                s.MakeORM(),
+		Config:             s.ConfigFile(),
+		ConfigTemplatePath: s.PathTemplateConf,
+		Log:                s.MakeLogger(),
+		PlumbRepo:          s.MakePlumbingRepo(),
+		PlumbTemplates:     s.MakePlumbingTemplate(),
+		Stderr:             s.Stderr,
+		Stdout:             s.Stdout,
+	}
+	s.cacheSync = syn
+	return syn
+}
+
+// MakeTemplate dependency injector
+func (s *DI) MakeTemplate() *template.Template {
+	if s.cacheTemplate != nil {
+		return s.cacheTemplate
+	}
+	vars := variables.New()
+	vars.ProjectVariable("NAME", s.ProjectName)
+	t := &template.Template{
+		Config:        s.ConfigFile(),
+		Log:           s.MakeLogger(),
+		Stderr:        s.Stderr,
+		Stdout:        s.Stdout,
+		TemplateDir:   s.PathTemplateDir,
+		Variables:     vars,
+		RenderCurrent: "envsubst",
+		RenderersAvail: map[string]renderer.Renderer{
+			"texttemplate": &renderer.RenderText{},
+			"envsubst":     &renderer.RenderEnv{},
+		},
+	}
+	s.cacheTemplate = t
+	return t
+}
+
+// MakeUpdate dependency injector
+func (s *DI) MakeUpdate() *update.Update {
+	if s.cacheUpdate != nil {
+		return s.cacheUpdate
+	}
+	u := &update.Update{
+		ConfigFile:  s.ConfigFile(),
+		ORM:         s.MakeORM(),
+		Log:         s.MakeLogger(),
+		MetadataDir: s.PathMetadataDir,
+	}
+	s.cacheUpdate = u
+	return u
 }

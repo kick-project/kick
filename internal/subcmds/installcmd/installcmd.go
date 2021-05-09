@@ -4,15 +4,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/jinzhu/copier"
 	"github.com/kick-project/kick/internal/di"
-	"github.com/kick-project/kick/internal/di/icheck"
-	"github.com/kick-project/kick/internal/di/iinstall"
-	"github.com/kick-project/kick/internal/di/iupdate"
-	"github.com/kick-project/kick/internal/resources/check"
 	"github.com/kick-project/kick/internal/resources/exit"
-	"github.com/kick-project/kick/internal/services/install"
-	"github.com/kick-project/kick/internal/services/update"
 	"github.com/kick-project/kick/internal/utils/errutils"
 	"github.com/kick-project/kick/internal/utils/options"
 )
@@ -45,24 +38,17 @@ func Install(args []string, inject *di.DI) int {
 		return 256
 	}
 
-	chk := &check.Check{}
-	err := copier.Copy(chk, icheck.Inject(inject))
-	errutils.Epanic(err)
+	chk := inject.MakeCheck()
 
-	if err = chk.Init(); err != nil {
+	if err := chk.Init(); err != nil {
 		fmt.Fprintf(inject.Stderr, "%s\n", err.Error())
 		exit.Exit(255)
 	}
 
-	m := &update.Update{}
-	err = copier.Copy(m, iupdate.Inject(inject))
+	m := inject.MakeUpdate()
+	err := m.Build()
 	errutils.Epanic(err)
 
-	err = m.Build()
-	errutils.Epanic(err)
-
-	inst := &install.Install{}
-	err = copier.Copy(inst, iinstall.Inject(inject))
-	errutils.Epanic(err)
+	inst := inject.MakeInstall()
 	return inst.Install(opts.Handle, opts.Template)
 }

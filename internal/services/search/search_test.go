@@ -1,4 +1,4 @@
-package search
+package search_test
 
 import (
 	"fmt"
@@ -7,14 +7,9 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/jinzhu/copier"
 	"github.com/kick-project/kick/internal/di"
-	"github.com/kick-project/kick/internal/di/iinitialize"
-	"github.com/kick-project/kick/internal/di/isearch"
 	"github.com/kick-project/kick/internal/resources/model"
-	"github.com/kick-project/kick/internal/services/initialize"
 	"github.com/kick-project/kick/internal/utils"
-	"github.com/kick-project/kick/internal/utils/errutils"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -24,10 +19,8 @@ func TestSearch(t *testing.T) {
 	// Initialize database
 	home := filepath.Join(utils.TempDir(), "TestSearch")
 	inject := di.Setup(home)
-	i := &initialize.Initialize{}
-	err := copier.Copy(i, iinitialize.Inject(inject))
-	errutils.Epanic(err)
-	if _, err = os.Stat(inject.SqliteDB); err == nil {
+	i := inject.MakeInitialize()
+	if _, err := os.Stat(inject.SqliteDB); err == nil {
 		err = os.Remove(inject.SqliteDB)
 		if err != nil {
 			t.Error(err)
@@ -40,9 +33,7 @@ func TestSearch(t *testing.T) {
 	// Target search term
 	searchTerm := "template"
 
-	srch := &Search{}
-	err = copier.Copy(srch, isearch.Inject(inject))
-	errutils.Epanic(err)
+	srch := inject.MakeSearch()
 
 	// Parallel arrays to count regexp
 	matchmaker := map[string]*regexp.Regexp{}

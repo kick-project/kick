@@ -6,7 +6,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/jinzhu/copier"
 	_ "github.com/mattn/go-sqlite3" // Required by 'database/sql'
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
@@ -15,24 +14,17 @@ import (
 	fp "path/filepath"
 
 	"github.com/kick-project/kick/internal/di"
-	"github.com/kick-project/kick/internal/di/iinitialize"
-	"github.com/kick-project/kick/internal/di/isync"
 	"github.com/kick-project/kick/internal/resources/model"
 	"github.com/kick-project/kick/internal/resources/model/clauses"
 	"github.com/kick-project/kick/internal/resources/sync"
-	"github.com/kick-project/kick/internal/services/initialize"
 	"github.com/kick-project/kick/internal/utils"
-	"github.com/kick-project/kick/internal/utils/errutils"
 )
 
 func setup(t *testing.T, home string, models ...interface{}) (*sync.Sync, *di.DI, *gorm.DB) {
 	home = fp.Join(utils.TempDir(), home)
 	inject := di.Setup(home)
-	init := initialize.Initialize{}
-	err := copier.Copy(&init, iinitialize.Inject(inject))
-	if err != nil {
-		errutils.Epanic(err)
-	}
+
+	init := inject.MakeInitialize()
 	init.Init()
 
 	db := inject.MakeORM()
@@ -57,12 +49,7 @@ func setup(t *testing.T, home string, models ...interface{}) (*sync.Sync, *di.DI
 		}
 	}
 
-	sync := &sync.Sync{}
-	err = copier.Copy(sync, isync.Inject(inject))
-	if err != nil {
-		t.Error(err)
-		t.FailNow()
-	}
+	sync := inject.MakeSync()
 	return sync, inject, db
 }
 

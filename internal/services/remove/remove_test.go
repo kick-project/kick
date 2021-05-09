@@ -4,15 +4,10 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/jinzhu/copier"
 	"github.com/kick-project/kick/internal/di"
-	"github.com/kick-project/kick/internal/di/iinitialize"
-	"github.com/kick-project/kick/internal/di/iremove"
 	"github.com/kick-project/kick/internal/resources/config"
-	"github.com/kick-project/kick/internal/services/initialize"
 	"github.com/kick-project/kick/internal/services/remove"
 	"github.com/kick-project/kick/internal/utils"
-	"github.com/kick-project/kick/internal/utils/errutils"
 	"github.com/kick-project/kick/internal/utils/file"
 	"github.com/stretchr/testify/assert"
 )
@@ -52,15 +47,10 @@ func setup() (r *remove.Remove) {
 	}
 	inject := di.Setup(home)
 
-	init := &initialize.Initialize{}
-	err = copier.Copy(init, iinitialize.Inject(inject))
-	if err != nil {
-		panic(err)
-	}
+	init := inject.MakeInitialize()
+	init.Init()
 
-	r = &remove.Remove{}
-	err = copier.Copy(r, iremove.Inject(inject))
-	errutils.Epanic(err)
+	r = inject.MakeRemove()
 	return r
 }
 

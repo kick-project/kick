@@ -4,11 +4,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/jinzhu/copier"
 	"github.com/kick-project/kick/internal/di"
-	"github.com/kick-project/kick/internal/di/iinitialize"
 	"github.com/kick-project/kick/internal/resources/exit"
-	"github.com/kick-project/kick/internal/services/initialize"
 	"github.com/kick-project/kick/internal/subcmds/listcmd"
 	"github.com/kick-project/kick/internal/subcmds/updatecmd"
 	"github.com/kick-project/kick/internal/utils"
@@ -23,11 +20,7 @@ func TestList(t *testing.T) {
 	exit.Mode(exit.MPanic)
 	home := filepath.Join(utils.TempDir(), "home")
 	s := di.Setup(home)
-	i := &initialize.Initialize{}
-	err := copier.Copy(i, iinitialize.Inject(s))
-	if err != nil {
-		t.Error(err)
-	}
+	i := s.MakeInitialize()
 	i.Init()
 
 	updatecmd.Update([]string{"update"}, s)
@@ -42,11 +35,7 @@ func TestListLong(t *testing.T) {
 	exit.Mode(exit.MPanic)
 	home := filepath.Join(utils.TempDir(), "home")
 	inject := di.Setup(home)
-	i := &initialize.Initialize{}
-	err := copier.Copy(i, iinitialize.Inject(inject))
-	if err != nil {
-		t.Error(err)
-	}
+	i := inject.MakeInitialize()
 	i.Init()
 
 	updatecmd.Update([]string{"update"}, inject)

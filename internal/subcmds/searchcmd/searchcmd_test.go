@@ -4,14 +4,10 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/jinzhu/copier"
 	"github.com/kick-project/kick/internal/di"
-	"github.com/kick-project/kick/internal/di/iinitialize"
 	"github.com/kick-project/kick/internal/resources/exit"
-	"github.com/kick-project/kick/internal/services/initialize"
 	"github.com/kick-project/kick/internal/subcmds/searchcmd"
 	"github.com/kick-project/kick/internal/utils"
-	"github.com/kick-project/kick/internal/utils/errutils"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -24,9 +20,7 @@ func TestSearch(t *testing.T) {
 	args := []string{"search", "keyword"}
 	home := filepath.Join(utils.TempDir(), "home")
 	inject := di.Setup(home)
-	i := &initialize.Initialize{}
-	err := copier.Copy(i, iinitialize.Inject(inject))
-	errutils.Epanic(err)
+	i := inject.MakeInitialize()
 	i.Init()
 	searchcmd.Search(args, inject)
 }

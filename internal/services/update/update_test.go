@@ -1,4 +1,4 @@
-package update
+package update_test
 
 import (
 	"fmt"
@@ -7,11 +7,8 @@ import (
 	fp "path/filepath"
 	"testing"
 
-	"github.com/jinzhu/copier"
 	"github.com/kick-project/kick/internal/di"
-	"github.com/kick-project/kick/internal/di/iinitialize"
-	"github.com/kick-project/kick/internal/di/iupdate"
-	"github.com/kick-project/kick/internal/services/initialize"
+	"github.com/kick-project/kick/internal/services/update"
 	"github.com/kick-project/kick/internal/utils"
 	"github.com/kick-project/kick/internal/utils/errutils"
 	"syreclabs.com/go/faker"
@@ -21,21 +18,15 @@ func TestBuild(t *testing.T) {
 	home := fp.Join(utils.TempDir(), "home")
 	s := di.Setup(home)
 	initIt(s)
-	m := &Update{}
-	err := copier.Copy(m, iupdate.Inject(s))
-	if err != nil {
-		t.Error(err)
-	}
-	err = m.Build()
+	m := s.MakeUpdate()
+	err := m.Build()
 	if err != nil {
 		t.Error(err)
 	}
 }
 
 func initIt(inject *di.DI) {
-	i := &initialize.Initialize{}
-	err := copier.Copy(i, iinitialize.Inject(inject))
-	errutils.Epanic(err)
+	i := inject.MakeInitialize()
 	i.Init()
 }
 
@@ -43,7 +34,7 @@ func TestRepo_Load(t *testing.T) {
 	path, fname, furl, fdesc := fakeJSON(t)
 	defer os.Remove(path)
 	notEmpty(t, path)
-	m := Repo{}
+	m := update.Repo{}
 	err := m.Load(path)
 	if err != nil {
 		errutils.Epanic(err)
@@ -62,7 +53,7 @@ func TestRepo_Load(t *testing.T) {
 func TestRepo_Save(t *testing.T) {
 	path, _, _, _ := fakeJSON(t)
 	defer os.Remove(path)
-	m := Repo{}
+	m := update.Repo{}
 	err := m.Load(path)
 	errutils.Epanic(err)
 	tmpfile, err := ioutil.TempFile("", "*.json")
@@ -83,7 +74,7 @@ func TestTemplate_Load(t *testing.T) {
 	path, fname, furl, fdesc := fakeJSON(t)
 	defer os.Remove(path)
 	notEmpty(t, path)
-	tpl := Template{}
+	tpl := update.Template{}
 	err := tpl.Load(path)
 	if err != nil {
 		t.Error(err)
@@ -102,7 +93,7 @@ func TestTemplate_Load(t *testing.T) {
 func TestTemplate_Save(t *testing.T) {
 	path, _, _, _ := fakeJSON(t)
 	defer os.Remove(path)
-	tpl := Template{}
+	tpl := update.Template{}
 	err := tpl.Load(path)
 	if err != nil {
 		t.Error(err)
