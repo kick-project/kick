@@ -6,9 +6,9 @@ import (
 
 	"github.com/kick-project/kick/internal/di"
 	"github.com/kick-project/kick/internal/resources/config"
+	"github.com/kick-project/kick/internal/resources/file"
 	"github.com/kick-project/kick/internal/services/remove"
 	"github.com/kick-project/kick/internal/utils"
-	"github.com/kick-project/kick/internal/utils/file"
 	"github.com/stretchr/testify/assert"
 )
 

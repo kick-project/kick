@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/kick-project/kick/internal/utils/file"
+	"github.com/kick-project/kick/internal/resources/file"
 	"gopkg.in/yaml.v2"
 )
 
