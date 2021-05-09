@@ -1,4 +1,4 @@
-package initialize
+package setup
 
 import (
 	"os"
@@ -8,8 +8,8 @@ import (
 	"github.com/kick-project/kick/internal/resources/model"
 )
 
-// Initialize is responsible for initializing all disk paths
-type Initialize struct {
+// Setup is responsible for initializing all disk paths
+type Setup struct {
 	ConfigPath         string `validate:"required"`
 	ConfigTemplatePath string `validate:"required"`
 	HomeDir            string `validate:"required"`
@@ -19,14 +19,14 @@ type Initialize struct {
 }
 
 // Init initialize everything.
-func (i *Initialize) Init() {
+func (i *Setup) Init() {
 	i.InitPaths()
 	i.InitMetadata()
 	i.InitConfig()
 }
 
 // InitPaths initialize paths.
-func (i *Initialize) InitPaths() {
+func (i *Setup) InitPaths() {
 	for _, cur := range []string{fp.Dir(i.ConfigPath), fp.Dir(i.SQLiteFile), i.TemplateDir, i.MetadataDir} {
 		if _, err := os.Stat(cur); os.IsNotExist(err) {
 			err := os.MkdirAll(cur, 0755)
@@ -36,7 +36,7 @@ func (i *Initialize) InitPaths() {
 }
 
 // InitMetadata initialize metadata.
-func (i *Initialize) InitMetadata() {
+func (i *Setup) InitMetadata() {
 	// Creating an ORM based model
 	model.CreateModel(&model.Options{
 		File: i.SQLiteFile,
@@ -44,7 +44,7 @@ func (i *Initialize) InitMetadata() {
 }
 
 // InitConfig initialize configuration file.
-func (i *Initialize) InitConfig() {
+func (i *Setup) InitConfig() {
 	_, err := os.Stat(i.ConfigPath)
 	if os.IsNotExist(err) {
 		f, err := os.Create(i.ConfigPath)

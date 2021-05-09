@@ -24,7 +24,7 @@ func setup(t *testing.T, home string, models ...interface{}) (*sync.Sync, *di.DI
 	home = fp.Join(testtools.TempDir(), home)
 	inject := di.Setup(home)
 
-	init := inject.MakeInitialize()
+	init := inject.MakeSetup()
 	init.Init()
 
 	db := inject.MakeORM()

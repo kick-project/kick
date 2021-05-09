@@ -11,8 +11,8 @@ import (
 	"github.com/kick-project/kick/internal/resources/exit"
 	"github.com/kick-project/kick/internal/resources/file"
 	"github.com/kick-project/kick/internal/resources/testtools"
-	"github.com/kick-project/kick/internal/subcmds/initcmd"
 	"github.com/kick-project/kick/internal/subcmds/installcmd"
+	"github.com/kick-project/kick/internal/subcmds/setupcmd"
 	"github.com/kick-project/kick/internal/subcmds/startcmd"
 	"github.com/kick-project/kick/internal/subcmds/updatecmd"
 	"github.com/stretchr/testify/assert"
@@ -78,7 +78,7 @@ func installTest(t *testing.T, id, handle, template string) {
 	inject := di.Setup(home)
 	inject.LogLevel(log.DebugLevel)
 
-	ec := initcmd.InitCmd([]string{"init"}, inject)
+	ec := setupcmd.SetupCmd([]string{"setup"}, inject)
 	assert.Equal(t, 0, ec)
 
 	ec = updatecmd.Update([]string{"update"}, inject)

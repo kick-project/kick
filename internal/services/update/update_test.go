@@ -26,7 +26,7 @@ func TestBuild(t *testing.T) {
 }
 
 func initIt(inject *di.DI) {
-	i := inject.MakeInitialize()
+	i := inject.MakeSetup()
 	i.Init()
 }
 

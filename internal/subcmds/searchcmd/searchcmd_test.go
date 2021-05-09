@@ -20,7 +20,7 @@ func TestSearch(t *testing.T) {
 	args := []string{"search", "keyword"}
 	home := filepath.Join(testtools.TempDir(), "home")
 	inject := di.Setup(home)
-	i := inject.MakeInitialize()
+	i := inject.MakeSetup()
 	i.Init()
 	searchcmd.Search(args, inject)
 }

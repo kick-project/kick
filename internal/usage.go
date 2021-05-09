@@ -13,23 +13,23 @@ var usageDoc = `Generate project scaffolding from a predefined set of templates
 
 Usage:
     kick start
-    kick init
-    kick install
     kick list
+    kick install
     kick remove
     kick search
     kick update
+    kick setup
 
 Options:
     -h --help     print help
     -v --version  print version
     start         start a project
-    init          initialize configuration
-    install       install a template
     list          list installed templates
+    install       install a template
     remove        remove an installed template
     search        search repositories for available templates
     update        update repository data
+    setup         setup configuration
 `
 
 //
@@ -39,7 +39,7 @@ Options:
 // OptMain holds all parsed options from GetOptMain.
 type OptMain struct {
 	Start   bool `docopt:"start"`
-	Init    bool `docopt:"init"`
+	Setup   bool `docopt:"setup"`
 	Install bool `docopt:"install"`
 	List    bool `docopt:"list"`
 	Remove  bool `docopt:"remove"`

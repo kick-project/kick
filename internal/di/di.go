@@ -22,12 +22,12 @@ import (
 	"github.com/kick-project/kick/internal/resources/template"
 	"github.com/kick-project/kick/internal/resources/template/renderer"
 	"github.com/kick-project/kick/internal/resources/template/variables"
-	"github.com/kick-project/kick/internal/services/initialize"
 	"github.com/kick-project/kick/internal/services/install"
 	"github.com/kick-project/kick/internal/services/list"
 	"github.com/kick-project/kick/internal/services/remove"
 	"github.com/kick-project/kick/internal/services/search"
 	"github.com/kick-project/kick/internal/services/search/formatter"
+	"github.com/kick-project/kick/internal/services/setup"
 	"github.com/kick-project/kick/internal/services/update"
 	_ "github.com/mattn/go-sqlite3" // Driver for database/sql
 	"gorm.io/driver/sqlite"
@@ -75,7 +75,7 @@ type DI struct {
 	cacheErrHandler       *errs.Handler
 	cacheExitHandler      *exit.Handler
 	cacheCheck            *check.Check
-	cacheInitialize       *initialize.Initialize
+	cacheSetup            *setup.Setup
 	cacheList             *list.List
 	cacheInstall          *install.Install
 	cachePlumbingRepo     *plumbing.Plumbing
@@ -277,12 +277,12 @@ func (s *DI) MakeCheck() *check.Check {
 	return chk
 }
 
-// MakeInitialize dependency injector
-func (s *DI) MakeInitialize() *initialize.Initialize {
-	if s.cacheInitialize != nil {
-		return s.cacheInitialize
+// MakeSetup dependency injector
+func (s *DI) MakeSetup() *setup.Setup {
+	if s.cacheSetup != nil {
+		return s.cacheSetup
 	}
-	i := &initialize.Initialize{
+	i := &setup.Setup{
 		ConfigPath:         s.PathUserConf,
 		ConfigTemplatePath: s.PathTemplateConf,
 		HomeDir:            s.Home,
@@ -291,7 +291,7 @@ func (s *DI) MakeInitialize() *initialize.Initialize {
 		TemplateDir:        s.PathTemplateDir,
 	}
 	s.validate(i)
-	s.cacheInitialize = i
+	s.cacheSetup = i
 	return i
 }
 

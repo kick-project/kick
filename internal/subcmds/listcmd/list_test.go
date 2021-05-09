@@ -20,7 +20,7 @@ func TestList(t *testing.T) {
 	exit.Mode(exit.MPanic)
 	home := filepath.Join(testtools.TempDir(), "home")
 	s := di.Setup(home)
-	i := s.MakeInitialize()
+	i := s.MakeSetup()
 	i.Init()
 
 	updatecmd.Update([]string{"update"}, s)
@@ -35,7 +35,7 @@ func TestListLong(t *testing.T) {
 	exit.Mode(exit.MPanic)
 	home := filepath.Join(testtools.TempDir(), "home")
 	inject := di.Setup(home)
-	i := inject.MakeInitialize()
+	i := inject.MakeSetup()
 	i.Init()
 
 	updatecmd.Update([]string{"update"}, inject)

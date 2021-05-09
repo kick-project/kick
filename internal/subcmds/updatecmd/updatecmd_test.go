@@ -7,7 +7,7 @@ import (
 	"github.com/kick-project/kick/internal/di"
 	"github.com/kick-project/kick/internal/resources/exit"
 	"github.com/kick-project/kick/internal/resources/testtools"
-	"github.com/kick-project/kick/internal/subcmds/initcmd"
+	"github.com/kick-project/kick/internal/subcmds/setupcmd"
 	"github.com/kick-project/kick/internal/subcmds/updatecmd"
 	"github.com/stretchr/testify/assert"
 )
@@ -22,7 +22,7 @@ func TestUpdate(t *testing.T) {
 	home := filepath.Join(testtools.TempDir(), "home")
 	inject := di.Setup(home)
 
-	initcmd.InitCmd([]string{"init"}, inject)
+	setupcmd.SetupCmd([]string{"setup"}, inject)
 
 	dbConn := inject.MakeORM()
 	result := dbConn.Raw(`DELETE FROM template`)

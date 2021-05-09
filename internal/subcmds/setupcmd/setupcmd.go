@@ -1,4 +1,4 @@
-package initcmd
+package setupcmd
 
 import (
 	"log"
@@ -11,27 +11,27 @@ import (
 var UsageDoc = `initialize configuration
 
 Usage:
-    kick init
+    kick setup
 
 Options:
     -h --help     print help
 `
 
-// OptInit initialize configuration file
-type OptInit struct {
-	Init bool `docopt:"init"`
+// OptSetup initialize configuration file
+type OptSetup struct {
+	Setup bool `docopt:"setup"`
 }
 
-// InitCmd initialize configuration
-func InitCmd(args []string, inject *di.DI) int {
-	opts := &OptInit{}
+// SetupCmd initialize configuration
+func SetupCmd(args []string, inject *di.DI) int {
+	opts := &OptSetup{}
 	options.Bind(UsageDoc, args, opts)
-	if !opts.Init {
+	if !opts.Setup {
 		log.Println("error can not initialize")
 		return 256
 	}
 
-	i := inject.MakeInitialize()
+	i := inject.MakeSetup()
 	i.Init()
 
 	return 0

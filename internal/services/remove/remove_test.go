@@ -47,7 +47,7 @@ func setup() (r *remove.Remove) {
 	}
 	inject := di.Setup(home)
 
-	init := inject.MakeInitialize()
+	init := inject.MakeSetup()
 	init.Init()
 
 	r = inject.MakeRemove()

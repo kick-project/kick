@@ -19,7 +19,7 @@ func TestSearch(t *testing.T) {
 	// Initialize database
 	home := filepath.Join(testtools.TempDir(), "TestSearch")
 	inject := di.Setup(home)
-	i := inject.MakeInitialize()
+	i := inject.MakeSetup()
 	if _, err := os.Stat(inject.SqliteDB); err == nil {
 		err = os.Remove(inject.SqliteDB)
 		if err != nil {
