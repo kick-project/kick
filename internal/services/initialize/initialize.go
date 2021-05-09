@@ -27,9 +27,12 @@ func (i *Initialize) Init() {
 
 // InitPaths initialize paths.
 func (i *Initialize) InitPaths() {
-	confdir := fp.Dir(i.ConfigPath)
-	dbdir := fp.Dir(i.SQLiteFile)
-	mkDirs([]string{confdir, dbdir, i.TemplateDir, i.MetadataDir})
+	for _, cur := range []string{fp.Dir(i.ConfigPath), fp.Dir(i.SQLiteFile), i.TemplateDir, i.MetadataDir} {
+		if _, err := os.Stat(cur); os.IsNotExist(err) {
+			err := os.MkdirAll(cur, 0755)
+			errs.PanicF("can not create %s: %w", cur, err)
+		}
+	}
 }
 
 // InitMetadata initialize metadata.
@@ -63,21 +66,5 @@ func (i *Initialize) InitConfig() {
 		errs.Panic(err)
 	} else if err != nil {
 		errs.PanicF("can not save configuration file: %w", err)
-	}
-}
-
-func mkDirs(i interface{}) {
-	var dirs []string
-	switch v := i.(type) {
-	case string:
-		dirs = []string{v}
-	case []string:
-		dirs = v
-	default:
-		panic("unknown type")
-	}
-	for _, d := range dirs {
-		err := os.MkdirAll(d, 0755)
-		errs.PanicF("can not create %s: %w", d, err)
 	}
 }
