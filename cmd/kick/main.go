@@ -10,6 +10,7 @@ import (
 	"github.com/kick-project/kick/internal/di"
 	"github.com/kick-project/kick/internal/resources/errs"
 	"github.com/kick-project/kick/internal/resources/exit"
+	"github.com/kick-project/kick/internal/subcmds/initcmd"
 	"github.com/kick-project/kick/internal/subcmds/installcmd"
 	"github.com/kick-project/kick/internal/subcmds/listcmd"
 	"github.com/kick-project/kick/internal/subcmds/removecmd"
@@ -46,6 +47,8 @@ func main() {
 		exit.Exit(installcmd.Install(args[1:], inject))
 	case o.Remove:
 		exit.Exit(removecmd.Remove(args[1:], inject))
+	case o.Init:
+		exit.Exit(initcmd.Init(args[1:], inject))
 	}
 	exit.Exit(255)
 }

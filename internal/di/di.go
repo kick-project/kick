@@ -22,6 +22,7 @@ import (
 	"github.com/kick-project/kick/internal/resources/template"
 	"github.com/kick-project/kick/internal/resources/template/renderer"
 	"github.com/kick-project/kick/internal/resources/template/variables"
+	"github.com/kick-project/kick/internal/services/initialize"
 	"github.com/kick-project/kick/internal/services/install"
 	"github.com/kick-project/kick/internal/services/list"
 	"github.com/kick-project/kick/internal/services/remove"
@@ -77,6 +78,7 @@ type DI struct {
 	cacheCheck            *check.Check
 	cacheSetup            *setup.Setup
 	cacheList             *list.List
+	cacheInit             *initialize.Init
 	cacheInstall          *install.Install
 	cachePlumbingRepo     *plumbing.Plumbing
 	cachePlumbingTemplate *plumbing.Plumbing
@@ -292,6 +294,21 @@ func (s *DI) MakeSetup() *setup.Setup {
 	}
 	s.validate(i)
 	s.cacheSetup = i
+	return i
+}
+
+// MakeInit dependency injector
+func (s *DI) MakeInit() *initialize.Init {
+	if s.cacheInit != nil {
+		return s.cacheInit
+	}
+	i := &initialize.Init{
+		ErrHandler: s.MakeErrorHandler(),
+		Stdout:     s.Stdout,
+		Stderr:     s.Stderr,
+	}
+	s.validate(i)
+	s.cacheInit = i
 	return i
 }
 

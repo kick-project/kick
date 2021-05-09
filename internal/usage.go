@@ -19,6 +19,7 @@ Usage:
     kick search
     kick update
     kick setup
+    kick init
 
 Options:
     -h --help     print help
@@ -30,6 +31,7 @@ Options:
     search        search repositories for available templates
     update        update repository data
     setup         setup configuration
+    init          initialize a template or repository
 `
 
 //
@@ -45,6 +47,7 @@ type OptMain struct {
 	Remove  bool `docopt:"remove"`
 	Search  bool `docopt:"search"`
 	Update  bool `docopt:"update"`
+	Init    bool `docopt:"init"`
 }
 
 // GetOptMain is a command line option parser that uses docopts-go to parse a
