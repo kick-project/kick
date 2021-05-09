@@ -9,13 +9,13 @@ import (
 
 	"github.com/kick-project/kick/internal/di"
 	"github.com/kick-project/kick/internal/resources/errs"
+	"github.com/kick-project/kick/internal/resources/testtools"
 	"github.com/kick-project/kick/internal/services/update"
-	"github.com/kick-project/kick/internal/utils"
 	"syreclabs.com/go/faker"
 )
 
 func TestBuild(t *testing.T) {
-	home := fp.Join(utils.TempDir(), "home")
+	home := fp.Join(testtools.TempDir(), "home")
 	s := di.Setup(home)
 	initIt(s)
 	m := s.MakeUpdate()

@@ -7,8 +7,8 @@ import (
 
 	"github.com/kick-project/kick/internal/di"
 	"github.com/kick-project/kick/internal/resources/exit"
+	"github.com/kick-project/kick/internal/resources/testtools"
 	"github.com/kick-project/kick/internal/subcmds/initcmd"
-	"github.com/kick-project/kick/internal/utils"
 	_ "github.com/mattn/go-sqlite3" // Required by 'database/sql'
 	"github.com/stretchr/testify/assert"
 )
@@ -19,7 +19,7 @@ func TestUsageDoc(t *testing.T) {
 
 func TestInit(t *testing.T) {
 	exit.Mode(exit.MPanic)
-	home := fp.Join(utils.TempDir(), "init")
+	home := fp.Join(testtools.TempDir(), "init")
 	inject := di.Setup(home)
 	initcmd.InitCmd([]string{"init"}, inject)
 	dbfile := fp.Clean(fmt.Sprintf("%s/.kick/metadata/metadata.db", home))

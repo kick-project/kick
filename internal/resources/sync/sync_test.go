@@ -17,11 +17,11 @@ import (
 	"github.com/kick-project/kick/internal/resources/model"
 	"github.com/kick-project/kick/internal/resources/model/clauses"
 	"github.com/kick-project/kick/internal/resources/sync"
-	"github.com/kick-project/kick/internal/utils"
+	"github.com/kick-project/kick/internal/resources/testtools"
 )
 
 func setup(t *testing.T, home string, models ...interface{}) (*sync.Sync, *di.DI, *gorm.DB) {
-	home = fp.Join(utils.TempDir(), home)
+	home = fp.Join(testtools.TempDir(), home)
 	inject := di.Setup(home)
 
 	init := inject.MakeInitialize()

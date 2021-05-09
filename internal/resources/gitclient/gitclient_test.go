@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/kick-project/kick/internal/resources/gitclient"
-	"github.com/kick-project/kick/internal/utils"
+	"github.com/kick-project/kick/internal/resources/testtools"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -16,7 +16,7 @@ import (
 //
 func TestGitClient_Tag(t *testing.T) {
 	url := "http://127.0.0.1:5000/tmpl1.git"
-	tmpdir := utils.TempDir()
+	tmpdir := testtools.TempDir()
 	tmpproject, err := ioutil.TempDir(tmpdir, "TestGitClient_Tag-*")
 	if err != nil {
 		t.Fatal("Can not create temporary directory")

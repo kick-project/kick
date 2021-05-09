@@ -9,7 +9,7 @@ import (
 
 	"github.com/kick-project/kick/internal/di"
 	"github.com/kick-project/kick/internal/resources/model"
-	"github.com/kick-project/kick/internal/utils"
+	"github.com/kick-project/kick/internal/resources/testtools"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -17,7 +17,7 @@ import (
 
 func TestSearch(t *testing.T) {
 	// Initialize database
-	home := filepath.Join(utils.TempDir(), "TestSearch")
+	home := filepath.Join(testtools.TempDir(), "TestSearch")
 	inject := di.Setup(home)
 	i := inject.MakeInitialize()
 	if _, err := os.Stat(inject.SqliteDB); err == nil {

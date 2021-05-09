@@ -7,8 +7,8 @@ import (
 	"github.com/kick-project/kick/internal/di"
 	"github.com/kick-project/kick/internal/resources/config"
 	"github.com/kick-project/kick/internal/resources/file"
+	"github.com/kick-project/kick/internal/resources/testtools"
 	"github.com/kick-project/kick/internal/services/remove"
-	"github.com/kick-project/kick/internal/utils"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -37,7 +37,7 @@ func TestRemoveLast(t *testing.T) {
 }
 
 func setup() (r *remove.Remove) {
-	home := filepath.Clean(utils.TempDir() + "/TestRemove")
+	home := filepath.Clean(testtools.TempDir() + "/TestRemove")
 
 	src := filepath.Clean(home + "/.kick/templates.yml.save")
 	dst := filepath.Clean(home + "/.kick/templates.yml")

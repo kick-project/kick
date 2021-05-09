@@ -10,11 +10,11 @@ import (
 	"github.com/kick-project/kick/internal/di"
 	"github.com/kick-project/kick/internal/resources/exit"
 	"github.com/kick-project/kick/internal/resources/file"
+	"github.com/kick-project/kick/internal/resources/testtools"
 	"github.com/kick-project/kick/internal/subcmds/initcmd"
 	"github.com/kick-project/kick/internal/subcmds/installcmd"
 	"github.com/kick-project/kick/internal/subcmds/startcmd"
 	"github.com/kick-project/kick/internal/subcmds/updatecmd"
-	"github.com/kick-project/kick/internal/utils"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -42,14 +42,14 @@ func TestInstallTemplateURL(t *testing.T) {
 
 func TestInstallPath(t *testing.T) {
 	handle := "handle4"
-	template := filepath.Clean(utils.TempDir() + "/installcmd/kicks/go")
+	template := filepath.Clean(testtools.TempDir() + "/installcmd/kicks/go")
 	installTest(t, "TestInstallPath", handle, template)
 }
 
 func installTest(t *testing.T, id, handle, template string) {
 	exit.Mode(exit.MPanic)
 	// Home Directory
-	home := filepath.Join(utils.TempDir(), id)
+	home := filepath.Join(testtools.TempDir(), id)
 
 	// Make kick config dir
 	kickDir := filepath.Join(home, ".kick")
@@ -60,7 +60,7 @@ func installTest(t *testing.T, id, handle, template string) {
 	}
 
 	// Copy template
-	srcTemplate := filepath.Join(utils.FixtureDir(), "installcmd", ".kick", "templates.yml.save")
+	srcTemplate := filepath.Join(testtools.FixtureDir(), "installcmd", ".kick", "templates.yml.save")
 	destTemplate := filepath.Join(kickDir, "templates.yml")
 	_, err = file.Copy(srcTemplate, destTemplate)
 	if err != nil {
@@ -68,7 +68,7 @@ func installTest(t *testing.T, id, handle, template string) {
 	}
 
 	// Copy config
-	srcConfig := filepath.Join(utils.FixtureDir(), "installcmd", ".kick", "config.yml")
+	srcConfig := filepath.Join(testtools.FixtureDir(), "installcmd", ".kick", "config.yml")
 	destConfig := filepath.Join(kickDir, "config.yml")
 	_, err = file.Copy(srcConfig, destConfig)
 	if err != nil {
@@ -87,7 +87,7 @@ func installTest(t *testing.T, id, handle, template string) {
 	ec = installcmd.Install([]string{"install", handle, template}, inject)
 	assert.Equal(t, 0, ec)
 
-	td, err := ioutil.TempDir(utils.TempDir(), id+"-*")
+	td, err := ioutil.TempDir(testtools.TempDir(), id+"-*")
 	if err != nil {
 		t.Error(err)
 	}

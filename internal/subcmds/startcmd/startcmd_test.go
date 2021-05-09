@@ -7,8 +7,8 @@ import (
 
 	"github.com/kick-project/kick/internal/di"
 	"github.com/kick-project/kick/internal/resources/exit"
+	"github.com/kick-project/kick/internal/resources/testtools"
 	"github.com/kick-project/kick/internal/subcmds/startcmd"
-	"github.com/kick-project/kick/internal/utils"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -18,7 +18,7 @@ func TestUsageDoc(t *testing.T) {
 
 func TestStart(t *testing.T) {
 	exit.Mode(exit.MPanic)
-	tmpdir := utils.TempDir()
+	tmpdir := testtools.TempDir()
 	home, _ := filepath.Abs(filepath.Join(tmpdir, "home"))
 	path, _ := ioutil.TempDir(tmpdir, "start-")
 	path = filepath.Join(path, "tmpl")

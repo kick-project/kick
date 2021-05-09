@@ -1,4 +1,4 @@
-package utils
+package testtools
 
 import (
 	"path"
@@ -12,7 +12,7 @@ func FixtureDir() (fixturedir string) {
 	if !ok {
 		panic("Can not get filename")
 	}
-	fixturedir, err := filepath.Abs(path.Join(path.Dir(filename), "..", "..", "test", "fixtures"))
+	fixturedir, err := filepath.Abs(path.Join(path.Dir(filename), "..", "..", "..", "test", "fixtures"))
 	if err != nil {
 		panic(err)
 	}
@@ -25,7 +25,7 @@ func TempDir() (tempdir string) {
 	if !ok {
 		panic("Can not get filename")
 	}
-	tempdir, err := filepath.Abs(path.Join(path.Dir(filename), "..", "..", "tmp"))
+	tempdir, err := filepath.Abs(path.Join(path.Dir(filename), "..", "..", "..", "tmp"))
 	if err != nil {
 		panic(err)
 	}
