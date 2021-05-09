@@ -14,12 +14,14 @@ import (
 	"github.com/kick-project/kick/internal/subcmds/installcmd"
 	"github.com/kick-project/kick/internal/subcmds/listcmd"
 	"github.com/kick-project/kick/internal/subcmds/removecmd"
+	"github.com/kick-project/kick/internal/subcmds/repocmd"
 	"github.com/kick-project/kick/internal/subcmds/searchcmd"
 	"github.com/kick-project/kick/internal/subcmds/setupcmd"
 	"github.com/kick-project/kick/internal/subcmds/startcmd"
 	"github.com/kick-project/kick/internal/subcmds/updatecmd"
 )
 
+//gocyclo:ignore
 func main() {
 	loadDotenv()
 	home, err := os.UserHomeDir()
@@ -49,6 +51,8 @@ func main() {
 		exit.Exit(removecmd.Remove(args[1:], inject))
 	case o.Init:
 		exit.Exit(initcmd.Init(args[1:], inject))
+	case o.Repo:
+		exit.Exit(repocmd.Repo(args[1:], inject))
 	}
 	exit.Exit(255)
 }

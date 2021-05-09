@@ -26,6 +26,7 @@ import (
 	"github.com/kick-project/kick/internal/services/install"
 	"github.com/kick-project/kick/internal/services/list"
 	"github.com/kick-project/kick/internal/services/remove"
+	"github.com/kick-project/kick/internal/services/repo"
 	"github.com/kick-project/kick/internal/services/search"
 	"github.com/kick-project/kick/internal/services/search/formatter"
 	"github.com/kick-project/kick/internal/services/setup"
@@ -383,6 +384,20 @@ func (s *DI) MakeRemove() *remove.Remove {
 		Stdout:           s.Stdout,
 	}
 	s.cacheRemove = r
+	return r
+}
+
+// MakeRepo dependency injector
+func (s *DI) MakeRepo() *repo.Repo {
+	wd, err := os.Getwd()
+	errs.Panic(err)
+	r := &repo.Repo{
+		WD:         wd,
+		Plumb:      s.MakePlumbingTemplate(),
+		Validate:   s.MakeValidate(),
+		ErrHandler: s.MakeErrorHandler(),
+		Log:        s.MakeStdLogger(),
+	}
 	return r
 }
 

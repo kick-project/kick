@@ -1,4 +1,4 @@
-package repobuild
+package repo
 
 import (
 	"log"
@@ -15,23 +15,23 @@ import (
 	"github.com/kick-project/kick/internal/resources/serialize"
 )
 
-// RepoBuild build a repository repo
-type RepoBuild struct {
+// Repo build a repository repo
+type Repo struct {
 	WD         string              // Working Directory
-	Plumb      plumbing.Plumbing   // Plumbing object
+	Plumb      *plumbing.Plumbing  // Plumbing object
 	Serialized serialize.RepoMain  // Serialized config
 	Validate   *validator.Validate // Validation
 	ErrHandler *errs.Handler       // Error handler
 	Log        *log.Logger         // Logger
 }
 
-// Make build repo
-func (m *RepoBuild) Make() {
+// Build build repo
+func (m *Repo) Build() {
 	m.load()
 	m.download()
 }
 
-func (m *RepoBuild) load() {
+func (m *Repo) load() {
 	fp := filepath.Join(m.WD, "repo.yml")
 	err := marshal.FromFile(&m.Serialized, fp)
 	m.ErrHandler.FatalF("Can not load file \"%s\": %v", fp, err)
@@ -40,7 +40,7 @@ func (m *RepoBuild) load() {
 	m.ErrHandler.FatalF("Can not load file \"%s\", invalid fields: %v", fp, err)
 }
 
-func (m *RepoBuild) download() {
+func (m *Repo) download() {
 	destDir := filepath.Join(m.WD, "templates")
 	err := os.MkdirAll(destDir, 0755)
 	errs.FatalF("Can create directory \"%s\": %v", destDir, err)
@@ -53,7 +53,7 @@ func (m *RepoBuild) download() {
 		}
 
 		// Get URL
-		srcDir, err := gitclient.Get(url, &m.Plumb)
+		srcDir, err := gitclient.Get(url, m.Plumb)
 		if m.ErrHandler.LogF("Can not download \"%s\": %v", url, err) {
 			continue
 		}

@@ -20,6 +20,7 @@ Usage:
     kick update
     kick setup
     kick init
+    kick repo
 
 Options:
     -h --help     print help
@@ -32,6 +33,7 @@ Options:
     update        update repository data
     setup         setup configuration
     init          initialize a template or repository
+    repo          tool to build a repository
 `
 
 //
@@ -48,6 +50,7 @@ type OptMain struct {
 	Search  bool `docopt:"search"`
 	Update  bool `docopt:"update"`
 	Init    bool `docopt:"init"`
+	Repo    bool `docopt:"repo"`
 }
 
 // GetOptMain is a command line option parser that uses docopts-go to parse a

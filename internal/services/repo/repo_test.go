@@ -1,4 +1,4 @@
-package repobuild_test
+package repo_test
 
 import (
 	"io/ioutil"
@@ -11,12 +11,12 @@ import (
 	"github.com/kick-project/kick/internal/resources/exit"
 	"github.com/kick-project/kick/internal/resources/gitclient/plumbing"
 	"github.com/kick-project/kick/internal/resources/testtools"
-	"github.com/kick-project/kick/internal/services/repobuild"
+	"github.com/kick-project/kick/internal/services/repo"
 )
 
-func TestRepoBuild_Make(t *testing.T) {
+func TestRepo_Build(t *testing.T) {
 	// Make directory
-	dirPath := filepath.Clean(testtools.TempDir() + "/TestRepoBuild_Make")
+	dirPath := filepath.Join(testtools.TempDir(), "TestRepo_Build")
 	err := os.MkdirAll(dirPath, 0755)
 	if err != nil {
 		t.Errorf("Can not create directory %s: %v", dirPath, err)
@@ -24,7 +24,7 @@ func TestRepoBuild_Make(t *testing.T) {
 	}
 
 	// Make file
-	filePath := filepath.Clean(dirPath + "/repo.yml")
+	filePath := filepath.Join(dirPath, "repo.yml")
 	data := []byte(
 		`name: repo1
 description: repo1 repo
@@ -42,9 +42,9 @@ templates:
 		return
 	}
 
-	m := repobuild.RepoBuild{
+	m := repo.Repo{
 		WD: dirPath,
-		Plumb: plumbing.Plumbing{
+		Plumb: &plumbing.Plumbing{
 			Base: filepath.Join(testtools.TempDir(), "home", ".kick", "metadata"),
 		},
 		Validate: validator.New(),
@@ -54,5 +54,5 @@ templates:
 			},
 		},
 	}
-	m.Make()
+	m.Build()
 }
