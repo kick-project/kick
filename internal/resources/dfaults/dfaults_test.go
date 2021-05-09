@@ -3,7 +3,7 @@ package dfaults_test
 import (
 	"testing"
 
-	"github.com/kick-project/kick/internal/utils/dfaults"
+	"github.com/kick-project/kick/internal/resources/dfaults"
 	"github.com/stretchr/testify/assert"
 	"syreclabs.com/go/faker"
 )
