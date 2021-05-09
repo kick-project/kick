@@ -1,4 +1,4 @@
-package gitclient
+package gitclient_test
 
 import (
 	"io/ioutil"
@@ -6,6 +6,7 @@ import (
 	"regexp"
 	"testing"
 
+	"github.com/kick-project/kick/internal/resources/gitclient"
 	"github.com/kick-project/kick/internal/utils"
 	"github.com/stretchr/testify/assert"
 )
@@ -24,7 +25,7 @@ func TestGitClient_Tag(t *testing.T) {
 	if err != nil {
 		t.Fatal("Can not remove temporary directory")
 	}
-	client := Gitclient{
+	client := gitclient.Gitclient{
 		URL:    url,
 		Local:  tmpproject,
 		Output: os.Stdout,

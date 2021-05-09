@@ -1,4 +1,4 @@
-package compression
+package compression_test
 
 import (
 	"path/filepath"
@@ -6,13 +6,14 @@ import (
 
 	"github.com/kick-project/kick/internal/utils"
 	"github.com/kick-project/kick/internal/utils/checksum"
+	"github.com/kick-project/kick/internal/utils/compression"
 )
 
 func TestCompress(t *testing.T) {
 	src := filepath.Join(utils.TempDir(), "compression", "plaintext.txt")
 	dst := filepath.Join(utils.TempDir(), "compression", "plaintext.txt.gz")
 	sumfile := dst + ".sha256"
-	sz, err := Compress(src, dst)
+	sz, err := compression.Compress(src, dst)
 	if err != nil {
 		t.Error(err)
 	}
@@ -36,7 +37,7 @@ func TestDecompress(t *testing.T) {
 	src := filepath.Join(utils.TempDir(), "compression", "compressedtext.txt.gz")
 	dst := filepath.Join(utils.TempDir(), "compression", "compressedtext.txt")
 	sumfile := dst + ".sha256"
-	sz, err = Decompress(src, dst)
+	sz, err = compression.Decompress(src, dst)
 	if err != nil {
 		t.Error(err)
 	}

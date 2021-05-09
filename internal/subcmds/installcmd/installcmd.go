@@ -17,7 +17,8 @@ import (
 	"github.com/kick-project/kick/internal/utils/options"
 )
 
-var usageDoc = `Install template
+// UsageDoc help document passed to docopts
+var UsageDoc = `Install template
 
 Usage:
     kick install <handle> <location>
@@ -38,7 +39,7 @@ type OptInstall struct {
 // Install install a template
 func Install(args []string, inject *di.DI) int {
 	opts := &OptInstall{}
-	options.Bind(usageDoc, args, opts)
+	options.Bind(UsageDoc, args, opts)
 	if !opts.Install {
 		errutils.Epanic(errors.New("Install set to false"))
 		return 256

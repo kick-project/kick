@@ -17,7 +17,8 @@ import (
 	"github.com/kick-project/kick/internal/utils/options"
 )
 
-var usageDoc = `generate project scaffolding
+// UsageDoc help document passed to docopts
+var UsageDoc = `generate project scaffolding
 
 Usage:
     kick start <handle> <project>
@@ -38,7 +39,7 @@ type OptStart struct {
 // Start start cli option
 func Start(args []string, inject *di.DI) int {
 	opts := &OptStart{}
-	options.Bind(usageDoc, args, opts)
+	options.Bind(UsageDoc, args, opts)
 
 	chk := &check.Check{}
 	err := copier.Copy(chk, icheck.Inject(inject))

@@ -1,4 +1,4 @@
-package updatecmd
+package updatecmd_test
 
 import (
 	"path/filepath"
@@ -7,12 +7,13 @@ import (
 	"github.com/kick-project/kick/internal/di"
 	"github.com/kick-project/kick/internal/resources/exit"
 	"github.com/kick-project/kick/internal/subcmds/initcmd"
+	"github.com/kick-project/kick/internal/subcmds/updatecmd"
 	"github.com/kick-project/kick/internal/utils"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestUsageDoc(t *testing.T) {
-	assert.NotRegexp(t, "\t", usageDoc)
+	assert.NotRegexp(t, "\t", updatecmd.UsageDoc)
 }
 
 func TestUpdate(t *testing.T) {
@@ -29,7 +30,7 @@ func TestUpdate(t *testing.T) {
 		t.Error(result.Error)
 	}
 
-	Update([]string{"update"}, inject)
+	updatecmd.Update([]string{"update"}, inject)
 
 	var count int
 	row := dbConn.Raw(`SELECT count(*) AS count FROM template`).Row()

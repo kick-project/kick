@@ -1,4 +1,4 @@
-package searchcmd
+package searchcmd_test
 
 import (
 	"path/filepath"
@@ -9,13 +9,14 @@ import (
 	"github.com/kick-project/kick/internal/di/iinitialize"
 	"github.com/kick-project/kick/internal/resources/exit"
 	"github.com/kick-project/kick/internal/services/initialize"
+	"github.com/kick-project/kick/internal/subcmds/searchcmd"
 	"github.com/kick-project/kick/internal/utils"
 	"github.com/kick-project/kick/internal/utils/errutils"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestUsageDoc(t *testing.T) {
-	assert.NotRegexp(t, "\t", usageDoc)
+	assert.NotRegexp(t, "\t", searchcmd.UsageDoc)
 }
 
 func TestSearch(t *testing.T) {
@@ -27,5 +28,5 @@ func TestSearch(t *testing.T) {
 	err := copier.Copy(i, iinitialize.Inject(inject))
 	errutils.Epanic(err)
 	i.Init()
-	Search(args, inject)
+	searchcmd.Search(args, inject)
 }

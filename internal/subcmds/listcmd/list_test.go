@@ -1,4 +1,4 @@
-package listcmd
+package listcmd_test
 
 import (
 	"path/filepath"
@@ -9,13 +9,14 @@ import (
 	"github.com/kick-project/kick/internal/di/iinitialize"
 	"github.com/kick-project/kick/internal/resources/exit"
 	"github.com/kick-project/kick/internal/services/initialize"
+	"github.com/kick-project/kick/internal/subcmds/listcmd"
 	"github.com/kick-project/kick/internal/subcmds/updatecmd"
 	"github.com/kick-project/kick/internal/utils"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestUsageDoc(t *testing.T) {
-	assert.NotRegexp(t, "\t", usageDoc)
+	assert.NotRegexp(t, "\t", listcmd.UsageDoc)
 }
 
 func TestList(t *testing.T) {
@@ -33,7 +34,7 @@ func TestList(t *testing.T) {
 
 	// No entries
 	args := []string{"list"}
-	ret := List(args, s)
+	ret := listcmd.List(args, s)
 	assert.Equal(t, 0, ret)
 }
 
@@ -52,6 +53,6 @@ func TestListLong(t *testing.T) {
 
 	// No entries
 	args := []string{"list", "-l"}
-	ret := List(args, inject)
+	ret := listcmd.List(args, inject)
 	assert.Equal(t, 0, ret)
 }

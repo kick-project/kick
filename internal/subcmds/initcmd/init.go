@@ -11,7 +11,8 @@ import (
 	"github.com/kick-project/kick/internal/utils/options"
 )
 
-var usageDoc = `initialize configuration
+// UsageDoc help document passed to docopts
+var UsageDoc = `initialize configuration
 
 Usage:
     kick init
@@ -28,7 +29,7 @@ type OptInit struct {
 // InitCmd initialize configuration
 func InitCmd(args []string, inject *di.DI) int {
 	opts := &OptInit{}
-	options.Bind(usageDoc, args, opts)
+	options.Bind(UsageDoc, args, opts)
 	if !opts.Init {
 		log.Println("error can not initialize")
 		return 256

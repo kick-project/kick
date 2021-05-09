@@ -1,4 +1,4 @@
-package installcmd
+package installcmd_test
 
 import (
 	"io/ioutil"
@@ -10,6 +10,7 @@ import (
 	"github.com/kick-project/kick/internal/di"
 	"github.com/kick-project/kick/internal/resources/exit"
 	"github.com/kick-project/kick/internal/subcmds/initcmd"
+	"github.com/kick-project/kick/internal/subcmds/installcmd"
 	"github.com/kick-project/kick/internal/subcmds/startcmd"
 	"github.com/kick-project/kick/internal/subcmds/updatecmd"
 	"github.com/kick-project/kick/internal/utils"
@@ -18,7 +19,7 @@ import (
 )
 
 func TestUsageDoc(t *testing.T) {
-	assert.NotRegexp(t, "\t", usageDoc)
+	assert.NotRegexp(t, "\t", installcmd.UsageDoc)
 }
 
 func TestInstallTemplate(t *testing.T) {
@@ -83,7 +84,7 @@ func installTest(t *testing.T, id, handle, template string) {
 	ec = updatecmd.Update([]string{"update"}, inject)
 	assert.Equal(t, 0, ec)
 
-	ec = Install([]string{"install", handle, template}, inject)
+	ec = installcmd.Install([]string{"install", handle, template}, inject)
 	assert.Equal(t, 0, ec)
 
 	td, err := ioutil.TempDir(utils.TempDir(), id+"-*")

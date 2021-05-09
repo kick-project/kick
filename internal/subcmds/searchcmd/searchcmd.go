@@ -16,7 +16,8 @@ import (
 	"github.com/kick-project/kick/internal/utils/options"
 )
 
-var usageDoc = `search for templates using a keyword
+// UsageDoc help document passed to docopts
+var UsageDoc = `search for templates using a keyword
 
 Usage:
     kick search [-l] <term>
@@ -37,7 +38,7 @@ type OptSearch struct {
 // Search for templates
 func Search(args []string, inject *di.DI) int {
 	opts := &OptSearch{}
-	options.Bind(usageDoc, args, opts)
+	options.Bind(UsageDoc, args, opts)
 
 	chk := &check.Check{}
 	err := copier.Copy(chk, icheck.Inject(inject))

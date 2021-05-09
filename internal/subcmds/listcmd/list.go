@@ -14,7 +14,8 @@ import (
 	"github.com/kick-project/kick/internal/utils/options"
 )
 
-var usageDoc = `list handles/templates
+// UsageDoc help document passed to docopts
+var UsageDoc = `list handles/templates
 
 Usage:
     kick list [-l]
@@ -33,7 +34,7 @@ type OptList struct {
 // List starts the list sub command
 func List(args []string, inject *di.DI) int {
 	opts := &OptList{}
-	options.Bind(usageDoc, args, opts)
+	options.Bind(UsageDoc, args, opts)
 
 	chk := &check.Check{}
 	err := copier.Copy(chk, icheck.Inject(inject))

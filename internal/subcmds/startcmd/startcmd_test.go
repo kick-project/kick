@@ -1,4 +1,4 @@
-package startcmd
+package startcmd_test
 
 import (
 	"io/ioutil"
@@ -7,12 +7,13 @@ import (
 
 	"github.com/kick-project/kick/internal/di"
 	"github.com/kick-project/kick/internal/resources/exit"
+	"github.com/kick-project/kick/internal/subcmds/startcmd"
 	"github.com/kick-project/kick/internal/utils"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestUsageDoc(t *testing.T) {
-	assert.NotRegexp(t, "\t", usageDoc)
+	assert.NotRegexp(t, "\t", startcmd.UsageDoc)
 }
 
 func TestStart(t *testing.T) {
@@ -23,6 +24,6 @@ func TestStart(t *testing.T) {
 	path = filepath.Join(path, "tmpl")
 	args := []string{"start", "tmpl", path}
 	inject := di.Setup(home)
-	Start(args, inject)
+	startcmd.Start(args, inject)
 	assert.DirExists(t, path)
 }

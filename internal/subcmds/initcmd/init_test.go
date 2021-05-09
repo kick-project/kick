@@ -1,4 +1,4 @@
-package initcmd
+package initcmd_test
 
 import (
 	"fmt"
@@ -7,20 +7,21 @@ import (
 
 	"github.com/kick-project/kick/internal/di"
 	"github.com/kick-project/kick/internal/resources/exit"
+	"github.com/kick-project/kick/internal/subcmds/initcmd"
 	"github.com/kick-project/kick/internal/utils"
 	_ "github.com/mattn/go-sqlite3" // Required by 'database/sql'
 	"github.com/stretchr/testify/assert"
 )
 
 func TestUsageDoc(t *testing.T) {
-	assert.NotRegexp(t, "\t", usageDoc)
+	assert.NotRegexp(t, "\t", initcmd.UsageDoc)
 }
 
 func TestInit(t *testing.T) {
 	exit.Mode(exit.MPanic)
 	home := fp.Join(utils.TempDir(), "init")
 	inject := di.Setup(home)
-	InitCmd([]string{"init"}, inject)
+	initcmd.InitCmd([]string{"init"}, inject)
 	dbfile := fp.Clean(fmt.Sprintf("%s/.kick/metadata/metadata.db", home))
 	assert.DirExists(t, fp.Clean(fmt.Sprintf("%s/.kick", home)))
 	assert.FileExists(t, fp.Clean(fmt.Sprintf("%s/.kick/config.yml", home)))

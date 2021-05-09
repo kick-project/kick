@@ -14,7 +14,8 @@ import (
 	"github.com/kick-project/kick/internal/utils/options"
 )
 
-var usageDoc = `update repository data
+// UsageDoc help document passed to docopts
+var UsageDoc = `update repository data
 
 Usage:
     kick update
@@ -31,7 +32,7 @@ type OptUpdate struct {
 // Update for templates
 func Update(args []string, inject *di.DI) int {
 	opts := &OptUpdate{}
-	options.Bind(usageDoc, args, opts)
+	options.Bind(UsageDoc, args, opts)
 
 	chk := &check.Check{}
 	err := copier.Copy(chk, icheck.Inject(inject))

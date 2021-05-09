@@ -1,10 +1,11 @@
-package model
+package model_test
 
 import (
 	"os"
 	"path/filepath"
 	"testing"
 
+	"github.com/kick-project/kick/internal/resources/model"
 	"github.com/kick-project/kick/internal/utils"
 	_ "github.com/mattn/go-sqlite3" // Required by 'database/sql'
 )
@@ -16,7 +17,7 @@ func TestCreateModel(t *testing.T) {
 		os.Remove(path)
 	}
 
-	CreateModel(&Options{
+	model.CreateModel(&model.Options{
 		File: path,
 	})
 }
