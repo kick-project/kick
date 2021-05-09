@@ -13,7 +13,6 @@ import (
 	"github.com/kick-project/kick/internal/resources/gitclient/plumbing"
 	"github.com/kick-project/kick/internal/resources/marshal"
 	"github.com/kick-project/kick/internal/resources/serialize"
-	"github.com/kick-project/kick/internal/utils/errutils"
 )
 
 // RepoBuild build a repository repo
@@ -44,7 +43,7 @@ func (m *RepoBuild) load() {
 func (m *RepoBuild) download() {
 	destDir := filepath.Join(m.WD, "templates")
 	err := os.MkdirAll(destDir, 0755)
-	errutils.Efatalf("Can create directory \"%s\": %v", destDir, err)
+	errs.FatalF("Can create directory \"%s\": %v", destDir, err)
 
 	for _, url := range m.Serialized.TemplateURLs {
 		// Validate url

@@ -145,3 +145,107 @@ func TestErrors_Fatalf(t *testing.T) {
 	}()
 	e.FatalF(format, err)
 }
+
+// TestErrors_Panic_Paniced tests to see if a panic ensused and succeeds if it does
+func TestPanic_Paniced(t *testing.T) {
+	exit.Mode(exit.MPanic)
+	msg := "my error"
+	defer func() {
+		r := recover()
+		expectPanic(t, r, msg)
+	}()
+	err := errors.New(msg)
+	errs.Panic(err)
+}
+
+// TestErrors_Panic_None tests to see if a panic ensused and fails if it does
+func TestPanic_None(t *testing.T) {
+	exit.Mode(exit.MPanic)
+	defer func() {
+		r := recover()
+		expectNil(t, r)
+	}()
+	errs.Panic(nil)
+}
+
+// TestErrors_PanicF_Paniced tests to see if a panic ensused and succeeds if it does
+func TestPanicF_Paniced(t *testing.T) {
+	exit.Mode(exit.MPanic)
+	format := `Expecting a panic for error: %v`
+	msg := "My error"
+
+	defer func() {
+		r := recover()
+		expectPanic(t, r, fmt.Sprintf(format, msg))
+	}()
+	err := errors.New(msg)
+	errs.PanicF(format, err)
+}
+
+// TestErrors_PanicF_Paniced tests to see if a panic ensused and succeeds if it does
+func TestPanicF_None(t *testing.T) {
+	exit.Mode(exit.MPanic)
+	defer func() {
+		r := recover()
+		expectNil(t, r)
+	}()
+	errs.PanicF(`Expecting no panic for nil: %v`, nil)
+}
+
+// TestErrors_LogF_True tests that that a log message is created when an error has occurred
+func TestLogF_True(t *testing.T) {
+	exit.Mode(exit.MPanic)
+	format := `Logging an error: %v`
+	msg := "My error"
+
+	err := errors.New(msg)
+	assert.True(t, errs.LogF(format, err))
+}
+
+// TestErrors_LogF_True tests that that a log message is created when an error has occurred
+func TestLogF_False(t *testing.T) {
+	exit.Mode(exit.MPanic)
+	format := `Logging an error: %v`
+
+	assert.False(t, errs.LogF(format, nil))
+}
+
+// TestErrors_Fatal tests that the a the code will exit and log a message when an error is encountered
+func TestFatal(t *testing.T) {
+	exit.Mode(exit.MPanic)
+	msg := "My error"
+
+	err := errors.New(msg)
+	defer func() {
+		r := recover()
+		assert.NotNil(t, r)
+		switch v := r.(type) {
+		case string:
+			assert.Equal(t, r.(string), "Exit 255\n")
+		default:
+			t.Errorf("Unexpected recovery type \"%T\"", v)
+		}
+	}()
+	errs.Fatal(err)
+}
+
+// TestErrors_Fatalf tests that the a the code will exit and log a message when an error is encountered
+func TestFatalf(t *testing.T) {
+	exit.Mode(exit.MPanic)
+	format := `Expecting an error: %v`
+	msg := "My error"
+	err := errors.New(msg)
+
+	defer func() {
+		r := recover()
+		assert.NotNil(t, r)
+		switch v := r.(type) {
+		case string:
+			assert.Equal(t, r.(string), "Exit 255\n")
+		default:
+			t.Errorf("Unexpected recovery type \"%T\"", v)
+		}
+
+	}()
+	errs.FatalF(format, err)
+}

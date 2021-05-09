@@ -5,7 +5,7 @@ import (
 	"io"
 
 	"github.com/kick-project/kick/internal/resources/config"
-	"github.com/kick-project/kick/internal/utils/errutils"
+	"github.com/kick-project/kick/internal/resources/errs"
 )
 
 // Remove remove installed templates
@@ -52,7 +52,7 @@ func (r *Remove) Remove(handle string) int {
 	}
 	r.Conf.Templates = templates
 	err := r.Conf.SaveTemplates()
-	errutils.Epanic(err)
+	errs.Panic(err)
 
 	return 0
 }

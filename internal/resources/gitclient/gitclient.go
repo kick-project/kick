@@ -6,8 +6,8 @@ import (
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
+	"github.com/kick-project/kick/internal/resources/errs"
 	plumb "github.com/kick-project/kick/internal/resources/gitclient/plumbing"
-	"github.com/kick-project/kick/internal/utils/errutils"
 )
 
 // Get Downloads using the data provider by getter
@@ -63,7 +63,7 @@ func (d *Gitclient) Clone() {
 			URL:      d.URL,
 			Progress: os.Stdout,
 		})
-		errutils.Efatalf("Can not clone %s: %v", d.URL, err)
+		errs.FatalF("Can not clone %s: %v", d.URL, err)
 	}
 }
 
@@ -74,15 +74,15 @@ func (d *Gitclient) Pull() {
 		return
 	}
 	r, err := git.PlainOpen(p)
-	errutils.Elogf("Error opening path '%s': %+v", p, err)
+	errs.LogF("Error opening path '%s': %+v", p, err)
 
 	w, err := r.Worktree()
-	errutils.Elogf("Error reading path '%s': %+v", p, err)
+	errs.LogF("Error reading path '%s': %+v", p, err)
 
 	pullopts := &git.PullOptions{}
 	err = w.Pull(pullopts)
 	if err != git.NoErrAlreadyUpToDate {
-		errutils.Elogf("Error cloning %s: %+v", d.URL, err)
+		errs.LogF("Error cloning %s: %+v", d.URL, err)
 	}
 }
 
@@ -92,14 +92,14 @@ func (d *Gitclient) Tags() []string {
 
 	r := d.plainopen()
 	iter, err := r.Tags()
-	errutils.Elogf("Error listing tags %s: %+v", d.URL, err)
+	errs.LogF("Error listing tags %s: %+v", d.URL, err)
 
 	fn := func(tag *plumbing.Reference) error {
 		taglist = append(taglist, tag.Name().Short())
 		return nil
 	}
 	err = iter.ForEach(fn)
-	errutils.Elogf("Error listing tags %s: %+v", d.URL, err)
+	errs.LogF("Error listing tags %s: %+v", d.URL, err)
 
 	return taglist
 }
@@ -114,20 +114,20 @@ func (d *Gitclient) Checkout(ref string) {
 		return
 	}
 	r, err := git.PlainOpen(d.Local)
-	errutils.Epanicf("Error opening path '%s': %+v", d.Local, err)
+	errs.PanicF("Error opening path '%s': %+v", d.Local, err)
 
 	refObj, err := r.Reference(plumbing.ReferenceName(d.Ref), true)
-	errutils.Epanicf("Error reading reference '%s' for path '%s': %+v", d.Ref, d.Local, err)
+	errs.PanicF("Error reading reference '%s' for path '%s': %+v", d.Ref, d.Local, err)
 
 	chkops := &git.CheckoutOptions{
 		Hash: refObj.Hash(),
 	}
 
 	w, err := r.Worktree()
-	errutils.Epanicf("Error reading path '%s': %+v", d.Local, err)
+	errs.PanicF("Error reading path '%s': %+v", d.Local, err)
 
 	err = w.Checkout(chkops)
-	errutils.Epanicf("Error checkout out: %+v", err)
+	errs.PanicF("Error checkout out: %+v", err)
 }
 
 func (d *Gitclient) plainopen() *git.Repository {
@@ -136,6 +136,6 @@ func (d *Gitclient) plainopen() *git.Repository {
 		return nil
 	}
 	r, err := git.PlainOpen(p)
-	errutils.Elogf("Error opening path '%s': %+v", p, err)
+	errs.LogF("Error opening path '%s': %+v", p, err)
 	return r
 }

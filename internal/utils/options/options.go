@@ -2,7 +2,7 @@ package options
 
 import (
 	"github.com/docopt/docopt-go"
-	"github.com/kick-project/kick/internal/utils/errutils"
+	"github.com/kick-project/kick/internal/resources/errs"
 )
 
 // Bind parse options from document text and populate a struct "opts".
@@ -10,7 +10,7 @@ import (
 // information.
 func Bind(usage string, args []string, opts interface{}) {
 	parser, err := docopt.ParseArgs(usage, args, "")
-	errutils.Epanicf("Can not parse usage doc: %s", err) // nolint
+	errs.PanicF("Can not parse usage doc: %s", err) // nolint
 	err = parser.Bind(opts)
-	errutils.Epanicf("Can not bind to structure: %s", err) // nolint
+	errs.PanicF("Can not bind to structure: %s", err) // nolint
 }

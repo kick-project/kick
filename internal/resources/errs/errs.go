@@ -2,6 +2,7 @@ package errs
 
 import (
 	"fmt"
+	"os"
 
 	"log"
 
@@ -84,4 +85,60 @@ func (e *Errors) hasErrPrintf(format string, v ...interface{}) bool {
 	e.Logger.Output(3, out.Error()) // nolint
 	e.Logger.SetFlags(log.LstdFlags)
 	return true
+}
+
+// Panic will log an error and panic if err is not nil.
+func Panic(err error) {
+	e := makeErrors()
+	has := e.hasErrPrint(err)
+	if !has {
+		return
+	}
+	panic(err)
+}
+
+// PanicF will log an error and panic if any argument passed to format is an error
+func PanicF(format string, v ...interface{}) {
+	e := makeErrors()
+	hasErr := e.hasErrPrintf(format, v...)
+	if !hasErr {
+		return
+	}
+	panic(fmt.Errorf(format, v...))
+}
+
+// LogF will log an error if any argument passed to format is an error
+func LogF(format string, v ...interface{}) bool { // nolint
+	e := makeErrors()
+	return e.hasErrPrintf(format, v...)
+}
+
+// Fatal will log an error and exit if err is not nil.
+func Fatal(err error) {
+	e := makeErrors()
+	has := e.hasErrPrint(err)
+	if !has {
+		return
+	}
+	e.Ex.Exit(255)
+}
+
+// FatalF will log an error and exit if any argument passed to fatal is an error
+func FatalF(format string, v ...interface{}) { // nolint
+	e := makeErrors()
+	hasErr := e.hasErrPrintf(format, v...)
+	if !hasErr {
+		return
+	}
+	e.Ex.Exit(255)
+}
+
+func makeErrors() *Errors {
+	e := &Errors{
+		Ex: &exit.Handler{
+			Mode: exit.ExitMode,
+		},
+		Logger: log.New(os.Stderr, "", log.LstdFlags),
+	}
+	return e
 }

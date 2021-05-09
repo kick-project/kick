@@ -15,13 +15,13 @@ import (
 
 	"github.com/apex/log"
 	"github.com/kick-project/kick/internal/resources/config"
+	"github.com/kick-project/kick/internal/resources/errs"
 	"github.com/kick-project/kick/internal/resources/exit"
 	"github.com/kick-project/kick/internal/resources/gitclient"
 	plumb "github.com/kick-project/kick/internal/resources/gitclient/plumbing"
 	"github.com/kick-project/kick/internal/resources/marshal"
 	"github.com/kick-project/kick/internal/resources/template/renderer"
 	"github.com/kick-project/kick/internal/resources/template/variables"
-	"github.com/kick-project/kick/internal/utils/errutils"
 )
 
 const (
@@ -83,7 +83,7 @@ func (t *Template) renderer() renderer.Renderer {
 
 func (t *Template) buildDir(id string) {
 	d, err := ioutil.TempDir(os.Getenv("TEMP"), fmt.Sprintf("kick-%s-", id))
-	errutils.Epanicf("Build Error: %v", err)
+	errs.PanicF("Build Error: %v", err)
 	t.builddir = d
 }
 
@@ -108,14 +108,14 @@ func (t *Template) SetSrc(name string) {
 	g := plumb.New(t.TemplateDir)
 	localpath, err := gitclient.Get(tmpl.URL, g)
 
-	errutils.Efatalf(`template "%s" not found: %v`, name, err)
+	errs.FatalF(`template "%s" not found: %v`, name, err)
 
 	// Set renderer from conf
 	confPath := filepath.Join(localpath, ".kick.yml")
 	t.loadTempateConf(confPath)
 
 	stat, err := os.Stat(localpath)
-	errutils.Efatalf(`error: %w`, err)
+	errs.FatalF(`error: %w`, err)
 
 	if !stat.IsDir() {
 		fmt.Fprintf(os.Stderr, `%s is not a directory`, localpath)
@@ -136,7 +136,7 @@ func (t *Template) Run() int {
 	path := t.localpath
 	base := t.localpath
 	skipRegex, err := regexp.Compile(fmt.Sprintf(`^%s/.git(?:/|$)`, base))
-	errutils.Epanicf("build error: %v", err)
+	errs.PanicF("build error: %v", err)
 	t.checkDstExists()
 	errWalk := filepath.Walk(path, func(srcPath string, info os.FileInfo, err error) error {
 		if skipRegex.MatchString(srcPath) {
@@ -160,7 +160,7 @@ func (t *Template) Run() int {
 			renderer:  t.renderer(),
 		}
 		err = pair.route()
-		errutils.Epanicf("Build Error: %v", err)
+		errs.PanicF("Build Error: %v", err)
 
 		return nil
 	})
@@ -170,14 +170,14 @@ func (t *Template) Run() int {
 	}
 
 	err = os.Rename(t.builddir, t.dest)
-	errutils.Epanicf("Build Error: %v", err)
+	errs.PanicF("Build Error: %v", err)
 	return 0
 }
 
 func (t *Template) checkDstExists() {
 	stat, err := os.Stat(t.dest)
 	if !os.IsNotExist(err) {
-		errutils.Epanicf("Build Error: %v", err)
+		errs.PanicF("Build Error: %v", err)
 	}
 	if stat != nil {
 		fmt.Printf("Path '%s' exists. Aborting.\n", t.dest) // nolint
@@ -192,13 +192,13 @@ func (t *Template) renderDir(path string) string {
 		return path
 	}
 	path, err := t.renderer().Text2String(path, t.Variables, true, true)
-	errutils.Efatalf("can not substitute path string \"%s\": %v", path, err)
+	errs.FatalF("can not substitute path string \"%s\": %v", path, err)
 	return path
 }
 
 // loadTemplateConf loads template configuration
 func (t *Template) loadTempateConf(path string) {
-	t.Log.Debugf("Loading template conf %s\n", path)
+	t.Log.Debugf("loading template conf %s\n", path)
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		return
 	} else if err != nil {
@@ -244,7 +244,7 @@ func (fp *filePair) route() error {
 		return nil
 	case lnum > 0 && action == MLrender:
 		err := fp.render(lnum)
-		errutils.Epanic(err)
+		errs.Panic(err)
 	case lnum > 0 && action == MLnorender:
 		return nil
 	case fp.srcInfo.Mode().IsRegular():
@@ -271,7 +271,7 @@ func (fp *filePair) mkdir() error {
 	defer fp.mu.Unlock()
 	if _, err := os.Stat(fp.dstPath); os.IsNotExist(err) {
 		err = os.Mkdir(fp.dstPath, 0755)
-		errutils.Epanicf("Build Error: %v", err)
+		errs.PanicF("Build Error: %v", err)
 	}
 	return nil
 }
@@ -305,13 +305,13 @@ func (fp *filePair) copy() error {
 
 func (fp *filePair) stripModeline(lnum uint8) string {
 	inF, err := os.Open(fp.srcPath)
-	errutils.Epanicf("Can not open '%s': %s", fp.srcPath, err) // nolint
-	defer inF.Close()                                          // nolint
+	errs.PanicF("Can not open '%s': %s", fp.srcPath, err) // nolint
+	defer inF.Close()                                     // nolint
 
 	tmpdir := os.Getenv("TMPDIR")
 	outF, err := ioutil.TempFile(tmpdir, "kick-")
-	errutils.Epanicf("Can not create tempfile: %s", err) // nolint
-	defer outF.Close()                                   // nolint
+	errs.PanicF("Can not create tempfile: %s", err) // nolint
+	defer outF.Close()                              // nolint
 
 	var cnt uint8
 	scner := bufio.NewScanner(inF)
@@ -326,7 +326,7 @@ func (fp *filePair) stripModeline(lnum uint8) string {
 			}
 		}
 		_, err := outF.Write(b)
-		errutils.Epanicf("Error writing to file '%s': %s", outF.Name(), err) // nolint
+		errs.PanicF("Error writing to file '%s': %s", outF.Name(), err) // nolint
 	}
 	return outF.Name()
 }
@@ -342,7 +342,7 @@ func (fp *filePair) render(mline uint8) error {
 	}()
 
 	err := fp.renderer.File2File(tempPath, fp.dstPath, fp.variables, false, false)
-	errutils.Epanic(err)
+	errs.Panic(err)
 	return nil
 }
 
@@ -353,7 +353,7 @@ func (fp *filePair) hasModeLine() (action int, lnum uint8) {
 	len := fp.mlen
 	mlactions := hasML{}.Init()
 	source, err := os.Open(fp.srcPath)
-	errutils.Efatalf("Can not open file %s: %v", fp.srcPath, err)
+	errs.FatalF("Can not open file %s: %v", fp.srcPath, err)
 
 	defer source.Close()
 	scner := bufio.NewScanner(source)
@@ -398,7 +398,7 @@ type templateConf struct {
 
 func regexCompile(rex string, action int) hasMLAction {
 	regex, err := regexp.Compile(rex)
-	errutils.Epanicf("Error compiling regex: %s", err) // nolint
+	errs.PanicF("Error compiling regex: %s", err) // nolint
 	ml := hasMLAction{
 		Regex:  regex,
 		Action: action,

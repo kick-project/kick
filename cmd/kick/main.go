@@ -8,6 +8,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/kick-project/kick/internal"
 	"github.com/kick-project/kick/internal/di"
+	"github.com/kick-project/kick/internal/resources/errs"
 	"github.com/kick-project/kick/internal/resources/exit"
 	"github.com/kick-project/kick/internal/subcmds/initcmd"
 	"github.com/kick-project/kick/internal/subcmds/installcmd"
@@ -16,13 +17,12 @@ import (
 	"github.com/kick-project/kick/internal/subcmds/searchcmd"
 	"github.com/kick-project/kick/internal/subcmds/startcmd"
 	"github.com/kick-project/kick/internal/subcmds/updatecmd"
-	"github.com/kick-project/kick/internal/utils/errutils"
 )
 
 func main() {
 	loadDotenv()
 	home, err := os.UserHomeDir()
-	errutils.Efatalf("error: %w", err)
+	errs.FatalF("error: %w", err)
 	inject := di.Setup(home)
 
 	if os.Getenv("KICK_DEBUG") == "true" {

@@ -7,7 +7,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/kick-project/kick/internal/utils/errutils"
+	"github.com/kick-project/kick/internal/resources/errs"
 )
 
 // Check runs a series of checks
@@ -33,7 +33,7 @@ func (c *Check) Init() error {
 		if os.IsNotExist(err) {
 			return errors.New(msg)
 		}
-		errutils.Epanic(err)
+		errs.Panic(err)
 
 		if !info.IsDir() {
 			return fmt.Errorf("warning %s is not a directory. please remove then run \"kick init\" to initialize", d)
@@ -47,7 +47,7 @@ func (c *Check) Init() error {
 		if os.IsNotExist(err) {
 			return errors.New(msg)
 		}
-		errutils.Epanic(err)
+		errs.Panic(err)
 
 		if info.IsDir() {
 			return fmt.Errorf("expected a normal file %s got a directory. please remove then run \"kick init\" to initialize", f)

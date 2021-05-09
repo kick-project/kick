@@ -2,7 +2,7 @@ package internal
 
 import (
 	"github.com/docopt/docopt-go"
-	"github.com/kick-project/kick/internal/utils/errutils"
+	"github.com/kick-project/kick/internal/resources/errs"
 )
 
 //
@@ -65,9 +65,9 @@ func GetOptMain(args []string) *OptMain {
 		break
 	}
 	opts, err = docopt.ParseArgs(usageDoc, filterArgs, Version)
-	errutils.Epanicf("Can not parse usage doc: %s", err) // nolint
+	errs.PanicF("Can not parse usage doc: %s", err) // nolint
 	o := new(OptMain)
 	err = opts.Bind(o)
-	errutils.Epanicf("Can not bind to structure: %s", err) // nolint
+	errs.PanicF("Can not bind to structure: %s", err) // nolint
 	return o
 }

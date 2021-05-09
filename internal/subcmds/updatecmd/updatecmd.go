@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	"github.com/kick-project/kick/internal/di"
+	"github.com/kick-project/kick/internal/resources/errs"
 	"github.com/kick-project/kick/internal/resources/exit"
-	"github.com/kick-project/kick/internal/utils/errutils"
 	"github.com/kick-project/kick/internal/utils/options"
 )
 
@@ -38,7 +38,7 @@ func Update(args []string, inject *di.DI) int {
 
 	u := inject.MakeUpdate()
 	err := u.Build()
-	errutils.Epanic(err)
+	errs.Panic(err)
 
 	return 0
 }

@@ -28,7 +28,6 @@ import (
 	"github.com/kick-project/kick/internal/services/search"
 	"github.com/kick-project/kick/internal/services/search/formatter"
 	"github.com/kick-project/kick/internal/services/update"
-	"github.com/kick-project/kick/internal/utils/errutils"
 	_ "github.com/mattn/go-sqlite3" // Driver for database/sql
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -163,7 +162,7 @@ func (s *DI) ConfigFile() *config.File {
 		PathTemplateConf: s.PathTemplateConf,
 	}
 	err := conf.Load()
-	errutils.Epanic(err)
+	errs.Panic(err)
 	s.cacheConfigFile = conf
 	return conf
 }
@@ -183,7 +182,7 @@ func (s *DI) MakeORM() *gorm.DB {
 				SingularTable: true,
 			},
 		})
-		errutils.Efatalf("Can not open ORM database %s: %v", s.SqliteDB, err)
+		errs.FatalF("Can not open ORM database %s: %v", s.SqliteDB, err)
 
 	}
 	s.cacheORM = db

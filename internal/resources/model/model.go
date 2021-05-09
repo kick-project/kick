@@ -3,7 +3,7 @@ package model
 import (
 	"time"
 
-	"github.com/kick-project/kick/internal/utils/errutils"
+	"github.com/kick-project/kick/internal/resources/errs"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -31,7 +31,7 @@ type Template struct {
 	Name     string
 	URL      string `gorm:"index:,unique"`
 	Desc     string
-	Repo   []Repo `gorm:"many2many:repo_template"`
+	Repo     []Repo `gorm:"many2many:repo_template"`
 	Versions []Versions
 }
 
@@ -83,7 +83,7 @@ func CreateModel(opts *Options) (db *gorm.DB) {
 		},
 	})
 
-	errutils.Efatalf("Can not initialize an ORM database: %v", err)
+	errs.FatalF("Can not initialize an ORM database: %v", err)
 
 	err = db.AutoMigrate(
 		&Repo{},
@@ -92,7 +92,7 @@ func CreateModel(opts *Options) (db *gorm.DB) {
 		&Installed{},
 		&Sync{},
 	)
-	errutils.Efatalf("can not migrate database: %v", err)
+	errs.FatalF("can not migrate database: %v", err)
 
 	// Insert base repo
 	m := &Repo{
@@ -102,7 +102,7 @@ func CreateModel(opts *Options) (db *gorm.DB) {
 	}
 	result := db.Clauses(clause.Insert{Modifier: "OR IGNORE"}).Create(m)
 	if result.Error != nil {
-		errutils.Efatalf("can not insert root record into database: %v", result.Error)
+		errs.FatalF("can not insert root record into database: %v", result.Error)
 	}
 
 	return db

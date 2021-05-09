@@ -8,9 +8,9 @@ import (
 	"testing"
 
 	"github.com/kick-project/kick/internal/di"
+	"github.com/kick-project/kick/internal/resources/errs"
 	"github.com/kick-project/kick/internal/services/update"
 	"github.com/kick-project/kick/internal/utils"
-	"github.com/kick-project/kick/internal/utils/errutils"
 	"syreclabs.com/go/faker"
 )
 
@@ -37,7 +37,7 @@ func TestRepo_Load(t *testing.T) {
 	m := update.Repo{}
 	err := m.Load(path)
 	if err != nil {
-		errutils.Epanic(err)
+		errs.Panic(err)
 	}
 	if m.Name != fname {
 		t.Fail()
@@ -55,7 +55,7 @@ func TestRepo_Save(t *testing.T) {
 	defer os.Remove(path)
 	m := update.Repo{}
 	err := m.Load(path)
-	errutils.Epanic(err)
+	errs.Panic(err)
 	tmpfile, err := ioutil.TempFile("", "*.json")
 	if err != nil {
 		t.Fatal("Error opening tempfile")

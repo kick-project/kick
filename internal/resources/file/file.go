@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/kick-project/kick/internal/utils/errutils"
+	"github.com/kick-project/kick/internal/resources/errs"
 )
 
 // AtomicWrite atomically writes files by using a temp file.
@@ -47,7 +47,7 @@ func (a *AtomicWrite) Copy(rdr io.Reader) (written int64, err error) {
 		return 0, err
 	}
 	written, err = io.Copy(f, rdr)
-	errutils.Epanic(err)
+	errs.Panic(err)
 	a.written += written
 	return written, nil
 }
@@ -59,7 +59,7 @@ func (a *AtomicWrite) Write(data []byte) (written int, err error) {
 		return 0, err
 	}
 	written, err = f.Write(data)
-	if errutils.Elogf("Can not write to temporary file: %w", err) {
+	if errs.LogF("Can not write to temporary file: %w", err) {
 		return written, err
 	}
 	return written, nil
@@ -71,7 +71,7 @@ func (a *AtomicWrite) tempfile() (*os.File, error) {
 		return a.file, nil
 	}
 	f, err := ioutil.TempFile("", "")
-	if errutils.Elogf("Can not open temp file: %v", err) {
+	if errs.LogF("Can not open temp file: %v", err) {
 		return nil, err
 	}
 	a.file = f

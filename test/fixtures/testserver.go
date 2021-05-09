@@ -9,7 +9,7 @@ import (
 	"sync"
 
 	"github.com/kick-project/kick/internal/resources/config"
-	"github.com/kick-project/kick/internal/utils/errutils"
+	"github.com/kick-project/kick/internal/resources/errs"
 	"github.com/sevlyar/go-daemon"
 	"github.com/sosedoff/gitkit"
 )
@@ -38,7 +38,7 @@ func main() {
 	}
 	defer func() {
 		err = cntxt.Release()
-		errutils.Epanic(err)
+		errs.Panic(err)
 	}()
 
 	startTestServer(home, srvpath)
@@ -117,7 +117,7 @@ func (s *testServerStruct) loadConfig() {
 		PathTemplateConf: filepath.Join(s.home, ".kick", "templates.yml"),
 	}
 	err := conf.Load()
-	errutils.Epanic(err)
+	errs.Panic(err)
 
 	s.config = conf
 }

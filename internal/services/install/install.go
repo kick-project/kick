@@ -12,12 +12,12 @@ import (
 
 	"github.com/apex/log"
 	"github.com/kick-project/kick/internal/resources/config"
+	"github.com/kick-project/kick/internal/resources/errs"
 	"github.com/kick-project/kick/internal/resources/exit"
 	"github.com/kick-project/kick/internal/resources/gitclient"
 	"github.com/kick-project/kick/internal/resources/gitclient/plumbing"
 	"github.com/kick-project/kick/internal/resources/sync"
 	"github.com/kick-project/kick/internal/utils"
-	"github.com/kick-project/kick/internal/utils/errutils"
 	"gorm.io/gorm"
 )
 
@@ -85,7 +85,7 @@ func (i *Install) processLocation(handle, location string) (found bool) {
 	i.Log.Debugf("processLocation(%s, %s)", handle, location)
 
 	p, err := filepath.Abs(utils.ExpandPath(location))
-	errutils.Epanic(err)
+	errs.Panic(err)
 	// Check if its a path on the local file system
 	if info, err := os.Stat(p); err == nil && info.IsDir() {
 		t := config.Template{
@@ -149,7 +149,7 @@ func (i *Install) checkInUse(handle string) (stop int) {
 	)
 	row := i.ORM.Raw(`SELECT count(*) AS count FROM installed WHERE ?`, handle).Row()
 	err := row.Scan(&count)
-	errutils.Epanic(err)
+	errs.Panic(err)
 
 	if count > 0 {
 		return 255
@@ -167,11 +167,11 @@ func (i *Install) templateMatches(name, origin string) (entries []config.Templat
 	if origin == "" {
 		i.Log.Debugf(utils.SQL2fmt(selectWithoutOrigin), name)
 		r, err := i.ORM.Raw(selectWithoutOrigin, name).Rows()
-		errutils.Efatal(err)
+		errs.Fatal(err)
 		rows = r
 	} else {
 		r, err := i.ORM.Raw(selectWithOrigin, name, origin).Rows()
-		errutils.Efatal(err)
+		errs.Fatal(err)
 		rows = r
 	}
 	for rows.Next() {
@@ -182,7 +182,7 @@ func (i *Install) templateMatches(name, origin string) (entries []config.Templat
 			desc     sql.NullString
 		)
 		err := rows.Scan(&template, &URL, &origin, &desc)
-		errutils.Epanic(err)
+		errs.Panic(err)
 
 		entry := config.Template{
 			Template: template.String,
@@ -213,14 +213,14 @@ func (i *Install) promptEntry(handle string, entries []config.Template) {
 		fmt.Fprintf(i.Stdout, "  Select an entry between 1-%d: ", l)
 		reader := bufio.NewReader(i.Stdin)
 		text, err := reader.ReadString('\n')
-		errutils.Epanic(err)
+		errs.Panic(err)
 
 		match = re.FindStringSubmatch(text)
 		if len(match) == 0 {
 			fmt.Print("\nInvalid entry\n\n")
 		} else {
 			selected, err = strconv.Atoi(match[1])
-			errutils.Epanic(err)
+			errs.Panic(err)
 		}
 
 		if selected < 1 || selected > l {

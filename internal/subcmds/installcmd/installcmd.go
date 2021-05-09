@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/kick-project/kick/internal/di"
+	"github.com/kick-project/kick/internal/resources/errs"
 	"github.com/kick-project/kick/internal/resources/exit"
-	"github.com/kick-project/kick/internal/utils/errutils"
 	"github.com/kick-project/kick/internal/utils/options"
 )
 
@@ -34,7 +34,7 @@ func Install(args []string, inject *di.DI) int {
 	opts := &OptInstall{}
 	options.Bind(UsageDoc, args, opts)
 	if !opts.Install {
-		errutils.Epanic(errors.New("Install set to false"))
+		errs.Panic(errors.New("Install set to false"))
 		return 256
 	}
 
@@ -47,7 +47,7 @@ func Install(args []string, inject *di.DI) int {
 
 	m := inject.MakeUpdate()
 	err := m.Build()
-	errutils.Epanic(err)
+	errs.Panic(err)
 
 	inst := inject.MakeInstall()
 	return inst.Install(opts.Handle, opts.Template)

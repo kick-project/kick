@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/kick-project/kick/internal/di"
+	"github.com/kick-project/kick/internal/resources/errs"
 	"github.com/kick-project/kick/internal/resources/exit"
-	"github.com/kick-project/kick/internal/utils/errutils"
 	"github.com/kick-project/kick/internal/utils/options"
 )
 
@@ -31,7 +31,7 @@ func Remove(args []string, inject *di.DI) int {
 	opts := &OptRemove{}
 	options.Bind(usageDoc, args, opts)
 	if !opts.Remove {
-		errutils.Epanic(errors.New("Remove set to false"))
+		errs.Panic(errors.New("Remove set to false"))
 		return 256
 	}
 

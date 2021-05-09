@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/kick-project/kick/internal/resources/errs"
 	"github.com/kick-project/kick/internal/services/search/entry"
 	"github.com/kick-project/kick/internal/services/search/formatter"
-	"github.com/kick-project/kick/internal/utils/errutils"
 	"gorm.io/gorm"
 )
 
@@ -69,14 +69,14 @@ func (s *Search) Search(term string) <-chan *entry.Entry {
 			fmt.Sprintf("%%%s%%", term),
 			fmt.Sprintf("%%%s%%", term),
 		).Rows()
-		errutils.Epanicf("query error: %w", err)
+		errs.PanicF("query error: %w", err)
 		defer rows.Close()
 
 		for rows.Next() {
 			var (
-				name       sql.NullString
-				URL        sql.NullString
-				desc       sql.NullString
+				name     sql.NullString
+				URL      sql.NullString
+				desc     sql.NullString
 				repoName sql.NullString
 				repoURL  sql.NullString
 				repoDesc sql.NullString
@@ -85,12 +85,12 @@ func (s *Search) Search(term string) <-chan *entry.Entry {
 				&name, &URL, &desc,
 				&repoName, &repoURL, &repoDesc,
 			)
-			errutils.Efatalf("%v", err)
+			errs.FatalF("%v", err)
 
 			ch <- &entry.Entry{
-				Name:       name.String,
-				URL:        URL.String,
-				Desc:       desc.String,
+				Name:     name.String,
+				URL:      URL.String,
+				Desc:     desc.String,
 				RepoName: repoName.String,
 				RepoURL:  repoURL.String,
 				RepoDesc: repoDesc.String,

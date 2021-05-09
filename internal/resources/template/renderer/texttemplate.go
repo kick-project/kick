@@ -6,8 +6,8 @@ import (
 	"regexp"
 	tt "text/template"
 
+	"github.com/kick-project/kick/internal/resources/errs"
 	"github.com/kick-project/kick/internal/resources/template/variables"
-	"github.com/kick-project/kick/internal/utils/errutils"
 )
 
 //
@@ -23,9 +23,9 @@ type RenderText struct {
 // template populated with variables
 func (r *RenderText) File2File(src, dst string, vars *variables.Variables, nounset, noempty bool) error {
 	b, err := ioutil.ReadFile(src)
-	errutils.Elogf("Can not open template file %s for reading: %v", src, err)
+	errs.LogF("Can not open template file %s for reading: %v", src, err)
 	err = r.Text2File(string(b), dst, vars, nounset, noempty)
-	errutils.Epanic(err)
+	errs.Panic(err)
 	return err
 }
 
@@ -33,17 +33,17 @@ func (r *RenderText) File2File(src, dst string, vars *variables.Variables, nouns
 func (r *RenderText) Text2File(text, dst string, vars *variables.Variables, nounset, noempty bool) error {
 	td := os.Getenv("TEMP")
 	f, err := ioutil.TempFile(td, "kick-*")
-	errutils.Epanicf("Error creating tempfile %v", err)
+	errs.PanicF("Error creating tempfile %v", err)
 
 	t := tt.Must(tt.New("texttemplate").Parse(text))
 
-	errutils.Epanicf("Error parsing variables: %v", err)
+	errs.PanicF("Error parsing variables: %v", err)
 	err = t.Execute(f, vars)
-	errutils.Epanicf("Error executing template: %v", err)
+	errs.PanicF("Error executing template: %v", err)
 	err = f.Close()
-	errutils.Epanicf("Error closing tempfile: %v", err)
+	errs.PanicF("Error closing tempfile: %v", err)
 	err = os.Rename(f.Name(), dst)
-	errutils.Epanicf("Error writing file %s: %v", dst, err)
+	errs.PanicF("Error writing file %s: %v", dst, err)
 	return err
 }
 
@@ -51,12 +51,12 @@ func (r *RenderText) Text2File(text, dst string, vars *variables.Variables, noun
 func (r *RenderText) Text2String(text string, vars *variables.Variables, nounset, noempty bool) (string, error) {
 	td := os.Getenv("TEMP")
 	f, err := ioutil.TempFile(td, "kick-*")
-	errutils.Epanicf("Error creating tempfile %v", err)
+	errs.PanicF("Error creating tempfile %v", err)
 	f.Close() // nolint
 	err = r.Text2File(text, f.Name(), vars, nounset, noempty)
-	errutils.Epanic(err)
+	errs.Panic(err)
 	b, err := ioutil.ReadFile(f.Name())
-	errutils.Elogf("Can not open template file %s for reading: %v", f.Name(), err)
+	errs.LogF("Can not open template file %s for reading: %v", f.Name(), err)
 	os.Remove(f.Name()) // nolint
 	return string(b), err
 }

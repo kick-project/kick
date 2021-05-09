@@ -16,7 +16,8 @@ const (
 )
 
 var (
-	exitMode int
+	// ExitMode is the current exit mode. Should be one of MNone or MPanic
+	ExitMode int
 )
 
 // Handler exit handling
@@ -39,7 +40,7 @@ func (e *Handler) Exit(code int) {
 // Exit exit function with exit code. 0 is success
 func Exit(code int) {
 	h := Handler{
-		Mode: exitMode,
+		Mode: ExitMode,
 	}
 	h.Exit(code)
 }
@@ -50,10 +51,10 @@ func Exit(code int) {
 func Mode(mode int) (ok bool) {
 	switch mode {
 	case MNone:
-		exitMode = MNone
+		ExitMode = MNone
 		ok = true
 	case MPanic:
-		exitMode = MPanic
+		ExitMode = MPanic
 		ok = true
 	}
 	return

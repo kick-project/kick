@@ -7,11 +7,11 @@ import (
 
 	"github.com/apex/log"
 	"github.com/kick-project/kick/internal/resources/config"
+	"github.com/kick-project/kick/internal/resources/errs"
 	"github.com/kick-project/kick/internal/resources/gitclient"
 	"github.com/kick-project/kick/internal/resources/gitclient/plumbing"
 	"github.com/kick-project/kick/internal/resources/marshal"
 	"github.com/kick-project/kick/internal/resources/model"
-	"github.com/kick-project/kick/internal/utils/errutils"
 	_ "github.com/mattn/go-sqlite3" // Required by 'database/sql'
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -77,30 +77,30 @@ func (c *workers) concurClones(num int, p *plumbing.Plumbing, churl <-chan strin
 
 func (c *workers) processURL(url string, p *plumbing.Plumbing, chtemplate chan<- *Template) {
 	localpath, err := gitclient.Get(url, p)
-	if errutils.Elogf("error: cloning repository: %w: skipping %s", err, url) {
+	if errs.LogF("error: cloning repository: %w: skipping %s", err, url) {
 		return
 	}
 
 	mpath := filepath.Clean(fmt.Sprintf("%s/repo.yml", localpath))
-	if errutils.Elogf("error: can not open %s: %w: skipping %s", mpath, err, url) {
+	if errs.LogF("error: can not open %s: %w: skipping %s", mpath, err, url) {
 		return
 	}
 
 	repo := &Repo{URL: url}
 	err = repo.Load(mpath)
-	if errutils.Elogf("error: %w: skipping %s\n", err, url) {
+	if errs.LogF("error: %w: skipping %s\n", err, url) {
 		return
 	}
 
 	paths, err := filepath.Glob(filepath.Clean(fmt.Sprintf("%s/templates/*.yml", localpath)))
-	if errutils.Elogf("error: getting a lists of paths: %w: skipping %s\n", err, url) {
+	if errs.LogF("error: getting a lists of paths: %w: skipping %s\n", err, url) {
 		return
 	}
 
 	for _, curpath := range paths {
 		t := &Template{}
 		err := t.Load(curpath)
-		if errutils.Elogf("error: loading template metadata from %s: %w: skipping", curpath, err) {
+		if errs.LogF("error: loading template metadata from %s: %w: skipping", curpath, err) {
 			continue
 		}
 		t.Repo = *repo
@@ -137,7 +137,7 @@ func (c *workers) insert(orm *gorm.DB, t *Template) {
 	if result.RowsAffected != 1 {
 		result = orm.First(&modRepo, "url = ?", t.Repo.URL)
 		if result.Error != nil {
-			errutils.Epanic(result.Error)
+			errs.Panic(result.Error)
 		}
 		modRepo.Name = t.Repo.Name
 		modRepo.URL = t.Repo.URL
@@ -156,7 +156,7 @@ func (c *workers) insert(orm *gorm.DB, t *Template) {
 	if result.RowsAffected != 1 {
 		result = orm.First(&modTemplate, "url = ?", t.URL)
 		if result.Error != nil {
-			errutils.Epanic(result.Error)
+			errs.Panic(result.Error)
 		}
 		modTemplate.Name = t.Name
 		modTemplate.URL = t.URL

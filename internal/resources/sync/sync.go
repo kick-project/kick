@@ -11,13 +11,13 @@ import (
 	"github.com/apex/log"
 	"github.com/jinzhu/copier"
 	"github.com/kick-project/kick/internal/resources/config"
+	"github.com/kick-project/kick/internal/resources/errs"
 	"github.com/kick-project/kick/internal/resources/gitclient"
 	"github.com/kick-project/kick/internal/resources/gitclient/plumbing"
 	"github.com/kick-project/kick/internal/resources/marshal"
 	"github.com/kick-project/kick/internal/resources/model"
 	"github.com/kick-project/kick/internal/resources/model/clauses"
 	"github.com/kick-project/kick/internal/resources/serialize"
-	"github.com/kick-project/kick/internal/utils/errutils"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
@@ -42,7 +42,7 @@ func (s *Sync) Repo() {
 
 func (s *Sync) processRepos() (repos []*model.Repo) {
 	rows, err := s.ORM.Model(&model.Repo{}).Rows()
-	errutils.Epanic(err)
+	errs.Panic(err)
 
 	defer rows.Close()
 	for rows.Next() {
@@ -75,18 +75,18 @@ func (s *Sync) processTemplates(repos []*model.Repo) {
 		}
 
 		err = copier.Copy(&repo, &repoSerialize)
-		if errutils.Elogf("Can not copy object: %v", err) {
+		if errs.LogF("Can not copy object: %v", err) {
 			continue
 		}
 		result := s.ORM.Clauses(clauses.OrIgnore).Create(&repo)
-		if errutils.Elogf("Can not insert into repo: %v", result.Error) {
+		if errs.LogF("Can not insert into repo: %v", result.Error) {
 			continue
 		} else if result.RowsAffected == 0 {
 			result2 := s.ORM.Model(&model.Repo{}).Updates(&repo)
-			if errutils.Elogf("Can not update repo table: %v", result2.Error) {
+			if errs.LogF("Can not update repo table: %v", result2.Error) {
 				continue
 			} else if result2.RowsAffected == 0 {
-				errutils.Elogf("%v", fmt.Errorf("Can not update repo table"))
+				errs.LogF("%v", fmt.Errorf("Can not update repo table"))
 				continue
 			}
 		}
@@ -98,7 +98,7 @@ func (s *Sync) processTemplates(repos []*model.Repo) {
 // downloadRepo downloads repo repo
 func (s *Sync) downloadRepo(url string) (path string, err error) {
 	path, err = gitclient.Get(url, s.PlumbRepo)
-	if errutils.Elogf("warning. can not download %s: %v\n", url, err) {
+	if errs.LogF("warning. can not download %s: %v\n", url, err) {
 		return
 	}
 
@@ -108,7 +108,7 @@ func (s *Sync) downloadRepo(url string) (path string, err error) {
 // loadRepo loads from a repo YAML file
 func (s *Sync) loadRepo(path string) (repo serialize.RepoMain, err error) {
 	err = marshal.FromFile(&repo, path)
-	if errutils.Elogf("warning. unable to unmarshal file \"%s\": %v", path, err) {
+	if errs.LogF("warning. unable to unmarshal file \"%s\": %v", path, err) {
 		return
 	}
 	return
@@ -117,7 +117,7 @@ func (s *Sync) loadRepo(path string) (repo serialize.RepoMain, err error) {
 // loadTemplates loads templates from a repo file
 func (s *Sync) loadTemplates(repo *model.Repo, templatedir string) {
 	matches, err := filepath.Glob(templatedir + "/*.yml")
-	if errutils.Elogf("Can not load templates from \"%s\": %v", templatedir, err) {
+	if errs.LogF("Can not load templates from \"%s\": %v", templatedir, err) {
 		return
 	}
 	for _, match := range matches {
@@ -127,19 +127,19 @@ func (s *Sync) loadTemplates(repo *model.Repo, templatedir string) {
 		)
 
 		err := marshal.FromFile(&templateElement, match)
-		if errutils.Elogf("Can not load template file \"%s\": %v", match, err) {
+		if errs.LogF("Can not load template file \"%s\": %v", match, err) {
 			continue
 		}
 
 		err = copier.Copy(&templateModel, &templateElement)
-		if errutils.Elogf("Can not copy object: %v", err) {
+		if errs.LogF("Can not copy object: %v", err) {
 			continue
 		}
 
 		templateModel.Repo = append(templateModel.Repo, *repo)
 
 		result := s.ORM.Clauses(clauses.OrReplace).Create(&templateModel)
-		if errutils.Elogf("Can not load template file \"%s\" into database: %v", match, result.Error) {
+		if errs.LogF("Can not load template file \"%s\" into database: %v", match, result.Error) {
 			continue
 		}
 	}
@@ -151,7 +151,7 @@ func (s *Sync) Files() {
 	key := "installed"
 	// Reload configuration incase the file changed after creation of self.
 	err := s.Config.Load()
-	errutils.Epanic(err)
+	errs.Panic(err)
 	t := time.Now()
 	ts := t.Format("2006-01-02T15:04:05")
 	for _, item := range s.Config.Templates {
@@ -168,21 +168,21 @@ func (s *Sync) Files() {
 			Time:     t,
 		}
 		result := s.ORM.Clauses(clause.Insert{Modifier: "OR REPLACE"}).Create(&inst)
-		errutils.Epanic(result.Error)
+		errs.Panic(result.Error)
 		if result.RowsAffected != 1 {
 			panic("failed to insert into 'installed' table")
 		}
 	}
 
 	result := s.ORM.Raw(`DELETE FROM installed WHERE time < ?`, ts)
-	errutils.Epanic(result.Error)
+	errs.Panic(result.Error)
 
 	syn := model.Sync{
 		Key:        key,
 		LastUpdate: t,
 	}
 	result = s.ORM.Clauses(clause.Insert{Modifier: "OR REPLACE"}).Create(&syn)
-	errutils.Epanic(result.Error)
+	errs.Panic(result.Error)
 	if result.RowsAffected != 1 {
 		panic("failed to insert into 'sync' table")
 	}

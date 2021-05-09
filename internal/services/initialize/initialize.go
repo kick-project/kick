@@ -4,8 +4,8 @@ import (
 	"os"
 	fp "path/filepath"
 
+	"github.com/kick-project/kick/internal/resources/errs"
 	"github.com/kick-project/kick/internal/resources/model"
-	"github.com/kick-project/kick/internal/utils/errutils"
 )
 
 // Initialize is responsible for initializing all disk paths
@@ -45,24 +45,24 @@ func (i *Initialize) InitConfig() {
 	_, err := os.Stat(i.ConfigPath)
 	if os.IsNotExist(err) {
 		f, err := os.Create(i.ConfigPath)
-		errutils.Elogf("error: %w", err)
+		errs.LogF("error: %w", err)
 		defer f.Close()
 		_, err = f.WriteString(`---
 `)
-		errutils.Epanic(err)
+		errs.Panic(err)
 	} else if err != nil {
-		errutils.Epanicf("can not save configuration file: %w", err)
+		errs.PanicF("can not save configuration file: %w", err)
 	}
 	_, err = os.Stat(i.ConfigTemplatePath)
 	if os.IsNotExist(err) {
 		f, err := os.Create(i.ConfigTemplatePath)
-		errutils.Elogf("error: %w", err)
+		errs.LogF("error: %w", err)
 		defer f.Close()
 		_, err = f.WriteString(`---
 `)
-		errutils.Epanic(err)
+		errs.Panic(err)
 	} else if err != nil {
-		errutils.Epanicf("can not save configuration file: %w", err)
+		errs.PanicF("can not save configuration file: %w", err)
 	}
 }
 
@@ -78,6 +78,6 @@ func mkDirs(i interface{}) {
 	}
 	for _, d := range dirs {
 		err := os.MkdirAll(d, 0755)
-		errutils.Epanicf("can not create %s: %w", d, err)
+		errs.PanicF("can not create %s: %w", d, err)
 	}
 }
