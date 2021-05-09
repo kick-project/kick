@@ -4,7 +4,7 @@ import (
 	"log"
 
 	"github.com/kick-project/kick/internal/di"
-	"github.com/kick-project/kick/internal/utils/options"
+	"github.com/kick-project/kick/internal/resources/options"
 )
 
 // UsageDoc help document passed to docopts
