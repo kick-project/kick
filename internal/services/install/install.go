@@ -17,6 +17,7 @@ import (
 	"github.com/kick-project/kick/internal/resources/file"
 	"github.com/kick-project/kick/internal/resources/gitclient"
 	"github.com/kick-project/kick/internal/resources/gitclient/plumbing"
+	"github.com/kick-project/kick/internal/resources/parse"
 	"github.com/kick-project/kick/internal/resources/sync"
 	"github.com/kick-project/kick/internal/utils"
 	"gorm.io/gorm"
@@ -96,7 +97,7 @@ func (i *Install) processLocation(handle, location string) (found bool) {
 		return true
 	}
 
-	urlx, err := utils.Parse(location)
+	urlx, err := parse.Parse(location)
 	if err != nil {
 		return false
 	}

@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/kick-project/kick/internal/resources/file"
-	"github.com/kick-project/kick/internal/utils"
+	"github.com/kick-project/kick/internal/resources/parse"
 )
 
 const (
@@ -49,7 +49,7 @@ func (plu *Plumbing) Handler(url string) error {
 		return nil
 	}
 
-	u := &utils.URLx{}
+	u := &parse.URLx{}
 	err := u.Parse(url)
 	if err != nil {
 		plu.mb = &plumb{}
@@ -117,7 +117,7 @@ func (plu *Plumbing) Local(relative string) string {
 }
 
 // localPath determines local path to template
-func (plu *Plumbing) localPath(u *utils.URLx) string {
+func (plu *Plumbing) localPath(u *parse.URLx) string {
 	if u.Scheme == "file" {
 		return u.Path
 	}
