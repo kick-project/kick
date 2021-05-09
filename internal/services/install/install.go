@@ -19,7 +19,6 @@ import (
 	"github.com/kick-project/kick/internal/resources/gitclient/plumbing"
 	"github.com/kick-project/kick/internal/resources/parse"
 	"github.com/kick-project/kick/internal/resources/sync"
-	"github.com/kick-project/kick/internal/utils"
 	"gorm.io/gorm"
 )
 
@@ -167,7 +166,6 @@ func (i *Install) templateMatches(name, origin string) (entries []config.Templat
 	var rows *sql.Rows
 	entries = []config.Template{}
 	if origin == "" {
-		i.Log.Debugf(utils.SQL2fmt(selectWithoutOrigin), name)
 		r, err := i.ORM.Raw(selectWithoutOrigin, name).Rows()
 		errs.Fatal(err)
 		rows = r
