@@ -1,9 +1,5 @@
 // Package di is a package that implements Dependency Injection through
-// methods that create the options needed for structs to be created. See
-// GetDI for more information.
-//
-// This package uses anonymous structs as the injection options, this is to
-// avoid issues with import loops when importing di into *_test.go files.
+// methods that create the options needed for structs to be created.
 package di
 
 import (
@@ -43,8 +39,7 @@ import (
 // DI
 //
 
-// DI provides Dependency Injection Container for resources & services. Injectors are in secperate pacages below this package
-// to get around dependency loops when injecting into unit tests.
+// DI provides Dependency Injection Container for resources & services.
 type DI struct {
 	Home string
 	// See https://pkg.go.dev/github.com/apex/log#InfoLevel for
