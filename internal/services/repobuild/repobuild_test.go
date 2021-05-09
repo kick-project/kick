@@ -48,7 +48,7 @@ templates:
 			Base: filepath.Join(testtools.TempDir(), "home", ".kick", "metadata"),
 		},
 		Validate: validator.New(),
-		ErrHandler: &errs.Errors{
+		ErrHandler: &errs.Handler{
 			Ex: &exit.Handler{
 				Mode: exit.MPanic,
 			},

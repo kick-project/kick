@@ -12,10 +12,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func setup() (*errs.Errors, *bytes.Buffer) {
+func setup() (*errs.Handler, *bytes.Buffer) {
 	str := ``
 	buf := bytes.NewBufferString(str)
-	e := errs.Errors{
+	e := errs.Handler{
 		Ex: &exit.Handler{
 			Mode: exit.MPanic,
 		},

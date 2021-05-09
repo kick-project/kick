@@ -71,7 +71,7 @@ type DI struct {
 	cacheORM              *gorm.DB
 	cacheLogger           *apexlog.Logger
 	cacheStdLogger        *log.Logger
-	cacheErrHandler       *errs.Errors
+	cacheErrHandler       *errs.Handler
 	cacheExitHandler      *exit.Handler
 	cacheCheck            *check.Check
 	cacheInitialize       *initialize.Initialize
@@ -217,11 +217,11 @@ func (s *DI) MakeStdLogger() *log.Logger {
 }
 
 // MakeErrorHandler dependency injector
-func (s *DI) MakeErrorHandler() *errs.Errors {
+func (s *DI) MakeErrorHandler() *errs.Handler {
 	if s.cacheErrHandler != nil {
 		return s.cacheErrHandler
 	}
-	handler := &errs.Errors{
+	handler := &errs.Handler{
 		Logger: s.MakeStdLogger(),
 		Ex:     s.MakeExitHandler(),
 	}

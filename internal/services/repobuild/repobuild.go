@@ -21,7 +21,7 @@ type RepoBuild struct {
 	Plumb      plumbing.Plumbing   // Plumbing object
 	Serialized serialize.RepoMain  // Serialized config
 	Validate   *validator.Validate // Validation
-	ErrHandler *errs.Errors        // Error handler
+	ErrHandler *errs.Handler       // Error handler
 	Log        *log.Logger         // Logger
 }
 
