@@ -199,8 +199,7 @@ depsdev: ## Install development dependencies
 ifeq ($(USEGITLAB),true)
 	@mkdir -p $(ROOT)/.cache/{go,gomod}
 endif
-	@GO111MODULE=on $(MAKE) $(GOGETS)
-	$(MAKE) $(GOGETSU)
+	$(MAKE) $(GOGETS)
 
 bumpmajor: ## Version - major bump
 	git fetch --tags
@@ -239,21 +238,18 @@ _catschema: ## Dump Schema to SQL. Used to inspect
 $(GOPATH)/bin/$(NAME): $(NAME)
 	install -m 755 $(NAME) $(GOPATH)/bin/$(NAME)
 
-GOGETS := github.com/crosseyed/versionbump/cmd/versionbump \
-		  github.com/github-release/github-release \
-		  github.com/golangci/golangci-lint/cmd/golangci-lint \
-		  github.com/goreleaser/nfpm/cmd/nfpm \
-		  github.com/joho/godotenv/cmd/godotenv github.com/sosedoff/gitkit \
-		  golang.org/x/lint/golint github.com/fzipp/gocyclo gotest.tools/gotestsum
-
-GOGETSU := github.com/vakenbolt/go-test-report/
+GOGETS = github.com/crosseyed/versionbump/cmd/versionbump@latest \
+		github.com/github-release/github-release@latest \
+		github.com/golangci/golangci-lint/cmd/golangci-lint@latest \
+		github.com/goreleaser/nfpm/cmd/nfpm@latest \
+		github.com/joho/godotenv/cmd/godotenv@latest \
+		golang.org/x/lint/golint@latest \
+		github.com/fzipp/gocyclo/cmd/gocyclo@latest \
+		gotest.tools/gotestsum@latest github.com/vakenbolt/go-test-report@latest
 
 .PHONY: $(GOGETS)
 $(GOGETS):
-	cd /tmp; go get $@
-
-$(GOGETSU):
-	cd /tmp; go get -u $@
+	go install $@
 
 REPORTS = reports/html/coverage.html reports/html/unit.html
 .PHONY: $(REPORTS)

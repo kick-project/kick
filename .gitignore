@@ -23,6 +23,9 @@
 # VSCode
 .vscode
 
+# Vagrant
+.vagrant
+
 # Project
 /dist/
 /reports/
