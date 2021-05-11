@@ -85,9 +85,14 @@ clean: ## Reset project to original state
 	rm -rf .cache kick dist reports tmp vendor
 
 test: ## Test
+	$(MAKE) goversion
 	$(MAKE) lint
 	$(MAKE) cc
 	@exit $$(cat reports/exitcode.txt)
+
+.PHONY: goversion
+goversion:
+	@go version | grep go1.16
 
 _unit: test_setup ## Unit testing
 	@$(MAKE) _test_setup_gitserver
