@@ -10,9 +10,15 @@ import (
 	"github.com/kick-project/kick/internal/resources/errs"
 )
 
+// Rename mock os.Rename
+type Rename func(oldpath string, newpath string) error
+
+// OsRename mocked os.Rename assignment
+var OsRename Rename = os.Rename
+
 // Move moves a file from src to dest
 func Move(src, dst string) error {
-	err := os.Rename(src, dst)
+	err := OsRename(src, dst)
 	if err == nil {
 		return err
 	}
@@ -44,7 +50,8 @@ func (m *mover) flagRemoval(path Info) {
 
 // flagRollback flag a file for rollback if needed
 func (m *mover) flagRollback(path Info) {
-	m.rollBackList = append(m.rollBackList, path)
+	info, _ := Stat(path.Path())
+	m.rollBackList = append(m.rollBackList, info)
 }
 
 // move
@@ -92,7 +99,7 @@ func (m *mover) dirMove(src, dst Info) error {
 		return err
 	}
 
-	files, err := ioutil.ReadDir(".")
+	files, err := ioutil.ReadDir(src.Abs())
 	if err != nil {
 		return err
 	}
