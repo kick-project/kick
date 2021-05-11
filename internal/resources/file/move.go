@@ -93,7 +93,6 @@ func (m *mover) fileMove(src, dst Info) error {
 
 // dirMove move directories
 func (m *mover) dirMove(src, dst Info) error {
-	// TODO: match mode and permissions
 	err := os.Mkdir(dst.Path(), 0755)
 	if err != nil {
 		return err

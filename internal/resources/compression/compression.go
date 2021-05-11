@@ -26,7 +26,6 @@ func Compress(plainSrc, gzDst string) (written int64, err error) {
 
 	gzWriter := gzip.NewWriter(dstIO)
 
-	// TODO: Bugfix written should reflect the number of bytes written not read.
 	written, err = io.Copy(gzWriter, srcIO)
 	if err != nil {
 		return 0, err
@@ -57,7 +56,6 @@ func Decompress(gzSrc, plainDst string) (written int64, err error) {
 		return 0, err
 	}
 
-	// TODO: Bugfix written should reflect the number of bytes written not read.
 	written, err = io.Copy(dstIO, gzReader)
 	if err != nil {
 		return 0, err

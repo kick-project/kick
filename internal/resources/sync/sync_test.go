@@ -35,7 +35,6 @@ func setup(t *testing.T, home string, models ...interface{}) (*sync.Sync, *di.DI
 		for i := 0; i < 10; i++ {
 			result := db.Clauses(clauses.OrIgnore).Create(m)
 
-			// TODO: Find internal race condition within gorm or sqlite3 library.
 			if result.Error == nil {
 				inserted = true
 				break

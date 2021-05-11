@@ -24,7 +24,6 @@ func Copy(src, dst string) (int64, error) {
 	}
 	defer source.Close()
 
-	// TODO: Match source mode and permissions
 	destination, err := os.Create(dst)
 	if err != nil {
 		return 0, err
