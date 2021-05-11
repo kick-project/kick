@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/kick-project/kick/internal/resources/errs"
+	"github.com/kick-project/kick/internal/resources/file"
 )
 
 // Sha256SumFile generates a sha256sum for srcFile and writes the output to sumfile.
@@ -33,7 +34,7 @@ func Sha256SumFile(srcFile string, sumfile string) (sum string, err error) {
 	_, err = dstIO.WriteString(sum)
 	errs.Panic(err)
 	dstIO.Close()
-	err = os.Rename(dstIO.Name(), sumfile)
+	err = file.Move(dstIO.Name(), sumfile)
 	errs.Panic(err)
 	return sum, err
 }

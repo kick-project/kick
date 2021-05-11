@@ -21,6 +21,7 @@ import (
 	"github.com/kick-project/kick/internal/subcmds/updatecmd"
 )
 
+//nolint
 //gocyclo:ignore
 func main() {
 	loadDotenv()

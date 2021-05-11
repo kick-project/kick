@@ -17,6 +17,7 @@ import (
 	"github.com/kick-project/kick/internal/resources/config"
 	"github.com/kick-project/kick/internal/resources/errs"
 	"github.com/kick-project/kick/internal/resources/exit"
+	"github.com/kick-project/kick/internal/resources/file"
 	"github.com/kick-project/kick/internal/resources/gitclient"
 	plumb "github.com/kick-project/kick/internal/resources/gitclient/plumbing"
 	"github.com/kick-project/kick/internal/resources/marshal"
@@ -169,7 +170,7 @@ func (t *Template) Run() int {
 		return 255
 	}
 
-	err = os.Rename(t.builddir, t.dest)
+	err = file.Move(t.builddir, t.dest)
 	errs.PanicF("Build Error: %v", err)
 	return 0
 }

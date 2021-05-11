@@ -7,6 +7,7 @@ import (
 	"regexp"
 
 	"github.com/a8m/envsubst"
+	"github.com/kick-project/kick/internal/resources/file"
 	"github.com/kick-project/kick/internal/resources/template/variables"
 )
 
@@ -48,7 +49,7 @@ func (r *RenderEnv) Text2File(text, dst string, vars *variables.Variables, nouns
 	if err != nil {
 		return fmt.Errorf("Text2File: %w", err)
 	}
-	err = os.Rename(f.Name(), dst)
+	err = file.Move(f.Name(), dst)
 	if err != nil {
 		return fmt.Errorf("Text2File: %w", err)
 	}

@@ -7,6 +7,7 @@ import (
 	tt "text/template"
 
 	"github.com/kick-project/kick/internal/resources/errs"
+	"github.com/kick-project/kick/internal/resources/file"
 	"github.com/kick-project/kick/internal/resources/template/variables"
 )
 
@@ -42,7 +43,7 @@ func (r *RenderText) Text2File(text, dst string, vars *variables.Variables, noun
 	errs.PanicF("Error executing template: %v", err)
 	err = f.Close()
 	errs.PanicF("Error closing tempfile: %v", err)
-	err = os.Rename(f.Name(), dst)
+	err = file.Move(f.Name(), dst)
 	errs.PanicF("Error writing file %s: %v", dst, err)
 	return err
 }

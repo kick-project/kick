@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/kick-project/kick/internal/resources/errs"
+	"github.com/kick-project/kick/internal/resources/file"
 )
 
 // Compress takes the path plainSrc compresses it and writes it to the path gzDst.
@@ -34,7 +35,7 @@ func Compress(plainSrc, gzDst string) (written int64, err error) {
 	gzWriter.Close()
 	dstIO.Close()
 
-	err = os.Rename(dstIO.Name(), gzDst)
+	err = file.Move(dstIO.Name(), gzDst)
 	errs.Panic(err)
 	return written, nil
 }
@@ -66,7 +67,7 @@ func Decompress(gzSrc, plainDst string) (written int64, err error) {
 	errs.Panic(err)
 	dstIO.Close()
 
-	err = os.Rename(dstIO.Name(), plainDst)
+	err = file.Move(dstIO.Name(), plainDst)
 	errs.Panic(err)
 	return written, nil
 }

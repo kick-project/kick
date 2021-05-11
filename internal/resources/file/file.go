@@ -33,7 +33,7 @@ func (a *AtomicWrite) Close() error {
 		}
 	}
 	a.file.Close()
-	err := os.Rename(a.file.Name(), a.dst)
+	err := Move(a.file.Name(), a.dst)
 	if err != nil {
 		return err
 	}
