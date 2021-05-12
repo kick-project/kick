@@ -274,6 +274,21 @@ ifeq ($(ISRELEASED),true)
 endif
 
 #
+# Vagrant targets
+#
+.PHONY: vmup
+vmup: ## Run vagrant up
+	@(vagrant status --no-color | grep running 2>&1) > /dev/null || vagrant up
+
+.PHONY: vmssh
+vmssh: vmup ## Run vagrant ssh and cd to shared directory
+	vagrant ssh -c "cd /vagrant; bash -l"
+
+.PHONY: vmdown
+vmdown: ## Run vagrant halt
+	vagrant halt
+
+#
 # File targets
 #
 $(NAME): dist/$(NAME)_$(GOOS)_$(GOARCH)/$(NAME)
