@@ -87,27 +87,31 @@ clean: ## Reset project to original state
 test: ## Test
 	$(MAKE) goversion
 	$(MAKE) lint
+	$(MAKE) unit
+	$(MAKE) cx
 	$(MAKE) cc
-	@exit $$(cat reports/exitcode.txt)
+	@# Combined the return codes of all the tests
+	@exit $$(( $$(cat reports/exitcode-unit.txt) + $$(cat reports/exitcode-golangci-lint.txt) + $$(cat reports/exitcode-golint.txt) ))
 
 .PHONY: goversion
 goversion:
 	@go version | grep go1.16
 
-_unit: test_setup ## Unit testing
+_unit: _test_setup ## Unit testing
 	@$(MAKE) _test_setup_gitserver
 	### Unit Tests
-	gotestsum --jsonfile reports/unit.json --junitfile reports/junit.xml -- -timeout 5s -covermode atomic -coverprofile=./reports/coverage.out -v ./...; echo $$? > reports/exitcode.txt
+	gotestsum --jsonfile reports/unit.json --junitfile reports/junit.xml -- -timeout 5s -covermode atomic -coverprofile=./reports/coverage.out -v ./...; echo $$? > reports/exitcode-unit.txt
 	@go-test-report -t "kick unit tests" -o reports/html/unit.html < reports/unit.json > /dev/null
 
-_cc: _unit ## Code coverage
+_cc: _test_setup ## Code coverage
 	### Code Coverage
 	@go tool cover -func=./reports/coverage.out | tee ./reports/coverage.txt
 	@go tool cover -html=reports/coverage.out -o reports/html/coverage.html
 
-_cx: test_setup ## Code complexity test
+_cx: _test_setup ## Code complexity test
 	### Cyclomatix Complexity Report
-	@gocyclo -avg $(GODIRS) | grep -v _test.go | tee reports/cyclocomplexity.txt
+	@gocyclo -avg $(GODIRS) | grep -v _test.go | tee reports/cyclomaticcomplexity.txt
+	@contents=$$(cat reports/cyclomaticcomplexity.txt); echo "<html><title>cyclomatic complexity</title><body><pre>$${contents}</pre></body><html>" > reports/html/cyclomaticcomplexity.html
 
 _package: ## Create an RPM & DEB
 	@XCOMPILE=true make build
@@ -188,8 +192,8 @@ _release_github: _package ## To be run inside a github workflow
 	  --file dist/kick_$(VERSION)_amd64.deb
 
 lint: internal/version.go ## Lint tests
-	golangci-lint run --enable=gocyclo
-	golint -set_exit_status ./...
+	golangci-lint run --enable=gocyclo; echo $$? > reports/exitcode-golangci-lint.txt
+	golint -set_exit_status ./..; echo $$? > reports/exitcode-golint.txt
 
 tag:
 	git fetch --tags
@@ -256,7 +260,7 @@ GOGETS = github.com/crosseyed/versionbump/cmd/versionbump@latest \
 $(GOGETS):
 	go install $@
 
-REPORTS = reports/html/coverage.html reports/html/unit.html
+REPORTS = reports/html/unit.html reports/html/coverage.html reports/html/cyclomaticcomplexity.html
 .PHONY: $(REPORTS)
 $(REPORTS):
 ifeq ($(GOOS),darwin)
