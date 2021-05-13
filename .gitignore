@@ -35,3 +35,4 @@
 /.cache
 /nfpm.yaml
 /kick.rb
+/examples/*.gz
