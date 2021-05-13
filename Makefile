@@ -32,10 +32,6 @@ GOGETOPTS = GO111MODULE=off
 GOFILES := $(shell find cmd pkg internal src -name '*.go' 2> /dev/null)
 GODIRS = $(shell find . -maxdepth 1 -mindepth 1 -type d | egrep 'cmd|internal|pkg|api')
 
-.PHONY: _build report cattest clean _deps depsdev _go.mod _go.mod_err help \
-        _isreleased lint _package _release _release_gitlab test _test _test_setup _test_setup_dirs \
-        _test_setup_gitserver _unit _cc _cx _install tag
-
 #
 # Help Script
 #
@@ -58,6 +54,7 @@ export PRINT_HELP_PYSCRIPT
 #
 # End user targets
 #
+.PHONY: help
 ifneq (, ${PYTHON})
 help: ## Print Help
 	@$(PYTHON) -c "$$PRINT_HELP_PYSCRIPT" < $(MAKEFILE_LIST)
@@ -67,6 +64,7 @@ help:
 endif
 
 
+.PHONY: _build
 _build: ## Build binary
 	@test -d .cache || go fmt ./...
 ifeq ($(XCOMPILE),true)
@@ -78,12 +76,15 @@ ifeq ($(HASCMD),true)
 	@$(MAKE) $(NAME)
 endif
 
+.PHONY: _install
 _install: $(GOPATH)/bin/$(NAME) ## Install to $(GOPATH)/bin
 
+.PHONY: clean
 clean: ## Reset project to original state
 	-test -f tmp/server.pid && kill -TERM $$(cat tmp/server.pid)
 	rm -rf .cache kick dist reports tmp vendor
 
+.PHONY: test
 test: ## Test
 	$(MAKE) goversion
 	$(MAKE) lint
@@ -97,22 +98,26 @@ test: ## Test
 goversion:
 	@go version | grep go1.16
 
+.PHONY: _unit
 _unit: _test_setup ## Unit testing
 	@$(MAKE) _test_setup_gitserver
 	### Unit Tests
 	gotestsum --jsonfile reports/unit.json --junitfile reports/junit.xml -- -timeout 5s -covermode atomic -coverprofile=./reports/coverage.out -v ./...; echo $$? > reports/exitcode-unit.txt
 	@go-test-report -t "kick unit tests" -o reports/html/unit.html < reports/unit.json > /dev/null
 
+.PHONY: _cc
 _cc: _test_setup ## Code coverage
 	### Code Coverage
 	@go tool cover -func=./reports/coverage.out | tee ./reports/coverage.txt
 	@go tool cover -html=reports/coverage.out -o reports/html/coverage.html
 
+.PHONY: _cx
 _cx: _test_setup ## Code complexity test
 	### Cyclomatix Complexity Report
 	@gocyclo -avg $(GODIRS) | grep -v _test.go | tee reports/cyclomaticcomplexity.txt
 	@contents=$$(cat reports/cyclomaticcomplexity.txt); echo "<html><title>cyclomatic complexity</title><body><pre>$${contents}</pre></body><html>" > reports/html/cyclomaticcomplexity.html
 
+.PHONY: _package
 _package: ## Create an RPM & DEB
 	@XCOMPILE=true make build
 	@VERSION=$(VERSION) envsubst < nfpm.yaml.in > nfpm.yaml
@@ -121,6 +126,7 @@ _package: ## Create an RPM & DEB
 	$(MAKE) dist/$(NAME)-$(VERSION).$(ARCH).rpm
 	$(MAKE) dist/$(NAME)_$(VERSION)_$(GOARCH).deb
 
+.PHONY: _test_setup
 _test_setup: ## Setup test directories
 	@mkdir -p tmp
 	@mkdir -p reports/html
@@ -128,9 +134,11 @@ _test_setup: ## Setup test directories
 	@$(MAKE) _test_setup_gitserver 2> /dev/null > /dev/null
 	@sync
 
+.PHONY: _test_setup_dirs
 _test_setup_dirs:
 	@find test/fixtures -maxdepth 1 -type d -exec cp -r {} tmp/ \; 
 
+.PHONY: _test_setup_gitserver
 _test_setup_gitserver:
 	@mkdir -p tmp/gitserveclient
 	@-kill -0 $$(cat tmp/server.pid 2>/dev/null) >/dev/null 2>&1 || go run test/fixtures/testserver.go
@@ -140,23 +148,27 @@ _test_setup_gitserver:
 	@$(MAKE) _test_setup_gitclient
 	@$(MAKE) _test_setup_metadata 2> /dev/null
 
+.PHONY: _test_setup_gitclient
 _test_setup_gitclient:
 	@-(find test/fixtures/gitserve -mindepth 1 -maxdepth 1 -type d -exec cp -r {} tmp/gitserveclient \;) 2>&1 > /dev/null
 	@-(for i in $$(pwd)/tmp/gitserveclient/*; do cd $$i; git init; git add .; git commit -m "Initial commit"; git tag 7.7.7; git push --set-upstream http://127.0.0.1:5000/$$(basename $$(pwd)).git master; git push --tags; done) 2> /dev/null > /dev/null
 	@sync
 
+.PHONY: _test_setup_metadata
 _test_setup_metadata:
 	@-rm -rf tmp/metadata 2> /dev/null > /dev/null
 	@mkdir -p tmp/metadata
 	@-(find test/fixtures/metadata -mindepth 1 -maxdepth 1 -type d -exec cp -r {} tmp/metadata \;) 2>&1 > /dev/null
 	@-(for i in $$(pwd)/tmp/metadata/templates/*; do cd $$i; git init; git add .; git commit -m 'Initial commit';make release; make bumpmajor; make release; git push --set-upstream http://127.0.0.1:5000/$$(basename $$(pwd)).git master; git push --tags; done) 2> /dev/null > /dev/null
 
+.PHONY: _release
 _release: ## Trigger a release
 	@echo "### Releasing v$(VERSION)"
 	@$(MAKE) _isreleased 2> /dev/null
 	git tag v$(VERSION)
 	git push --tags
 
+.PHONY: _release_github
 _release_github: _package ## To be run inside a github workflow
 	github-release release \
 	  --user kick-project \
@@ -191,40 +203,49 @@ _release_github: _package ## To be run inside a github workflow
 	  --tag v$(VERSION) \
 	  --file dist/kick_$(VERSION)_amd64.deb
 
-lint: internal/version.go ## Lint tests
+.PHONY: lint
+lint: internal/version.go test_setup ## Lint tests
 	golangci-lint run --enable=gocyclo; echo $$? > reports/exitcode-golangci-lint.txt
 	golint -set_exit_status ./..; echo $$? > reports/exitcode-golint.txt
 
+.PHONY: tag
 tag:
 	git fetch --tags
 	git tag v$(VERSION)
 	git push --tags
 
+.PHONY: deps
 deps: go.mod ## Install build dependencies
 	$(GOMODOPTS) go mod tidy
 	$(GOMODOPTS) go mod download
 
+.PHONY: depsdev
 depsdev: ## Install development dependencies
 ifeq ($(USEGITLAB),true)
 	@mkdir -p $(ROOT)/.cache/{go,gomod}
 endif
 	$(MAKE) $(GOGETS)
 
+.PHONY: bumpmajor
 bumpmajor: ## Version - major bump
 	git fetch --tags
 	versionbump --checktags major VERSION
 
+.PHONY: bumpminor
 bumpminor: ## Version - minor bump
 	git fetch --tags
 	versionbump --checktags minor VERSION
 
+.PHONY: bumppatch
 bumppatch: ## Version - patch bump
 	git fetch --tags
 	versionbump --checktags patch VERSION
 
+.PHONY: report
 report: ## Open reports in a browser
 	@$(MAKE) $(REPORTS)
 
+.PHONY: cattest
 cattest: ## Print the output of the last set of tests
 	### Unit Tests
 	@cat reports/test.txt
@@ -270,6 +291,7 @@ else ifeq ($(GOOS),linux)
 endif
 
 # Check versionbump
+.PHONY: _isreleased
 _isreleased:
 ifeq ($(ISRELEASED),true)
 	@echo "Version $(VERSION) has been released."
