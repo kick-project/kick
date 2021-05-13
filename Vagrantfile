@@ -74,7 +74,7 @@ Vagrant.configure("2") do |config|
 
     cat <<'EOF' > /etc/profile.d/go.sh
 #!/usr/bin/env bash
-export PATH=$PATH:/usr/local/go/bin
+export PATH=$PATH:$HOME/go/bin:/usr/local/go/bin
 EOF
     chmod 755 /etc/profile.d/go.sh
   SHELL
