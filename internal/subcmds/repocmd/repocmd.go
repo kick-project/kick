@@ -6,7 +6,7 @@ import (
 )
 
 // UsageDoc help document passed to docopts
-var UsageDoc = `Build a repo from repo.xml
+var UsageDoc = `Build a repo from repo.yml
 
 Usage:
     kick repo build
@@ -14,7 +14,7 @@ Usage:
 Options:
     -h --help    print help
     repo         repo subcommand
-    build        build repo by downloading the URLS defined in repo.xml and creating the files templates/*.yml
+    build        build repo by downloading the URLS defined in repo.yml and creating the files templates/*.yml
 `
 
 // OptRepo initialize configuration file

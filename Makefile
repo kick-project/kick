@@ -6,11 +6,9 @@ MAKEFLAGS += --no-print-directory
 NAME := kick
 GOPATH := $(shell go env GOPATH)
 VERSION ?= $(shell cat VERSION)
-COMMIT := $(shell test -d .git && git rev-parse --short HEAD)
-BUILD_INFO := $(COMMIT)-$(shell date -u +"%Y%m%d-%H%M%SZ")
 HASCMD := $(shell test -d cmd && echo "true")
-GOOS ?= $(shell uname | tr '[:upper:]' '[:lower:]')
-GOARCH ?= $(shell uname -m | sed 's/x86_64/amd64/; s/i386/386/')
+GOOS ?= $(shell go env GOOS)
+GOARCH ?= $(shell go env GOARCH)
 ARCH = $(shell uname -m)
 
 ISRELEASED := $(shell git show-ref v$$(cat VERSION) 2>&1 > /dev/null && echo "true")
@@ -85,12 +83,12 @@ endif
 .PHONY: _build
 _build: ## Build binary
 	@test -d .cache || go fmt ./...
+ifeq ($(HASCMD),true)
 ifeq ($(XCOMPILE),true)
 	GOOS=linux GOARCH=amd64 $(MAKE) dist/$(NAME)_linux_amd64/$(NAME)
 	GOOS=darwin GOARCH=amd64 $(MAKE) dist/$(NAME)_darwin_amd64/$(NAME)
 	GOOS=windows GOARCH=amd64 $(MAKE) dist/$(NAME)_windows_amd64/$(NAME).exe
 endif
-ifeq ($(HASCMD),true)
 	@$(MAKE) $(NAME)
 endif
 
@@ -241,22 +239,19 @@ bumppatch: ## Increment VERSION file 0.0.${patch} - patch bump
 	git fetch --tags
 	versionbump --checktags patch VERSION
 
-.PHONY: cattest
-cattest:
-	### Unit Tests
-	@cat reports/test.txt
-	### Code Coverage
-	@cat reports/coverage.txt
-	### Cyclomatix Complexity Report
-	@cat reports/cyclocomplexity.txt
-
 .PHONY: getversion
 getversion:
 	VERSION=$(VERSION) bash -c 'echo $$VERSION'
 
-.PHONY: _catschema
-_catschema:
-	test -f tmp/model_test.db && sqlite3 tmp/model_test.db ".schema --indent"
+### DOCUMENTATION
+
+.PHONY: builddocs
+builddocs: www/docs/cli.md ## Build documents
+
+# docserver is a python program install using pip install mkdocs-material
+.PHONY: docserver
+docserver: builddocs ## Start document server
+	cd www; mkdocs serve
 
 #
 # Helper targets
@@ -332,6 +327,9 @@ nfpm.yaml: nfpm.yaml.in VERSION
 
 dist/kick-$(VERSION).tar.gz: $(GOFILES)
 	tar -zcf dist/kick-$(VERSION).tar.gz $$(find . \( -path ./test -prune -o -path ./tmp \) -prune -false -o \( -name go.mod -o -name go.sum -o -name \*.go \))
+
+www/docs/cli.md: www/docs/cli.md.sh $(NAME)
+	bash $< > $@
 
 go.mod:
 	@$(DOTENV) $(MAKE) _go.mod

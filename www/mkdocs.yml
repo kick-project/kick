@@ -1,0 +1,14 @@
+site_name: Kick template tool
+theme:
+  name: mkdocs
+  favicon: images/favicon.png
+  logo: assets/favicon-32x32.png
+  hljs_languages:
+    - bash
+nav:
+  - home: index.md
+  - installation: install.md
+  - quick start: quickstart.md
+  - repositories: repos.md
+  - manual: manual.md
+  - cli: cli.md
