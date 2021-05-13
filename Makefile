@@ -302,16 +302,16 @@ endif
 #
 # Vagrant targets
 #
-.PHONY: vmup
-vmup: ## Run vagrant up
+.PHONY: up
+up: ## Run vagrant up
 	@(vagrant status --no-color | grep running 2>&1) > /dev/null || vagrant up
 
 .PHONY: ssh
-ssh: vmup ## Run vagrant ssh and cd to shared directory
+ssh: up ## Run vagrant ssh and cd to shared directory
 	vagrant ssh -c "cd /vagrant; bash -l"
 
-.PHONY: vmdown
-vmdown: ## Run vagrant halt
+.PHONY: halt
+halt: ## Run vagrant halt
 	vagrant halt
 
 #
