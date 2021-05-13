@@ -14,7 +14,7 @@ import (
 	"syreclabs.com/go/faker"
 )
 
-func TestBuild(t *testing.T) {
+func TestUpdate_Build(t *testing.T) {
 	home := fp.Join(testtools.TempDir(), "home")
 	s := di.Setup(home)
 	initIt(s)

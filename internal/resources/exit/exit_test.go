@@ -19,7 +19,7 @@ func Test_Exit(t *testing.T) {
 	exit.Exit(255)
 }
 
-func TestExit_Exit_Panic(t *testing.T) {
+func TestHandler_Exit_Panic(t *testing.T) {
 	e := exit.Handler{
 		Mode: exit.MPanic,
 	}
@@ -33,7 +33,7 @@ func TestExit_Exit_Panic(t *testing.T) {
 	e.Exit(255)
 }
 
-func TestExit_Exit_Unknown(t *testing.T) {
+func TestHandler_Exit_Unknown(t *testing.T) {
 	e := exit.Handler{
 		Mode: 5,
 	}
