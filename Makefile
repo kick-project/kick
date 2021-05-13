@@ -306,8 +306,8 @@ endif
 vmup: ## Run vagrant up
 	@(vagrant status --no-color | grep running 2>&1) > /dev/null || vagrant up
 
-.PHONY: vmssh
-vmssh: vmup ## Run vagrant ssh and cd to shared directory
+.PHONY: ssh
+ssh: vmup ## Run vagrant ssh and cd to shared directory
 	vagrant ssh -c "cd /vagrant; bash -l"
 
 .PHONY: vmdown
