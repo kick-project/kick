@@ -224,7 +224,7 @@ depsdev: ## Install development dependencies
 ifeq ($(USEGITLAB),true)
 	@mkdir -p $(ROOT)/.cache/{go,gomod}
 endif
-	$(MAKE) $(GOGETS)
+	cat goinstalls.txt | egrep -v '^#' | xargs go install
 
 .PHONY: bumpmajor
 bumpmajor: ## Version - major bump
@@ -268,19 +268,7 @@ _catschema: ## Dump Schema to SQL. Used to inspect
 $(GOPATH)/bin/$(NAME): $(NAME)
 	install -m 755 $(NAME) $(GOPATH)/bin/$(NAME)
 
-GOGETS = github.com/crosseyed/versionbump/cmd/versionbump@latest \
-		github.com/github-release/github-release@latest \
-		github.com/golangci/golangci-lint/cmd/golangci-lint@latest \
-		github.com/goreleaser/nfpm/cmd/nfpm@latest \
-		github.com/joho/godotenv/cmd/godotenv@latest \
-		golang.org/x/lint/golint@latest \
-		github.com/fzipp/gocyclo/cmd/gocyclo@latest \
-		gotest.tools/gotestsum@latest github.com/vakenbolt/go-test-report@latest
-
-.PHONY: $(GOGETS)
-$(GOGETS):
-	go install $@
-
+# Open html reports
 REPORTS = reports/html/unit.html reports/html/coverage.html reports/html/cyclomaticcomplexity.html
 .PHONY: $(REPORTS)
 $(REPORTS):

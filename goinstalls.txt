@@ -1,0 +1,10 @@
+# A list of go installs for cli utilities used in developing this project
+# to install run "cat goinstalls.txt | grep -v '^#' | xargs go install"
+github.com/crosseyed/versionbump/cmd/versionbump@latest
+github.com/github-release/github-release@latest
+github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+github.com/goreleaser/nfpm/cmd/nfpm@latest
+github.com/joho/godotenv/cmd/godotenv@latest
+golang.org/x/lint/golint@latest
+github.com/fzipp/gocyclo/cmd/gocyclo@latest
+gotest.tools/gotestsum@latest github.com/vakenbolt/go-test-report@latest
