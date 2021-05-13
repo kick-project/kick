@@ -6,8 +6,8 @@ class Kick < Formula
   sha256 "${SHA256}"
   license "APACHE-2.0"
 
-  depends_on "go@1.15" => :build
-  depends_on "sqlite"
+  depends_on "go@1.16" => :build
+  depends_on "sqlite" => :build
 
   def install
     ENV["CGO_ENABLED"] = "1"
