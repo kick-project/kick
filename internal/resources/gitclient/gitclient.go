@@ -10,7 +10,7 @@ import (
 )
 
 // Get Downloads using the data provider by getter
-func Get(url string, g *plumb.Plumbing) (path string, err error) {
+func Get(url string, g plumb.PlumbingIface) (path string, err error) {
 	err = g.Handler(url)
 	if err != nil {
 		return "", err

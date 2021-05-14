@@ -17,12 +17,12 @@ import (
 
 // Repo build a repository repo
 type Repo struct {
-	WD         string              // Working Directory
-	Plumb      *plumbing.Plumbing  // Plumbing object
-	Serialized serialize.RepoMain  // Serialized config
-	Validate   *validator.Validate // Validation
-	ErrHandler *errs.Handler       // Error handler
-	Log        *log.Logger         // Logger
+	WD         string                 // Working Directory
+	Plumb      plumbing.PlumbingIface // Plumbing object
+	Serialized serialize.RepoMain     // Serialized config
+	Validate   *validator.Validate    // Validation
+	ErrHandler errs.HandlerIface      // Error handler
+	Log        *log.Logger            // Logger
 }
 
 // Build build repo

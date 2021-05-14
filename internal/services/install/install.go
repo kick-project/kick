@@ -24,14 +24,14 @@ import (
 
 // Install manage installation of templates
 type Install struct {
-	ConfigFile *config.File       `validate:"required"`
-	ORM        *gorm.DB           `validate:"required"`
-	Log        *log.Logger        `validate:"required"`
-	Plumb      *plumbing.Plumbing `validate:"required"`
-	Stderr     io.Writer          `validate:"required"`
-	Stdin      io.Reader          `validate:"required"`
-	Stdout     io.Writer          `validate:"required"`
-	Sync       *sync.Sync         `validate:"required"`
+	ConfigFile *config.File           `validate:"required"`
+	ORM        *gorm.DB               `validate:"required"`
+	Log        *log.Logger            `validate:"required"`
+	Plumb      plumbing.PlumbingIface `validate:"required"`
+	Stderr     io.Writer              `validate:"required"`
+	Stdin      io.Reader              `validate:"required"`
+	Stdout     io.Writer              `validate:"required"`
+	Sync       sync.SyncIface         `validate:"required"`
 }
 
 var selectWithOrigin = `

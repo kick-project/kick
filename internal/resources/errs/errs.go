@@ -11,8 +11,8 @@ import (
 
 // Handler error handling
 type Handler struct {
-	Ex     *exit.Handler `validate:"required"` // Exit handler
-	Logger *log.Logger   `validate:"required"` // Default logger
+	Ex     exit.HandlerIface `validate:"required"` // Exit handler
+	Logger *log.Logger       `validate:"required"` // Default logger
 }
 
 // Panic will log an error and panic if err is not nil.

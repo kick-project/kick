@@ -14,9 +14,9 @@ import (
 
 // Init create repositories and templates
 type Init struct {
-	ErrHandler *errs.Handler `validate:"required"`
-	Stdout     io.Writer     `validate:"required"`
-	Stderr     io.Writer     `validate:"required"`
+	ErrHandler errs.HandlerIface `validate:"required"`
+	Stdout     io.Writer         `validate:"required"`
+	Stderr     io.Writer         `validate:"required"`
 }
 
 // CreateRepo create repository

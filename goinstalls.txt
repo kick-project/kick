@@ -7,4 +7,6 @@ github.com/goreleaser/nfpm/cmd/nfpm@latest
 github.com/joho/godotenv/cmd/godotenv@latest
 golang.org/x/lint/golint@latest
 github.com/fzipp/gocyclo/cmd/gocyclo@latest
-gotest.tools/gotestsum@latest github.com/vakenbolt/go-test-report@latest
+gotest.tools/gotestsum@latest
+github.com/vakenbolt/go-test-report@latest
+github.com/vburenin/ifacemaker@latest

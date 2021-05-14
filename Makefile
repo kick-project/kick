@@ -126,6 +126,10 @@ _package: ## Create an RPM & DEB
 	$(MAKE) dist/$(NAME)-$(VERSION).$(ARCH).rpm
 	$(MAKE) dist/$(NAME)_$(VERSION)_$(GOARCH).deb
 
+.PHONY: interfaces
+interfaces: ## Generate interfaces
+	cat ifacemaker.txt | egrep -v '^#' | xargs -n5 bash -c 'ifacemaker -f $$0 -s $$1 -p $$2 -i $$3 -o $$4 -c "DO NOT EDIT: Generated using \"make interfaces\""'
+
 .PHONY: _test_setup
 _test_setup: ## Setup test directories
 	@mkdir -p tmp
