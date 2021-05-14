@@ -67,7 +67,7 @@ Vagrant.configure("2") do |config|
   # documentation for more information about their specific syntax and use.
   config.vm.provision "shell", inline: <<-SHELL
     apt-get update
-    apt-get install -y make gcc
+    apt-get install -y make gcc sqlite3
     mkdir -p /var/cache/downloads
     wget -O /var/cache/downloads/go1.16.4.linux-amd64.tar.gz -c https://golang.org/dl/go1.16.4.linux-amd64.tar.gz
     test -d /usr/local/go || tar -C /usr/local -xzf /var/cache/downloads/go1.16.4.linux-amd64.tar.gz

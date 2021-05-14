@@ -12,20 +12,20 @@ import (
 
 // Check runs a series of checks
 type Check struct {
-	ConfigPath         string    `validate:"required,file"`
-	ConfigTemplatePath string    `validate:"required,file"`
-	HomeDir            string    `validate:"required,dir"`
-	MetadataDir        string    `validate:"required,dir"`
-	SQLiteFile         string    `validate:"required,file"`
+	ConfigPath         string    `validate:"required"`
+	ConfigTemplatePath string    `validate:"required"`
+	HomeDir            string    `validate:"required"`
+	MetadataDir        string    `validate:"required"`
+	SQLiteFile         string    `validate:"required"`
 	Stderr             io.Writer `validate:"required"`
 	Stdout             io.Writer `validate:"required"`
-	TemplateDir        string    `validate:"required,dir"`
+	TemplateDir        string    `validate:"required"`
 }
 
 // Init checks to see if an initialization has been performed. This function
 // will print an error message and exit if initialization is needed.
 func (c *Check) Init() error {
-	msg := "not initialized. please run \"kick init\" to initialize configuration"
+	msg := "not initialized. please run \"kick setup\" to initialize configuration"
 	// Directory checks
 	dirs := []string{c.HomeDir, c.MetadataDir, c.TemplateDir}
 	for _, d := range dirs {
