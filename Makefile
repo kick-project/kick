@@ -228,7 +228,7 @@ depsdev: ## Install development dependencies
 ifeq ($(USEGITLAB),true)
 	@mkdir -p $(ROOT)/.cache/{go,gomod}
 endif
-	cat goinstalls.txt | egrep -v '^#' | xargs go install
+	cat goinstalls.txt | egrep -v '^#' | xargs -t -n1 go install
 
 .PHONY: bumpmajor
 bumpmajor: ## Version - major bump
