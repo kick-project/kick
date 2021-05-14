@@ -12,11 +12,10 @@ import (
 var UsageDoc = `search for templates using a keyword
 
 Usage:
-    kick search [-l] <term>
+    kick search <term>
 
 Options:
     -h --help  print help
-    -l         long output
     <term>     search term
 `
 
@@ -24,7 +23,6 @@ Options:
 type OptSearch struct {
 	Search bool   `docopt:"search"`
 	Term   string `docopt:"<term>"`
-	Long   bool   `docopt:"-l"`
 }
 
 // Search for templates
