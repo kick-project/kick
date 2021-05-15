@@ -31,11 +31,11 @@ func TestListLong(t *testing.T) {
 	}
 	l.List(true)
 	out := stdout.String()
-	assert.Regexp(t, `^Handle\s+Template\s+Location\s`, out)
-	assert.Regexp(t, `handle1\s+template1/origin1\s+http://\S+`, out)
-	assert.Regexp(t, `handle2\s+template2/origin1\s+http://\S+`, out)
-	assert.Regexp(t, `handle3\s+template3\s+http://\S+`, out)
-	assert.Regexp(t, `handle4\s+http://\S+`, out)
+	assert.Regexp(t, `\|\s+HANDLE\s+\|\s+DESCRIPTION\s+\|\s+TEMPLATE\s+\|\s+LOCATION\s+\|`, out)
+	assert.Regexp(t, `\|\s+handle1\s+\|\s+-\s+|\s+template1/origin1\s+\|\s+http://\S+`, out)
+	assert.Regexp(t, `\|\s+handle2\s+\|\s+-\s+|\s+template2/origin1\s+\|\s+http://\S+`, out)
+	assert.Regexp(t, `\|\s+handle3\s+\|\s+-\s+\|\s+template3\s+\|\s+http://\S+`, out)
+	assert.Regexp(t, `\|\s+handle4\s+\|\s+-\s+\|\s+-\s+\|\s+http://\S+`, out)
 }
 
 func getOptions() (stderr, stdout *bytes.Buffer, conf *config.File) {
