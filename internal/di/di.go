@@ -27,7 +27,6 @@ import (
 	"github.com/kick-project/kick/internal/services/remove"
 	"github.com/kick-project/kick/internal/services/repo"
 	"github.com/kick-project/kick/internal/services/search"
-	"github.com/kick-project/kick/internal/services/search/formatter"
 	"github.com/kick-project/kick/internal/services/setup"
 	"github.com/kick-project/kick/internal/services/update"
 	_ "github.com/mattn/go-sqlite3" // Driver for database/sql
@@ -381,12 +380,8 @@ func (s *DI) MakeSearch() *search.Search {
 	if s.cacheSearch != nil {
 		return s.cacheSearch
 	}
-	format := &formatter.Standard{
-		NoANSICodes: s.NoColour,
-	}
 	srch := &search.Search{
 		ORM:    s.MakeORM(),
-		Format: format,
 		Writer: os.Stdout,
 	}
 	s.cacheSearch = srch

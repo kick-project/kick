@@ -53,7 +53,6 @@ FROM
 
 // Search search for templates
 type Search struct {
-	Format formatter.Format
 	ORM    *gorm.DB  `validate:"required"`
 	Writer io.Writer `validate:"required"`
 }
@@ -103,13 +102,9 @@ func (s *Search) Search(term string) <-chan *entry.Entry {
 
 // Search2Output searches database for term and sends the results to the formatter.Format function supplied in New.
 // Blocks until all entries are processed.
-func (s *Search) Search2Output(term string) int {
+func (s *Search) Search2Output(long bool, term string) int {
 	ch := s.Search(term)
-	if s.Format != nil {
-		s.Format.Writer(s.Writer, ch)
-	} else {
-		fmtter := formatter.Standard{}
-		fmtter.Writer(s.Writer, ch)
-	}
+	output := formatter.New(long)
+	output.Writer(s.Writer, ch)
 	return 0
 }

@@ -3,13 +3,10 @@ package formatter
 import (
 	"fmt"
 	"io"
-	"os"
-	"text/tabwriter"
 
-	"github.com/kick-project/kick/internal/resources/ansicodes"
+	"github.com/olekukonko/tablewriter"
+
 	"github.com/kick-project/kick/internal/services/search/entry"
-	"github.com/mattn/go-isatty"
-	term "github.com/wayneashleyberry/terminal-dimensions"
 )
 
 // Format Format is a interface to format search entries.
@@ -18,59 +15,52 @@ type Format interface {
 	Writer(io.Writer, <-chan *entry.Entry)
 }
 
-//type Format func(<-chan *entry.Entry, io.Writer)
-
-// Standard Standard is the default formatter for search.Entry
-type Standard struct {
-	// Disable ANSI Escape codes
-	NoANSICodes bool
-	noTTYFlag   *bool
+// Tables format as a table
+type Tables struct {
+	long bool
 }
 
-func (s *Standard) noTTY() bool {
-	if s.noTTYFlag != nil {
-		return *s.noTTYFlag
+// New return Tables pointer
+func New(long bool) *Tables {
+	return &Tables{
+		long: long,
 	}
-	noTTY := true
-	if isatty.IsTerminal(os.Stdout.Fd()) {
-		noTTY = false
-	}
-	s.noTTYFlag = &noTTY
-	return *s.noTTYFlag
 }
 
-// Writer format suitable for standard output
-func (s *Standard) Writer(w io.Writer, ch <-chan *entry.Entry) {
-	min := uint(20)
-	repeat := min
-	y, _ := term.Height()
-	if y > repeat {
-		repeat = y
+// Writer write entries
+func (t *Tables) Writer(w io.Writer, ch <-chan *entry.Entry) {
+	var (
+		header []string
+		table  [][]string
+	)
+	if t.long {
+		header, table = t.longFmt(ch)
+	} else {
+		header, table = t.shortFmt(ch)
 	}
-	tabwr := tabwriter.NewWriter(w, 0, 0, 10, ' ', 0)
-	i := uint(0)
+	writer := tablewriter.NewWriter(w)
+	writer.SetAlignment(tablewriter.ALIGN_LEFT)
+	writer.SetHeader(header)
+	for _, v := range table {
+		writer.Append(v)
+	}
+	writer.Render()
+}
+
+func (t *Tables) longFmt(ch <-chan *entry.Entry) (header []string, table [][]string) {
+	header = []string{"Template", "Repository", "Template description", "Template Location"}
 	for e := range ch {
-		// Header
-		if i == 0 {
-			if s.NoANSICodes || s.noTTY() {
-				fmt.Fprint(tabwr, "Template\tLocation\n")
-			} else {
-				fmt.Fprintf(tabwr, "%vTemplate%v\tLocation%v\n", ansicodes.Faint, ansicodes.Faint, ansicodes.None)
-			}
-		}
-		i++
-
-		// Body
-		if s.NoANSICodes || s.noTTY() {
-			fmt.Fprintf(tabwr, "%s/%s\t%s\n", e.Name, e.RepoName, e.URL)
-		} else {
-			fmt.Fprintf(tabwr, "%v%s%v/%s\t%s%v\n", ansicodes.GreenText, e.Name, ansicodes.None, e.RepoName, e.URL, ansicodes.None)
-		}
-
-		// Re-print header
-		if i == repeat {
-			i = 0
-		}
+		row := []string{fmt.Sprintf("%s/%s", e.Name, e.RepoName), e.RepoName, e.Desc, e.URL}
+		table = append(table, row)
 	}
-	tabwr.Flush()
+	return
+}
+
+func (t *Tables) shortFmt(ch <-chan *entry.Entry) (header []string, table [][]string) {
+	header = []string{"Template", "Location"}
+	for e := range ch {
+		row := []string{fmt.Sprintf("%s/%s", e.Name, e.RepoName), e.URL}
+		table = append(table, row)
+	}
+	return
 }

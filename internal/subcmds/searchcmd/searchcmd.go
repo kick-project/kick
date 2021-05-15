@@ -12,16 +12,18 @@ import (
 var UsageDoc = `search for templates using a keyword
 
 Usage:
-    kick search <term>
+    kick search [-l] <term>
 
 Options:
     -h --help  print help
+    -l         long output
     <term>     search term
 `
 
 // OptSearch bindings for docopts
 type OptSearch struct {
 	Search bool   `docopt:"search"`
+	Long   bool   `docopt:"-l"`
 	Term   string `docopt:"<term>"`
 }
 
@@ -40,5 +42,5 @@ func Search(args []string, inject *di.DI) int {
 	synchro := inject.MakeSync()
 	synchro.Files()
 	srch := inject.MakeSearch()
-	return srch.Search2Output(opts.Term)
+	return srch.Search2Output(opts.Long, opts.Term)
 }
