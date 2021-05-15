@@ -10,13 +10,13 @@ import (
 	"regexp"
 	"strconv"
 
-	"github.com/apex/log"
 	"github.com/kick-project/kick/internal/resources/config"
 	"github.com/kick-project/kick/internal/resources/errs"
 	"github.com/kick-project/kick/internal/resources/exit"
 	"github.com/kick-project/kick/internal/resources/file"
 	"github.com/kick-project/kick/internal/resources/gitclient"
 	"github.com/kick-project/kick/internal/resources/gitclient/plumbing"
+	"github.com/kick-project/kick/internal/resources/logger"
 	"github.com/kick-project/kick/internal/resources/parse"
 	"github.com/kick-project/kick/internal/resources/sync"
 	"gorm.io/gorm"
@@ -26,7 +26,7 @@ import (
 type Install struct {
 	ConfigFile *config.File           `validate:"required"`
 	ORM        *gorm.DB               `validate:"required"`
-	Log        *log.Logger            `validate:"required"`
+	Log        logger.LogIface        `validate:"required"`
 	Plumb      plumbing.PlumbingIface `validate:"required"`
 	Stderr     io.Writer              `validate:"required"`
 	Stdin      io.Reader              `validate:"required"`

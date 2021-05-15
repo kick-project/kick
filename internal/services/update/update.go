@@ -5,11 +5,11 @@ import (
 	"path/filepath"
 	"sync"
 
-	"github.com/apex/log"
 	"github.com/kick-project/kick/internal/resources/config"
 	"github.com/kick-project/kick/internal/resources/errs"
 	"github.com/kick-project/kick/internal/resources/gitclient"
 	"github.com/kick-project/kick/internal/resources/gitclient/plumbing"
+	"github.com/kick-project/kick/internal/resources/logger"
 	"github.com/kick-project/kick/internal/resources/marshal"
 	"github.com/kick-project/kick/internal/resources/model"
 	_ "github.com/mattn/go-sqlite3" // Required by 'database/sql'
@@ -19,10 +19,10 @@ import (
 
 // Update build metadata
 type Update struct {
-	ConfigFile  *config.File `validate:"required"`
-	ORM         *gorm.DB     `validate:"required"`
-	Log         *log.Logger  `validate:"required"`
-	MetadataDir string       `validate:"required"`
+	ConfigFile  *config.File    `validate:"required"`
+	ORM         *gorm.DB        `validate:"required"`
+	Log         logger.LogIface `validate:"required"`
+	MetadataDir string          `validate:"required"`
 }
 
 // Build metadata. Conf defaults to globals.Config if Conf is nil.
@@ -52,7 +52,7 @@ func (m *Update) Build() error {
 }
 
 type workers struct {
-	log  *log.Logger
+	log  logger.LogIface
 	wait *sync.WaitGroup
 }
 

@@ -1,7 +1,6 @@
 package repo
 
 import (
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -11,6 +10,7 @@ import (
 	"github.com/kick-project/kick/internal/resources/errs"
 	"github.com/kick-project/kick/internal/resources/gitclient"
 	"github.com/kick-project/kick/internal/resources/gitclient/plumbing"
+	"github.com/kick-project/kick/internal/resources/logger"
 	"github.com/kick-project/kick/internal/resources/marshal"
 	"github.com/kick-project/kick/internal/resources/serialize"
 )
@@ -22,7 +22,7 @@ type Repo struct {
 	Serialized serialize.RepoMain     // Serialized config
 	Validate   *validator.Validate    // Validation
 	ErrHandler errs.HandlerIface      // Error handler
-	Log        *log.Logger            // Logger
+	Log        logger.LogIface        // Logger
 }
 
 // Build build repo

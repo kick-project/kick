@@ -7,12 +7,13 @@ import (
 	"log"
 
 	"github.com/kick-project/kick/internal/resources/exit"
+	"github.com/kick-project/kick/internal/resources/logger"
 )
 
 // Handler error handling
 type Handler struct {
 	Ex     exit.HandlerIface `validate:"required"` // Exit handler
-	Logger *log.Logger       `validate:"required"` // Default logger
+	Logger logger.LogIface   `validate:"required"` // Default logger
 }
 
 // Panic will log an error and panic if err is not nil.
@@ -134,11 +135,12 @@ func FatalF(format string, v ...interface{}) { // nolint
 }
 
 func makeErrors() *Handler {
+	eh := &exit.Handler{
+		Mode: exit.ExitMode,
+	}
 	e := &Handler{
-		Ex: &exit.Handler{
-			Mode: exit.ExitMode,
-		},
-		Logger: log.New(os.Stderr, "", log.LstdFlags),
+		Ex:     eh,
+		Logger: logger.New(os.Stderr, "", log.LstdFlags, logger.ErrorLevel, eh),
 	}
 	return e
 }

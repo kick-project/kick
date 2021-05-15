@@ -8,12 +8,12 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/apex/log"
 	"github.com/jinzhu/copier"
 	"github.com/kick-project/kick/internal/resources/config"
 	"github.com/kick-project/kick/internal/resources/errs"
 	"github.com/kick-project/kick/internal/resources/gitclient"
 	"github.com/kick-project/kick/internal/resources/gitclient/plumbing"
+	"github.com/kick-project/kick/internal/resources/logger"
 	"github.com/kick-project/kick/internal/resources/marshal"
 	"github.com/kick-project/kick/internal/resources/model"
 	"github.com/kick-project/kick/internal/resources/model/clauses"
@@ -27,7 +27,7 @@ type Sync struct {
 	ORM                *gorm.DB               `validate:"required"`
 	Config             *config.File           `validate:"required"`
 	ConfigTemplatePath string                 `validate:"required"`
-	Log                *log.Logger            `validate:"required"`
+	Log                logger.LogIface        `validate:"required"`
 	PlumbTemplates     plumbing.PlumbingIface `validate:"required"`
 	PlumbRepo          plumbing.PlumbingIface `validate:"required"`
 	Stderr             io.Writer              `validate:"required"`

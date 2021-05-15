@@ -1,15 +1,16 @@
 package main
 
 import (
+	"log"
 	"os"
 	"path"
 
-	"github.com/apex/log"
 	"github.com/joho/godotenv"
 	"github.com/kick-project/kick/internal"
 	"github.com/kick-project/kick/internal/di"
 	"github.com/kick-project/kick/internal/resources/errs"
 	"github.com/kick-project/kick/internal/resources/exit"
+	"github.com/kick-project/kick/internal/resources/logger"
 	"github.com/kick-project/kick/internal/subcmds/initcmd"
 	"github.com/kick-project/kick/internal/subcmds/installcmd"
 	"github.com/kick-project/kick/internal/subcmds/listcmd"
@@ -30,7 +31,7 @@ func main() {
 	inject := di.Setup(home)
 
 	if os.Getenv("KICK_DEBUG") == "true" {
-		inject.LogLevel(log.DebugLevel)
+		inject.LogLevel(logger.DebugLevel)
 	}
 
 	args := os.Args

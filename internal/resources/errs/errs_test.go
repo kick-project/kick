@@ -9,17 +9,19 @@ import (
 
 	errs "github.com/kick-project/kick/internal/resources/errs"
 	"github.com/kick-project/kick/internal/resources/exit"
+	"github.com/kick-project/kick/internal/resources/logger"
 	"github.com/stretchr/testify/assert"
 )
 
 func setup() (*errs.Handler, *bytes.Buffer) {
 	str := ``
 	buf := bytes.NewBufferString(str)
+	eh := &exit.Handler{
+		Mode: exit.MPanic,
+	}
 	e := errs.Handler{
-		Ex: &exit.Handler{
-			Mode: exit.MPanic,
-		},
-		Logger: log.New(buf, "", log.LstdFlags),
+		Ex:     eh,
+		Logger: logger.New(buf, "", log.LstdFlags, logger.ErrorLevel, eh),
 	}
 
 	return &e, buf

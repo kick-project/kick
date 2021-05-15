@@ -13,13 +13,13 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/apex/log"
 	"github.com/kick-project/kick/internal/resources/config"
 	"github.com/kick-project/kick/internal/resources/errs"
 	"github.com/kick-project/kick/internal/resources/exit"
 	"github.com/kick-project/kick/internal/resources/file"
 	"github.com/kick-project/kick/internal/resources/gitclient"
 	plumb "github.com/kick-project/kick/internal/resources/gitclient/plumbing"
+	"github.com/kick-project/kick/internal/resources/logger"
 	"github.com/kick-project/kick/internal/resources/marshal"
 	"github.com/kick-project/kick/internal/resources/template/renderer"
 	"github.com/kick-project/kick/internal/resources/template/variables"
@@ -37,7 +37,7 @@ const (
 // Template the template itself
 type Template struct {
 	Config         *config.File                 `validate:"required"`
-	Log            *log.Logger                  `validate:"required"`
+	Log            logger.LogIface              `validate:"required"`
 	ModeLineLen    uint8                        `validate:"required"`
 	RenderCurrent  string                       `validate:"required"`
 	RenderersAvail map[string]renderer.Renderer `validate:"required"`

@@ -9,8 +9,6 @@ import (
 	"os"
 	fp "path/filepath"
 
-	apexlog "github.com/apex/log"
-	"github.com/apex/log/handlers/text"
 	"github.com/go-playground/validator"
 	"github.com/kick-project/kick/internal/env"
 	"github.com/kick-project/kick/internal/resources/check"
@@ -18,6 +16,7 @@ import (
 	"github.com/kick-project/kick/internal/resources/errs"
 	"github.com/kick-project/kick/internal/resources/exit"
 	"github.com/kick-project/kick/internal/resources/gitclient/plumbing"
+	"github.com/kick-project/kick/internal/resources/logger"
 	"github.com/kick-project/kick/internal/resources/sync"
 	"github.com/kick-project/kick/internal/resources/template"
 	"github.com/kick-project/kick/internal/resources/template/renderer"
@@ -46,7 +45,7 @@ type DI struct {
 	Home string
 	// See https://pkg.go.dev/github.com/apex/log#InfoLevel for
 	// available levels.
-	logLevel apexlog.Level
+	logLevel logger.Level
 
 	// Standard logging
 	StdLogFlags  int    // Go standard logging flags
@@ -72,8 +71,6 @@ type DI struct {
 	// Cached objects
 	cacheConfigFile       *config.File
 	cacheORM              *gorm.DB
-	cacheLogger           *apexlog.Logger
-	cacheStdLogger        *log.Logger
 	cacheErrHandler       *errs.Handler
 	cacheExitHandler      *exit.Handler
 	cacheCheck            *check.Check
@@ -123,9 +120,9 @@ func Setup(home string) *DI {
 	pathRepoDir := fp.Clean(fmt.Sprintf("%s/.kick/repos", home))
 	pathTemplateDir := fp.Clean(fmt.Sprintf("%s/.kick/templates", home))
 	pathMetadataDir := fp.Clean(fmt.Sprintf("%s/.kick/metadata", home))
-	logLvl := apexlog.ErrorLevel
+	logLvl := logger.ErrorLevel
 	if env.Debug() {
-		logLvl = apexlog.DebugLevel
+		logLvl = logger.DebugLevel
 	}
 	s := &DI{
 		SqliteDB:         sqlitedb,
@@ -147,7 +144,7 @@ func Setup(home string) *DI {
 }
 
 // LogLevel Sets the log level
-func (s *DI) LogLevel(lvl apexlog.Level) {
+func (s *DI) LogLevel(lvl logger.Level) {
 	s.logLevel = lvl
 }
 
@@ -207,30 +204,8 @@ func (s *DI) MakeORM() *gorm.DB {
 }
 
 // MakeLogger inject logger object.
-func (s *DI) MakeLogger() *apexlog.Logger {
-	if s.cacheLogger != nil {
-		return s.cacheLogger
-	}
-	logger := &apexlog.Logger{
-		Handler: text.New(s.Stderr),
-		Level:   s.logLevel,
-	}
-	s.cacheLogger = logger
-	return logger
-}
-
-// MakeStdLogger inject Go's standard logging library
-func (s *DI) MakeStdLogger() *log.Logger {
-	if s.cacheStdLogger != nil {
-		return s.cacheStdLogger
-	}
-	logger := log.New(
-		s.Stderr,
-		"",
-		s.StdLogFlags,
-	)
-	s.cacheStdLogger = logger
-	return logger
+func (s *DI) MakeLogger(prefix string) *logger.Log {
+	return logger.New(s.Stderr, prefix, s.StdLogFlags, s.logLevel, s.MakeExitHandler())
 }
 
 // MakeErrorHandler dependency injector
@@ -239,7 +214,7 @@ func (s *DI) MakeErrorHandler() *errs.Handler {
 		return s.cacheErrHandler
 	}
 	handler := &errs.Handler{
-		Logger: s.MakeStdLogger(),
+		Logger: s.MakeLogger(""),
 		Ex:     s.MakeExitHandler(),
 	}
 	s.validate(handler)
@@ -321,7 +296,7 @@ func (s *DI) MakeInstall() *install.Install {
 	i := &install.Install{
 		ConfigFile: s.ConfigFile(),
 		ORM:        s.MakeORM(),
-		Log:        s.MakeLogger(),
+		Log:        s.MakeLogger(""),
 		Plumb:      s.MakePlumbingTemplate(),
 		Stderr:     s.Stderr,
 		Stdin:      s.Stdin,
@@ -396,7 +371,7 @@ func (s *DI) MakeRepo() *repo.Repo {
 		Plumb:      s.MakePlumbingTemplate(),
 		Validate:   s.MakeValidate(),
 		ErrHandler: s.MakeErrorHandler(),
-		Log:        s.MakeStdLogger(),
+		Log:        s.MakeLogger(""),
 	}
 	return r
 }
@@ -427,7 +402,7 @@ func (s *DI) MakeSync() *sync.Sync {
 		ORM:                s.MakeORM(),
 		Config:             s.ConfigFile(),
 		ConfigTemplatePath: s.PathTemplateConf,
-		Log:                s.MakeLogger(),
+		Log:                s.MakeLogger(""),
 		PlumbRepo:          s.MakePlumbingRepo(),
 		PlumbTemplates:     s.MakePlumbingTemplate(),
 		Stderr:             s.Stderr,
@@ -446,7 +421,7 @@ func (s *DI) MakeTemplate() *template.Template {
 	vars.ProjectVariable("NAME", s.ProjectName)
 	t := &template.Template{
 		Config:        s.ConfigFile(),
-		Log:           s.MakeLogger(),
+		Log:           s.MakeLogger(""),
 		Stderr:        s.Stderr,
 		Stdout:        s.Stdout,
 		TemplateDir:   s.PathTemplateDir,
@@ -469,7 +444,7 @@ func (s *DI) MakeUpdate() *update.Update {
 	u := &update.Update{
 		ConfigFile:  s.ConfigFile(),
 		ORM:         s.MakeORM(),
-		Log:         s.MakeLogger(),
+		Log:         s.MakeLogger(""),
 		MetadataDir: s.PathMetadataDir,
 	}
 	s.cacheUpdate = u
