@@ -65,7 +65,7 @@ func (l *List) longFmt() {
 		header []string
 		table  [][]string
 	)
-	header = []string{"Handle", "Description", "Template", "Location"}
+	header = []string{"Handle", "Template", "Description", "Location"}
 	for _, row := range l.sort(l.Conf.Templates) {
 		var (
 			templateName string
@@ -83,7 +83,7 @@ func (l *List) longFmt() {
 		if desc == "" {
 			desc = "-"
 		}
-		table = append(table, []string{row.Handle, desc, templateName, row.URL})
+		table = append(table, []string{row.Handle, templateName, desc, row.URL})
 	}
 	writer := tablewriter.NewWriter(l.Stdout)
 	writer.SetAlignment(tablewriter.ALIGN_LEFT)
