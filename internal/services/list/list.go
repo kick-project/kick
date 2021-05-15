@@ -95,8 +95,7 @@ func (l *List) longFmt() {
 }
 
 func (l *List) sort(in []config.Template) (out []config.Template) {
-	templates := l.Conf.Templates
-	sort.Sort(config.SortByName(templates))
-	out = append(out, templates...)
+	sort.Sort(config.SortByName(in))
+	out = append(out, in...)
 	return
 }
