@@ -2,6 +2,7 @@ package repo_test
 
 import (
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 	"testing"
@@ -10,6 +11,7 @@ import (
 	"github.com/kick-project/kick/internal/resources/errs"
 	"github.com/kick-project/kick/internal/resources/exit"
 	"github.com/kick-project/kick/internal/resources/gitclient/plumbing"
+	"github.com/kick-project/kick/internal/resources/logger"
 	"github.com/kick-project/kick/internal/resources/testtools"
 	"github.com/kick-project/kick/internal/services/repo"
 )
@@ -42,17 +44,15 @@ templates:
 		return
 	}
 
+	eh := &exit.Handler{Mode: exit.MPanic}
+	lgr := logger.New(os.Stderr, "", log.LstdFlags, logger.ErrorLevel, eh)
 	m := repo.Repo{
 		WD: dirPath,
 		Plumb: &plumbing.Plumbing{
 			Base: filepath.Join(testtools.TempDir(), "home", ".kick", "metadata"),
 		},
-		Validate: validator.New(),
-		ErrHandler: &errs.Handler{
-			Ex: &exit.Handler{
-				Mode: exit.MPanic,
-			},
-		},
+		Validate:   validator.New(),
+		ErrHandler: errs.New(eh, lgr),
 	}
 	m.Build()
 }

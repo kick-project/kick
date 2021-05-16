@@ -12,7 +12,6 @@ import (
 
 	"github.com/kick-project/kick/internal/resources/config"
 	"github.com/kick-project/kick/internal/resources/errs"
-	"github.com/kick-project/kick/internal/resources/exit"
 	"github.com/kick-project/kick/internal/resources/file"
 	"github.com/kick-project/kick/internal/resources/gitclient"
 	"github.com/kick-project/kick/internal/resources/gitclient/plumbing"
@@ -26,7 +25,8 @@ import (
 type Install struct {
 	ConfigFile *config.File           `validate:"required"`
 	ORM        *gorm.DB               `validate:"required"`
-	Log        logger.LogIface        `validate:"required"`
+	Log        logger.OutputIface     `validate:"required"`
+	Err        *errs.Handler          `validate:"required"`
 	Plumb      plumbing.PlumbingIface `validate:"required"`
 	Stderr     io.Writer              `validate:"required"`
 	Stdin      io.Reader              `validate:"required"`
@@ -63,7 +63,7 @@ func (i *Install) Install(handle, template string) (ret int) {
 	// Check if handle is in use
 	ret = i.checkInUse(handle)
 	if ret != 0 {
-		fmt.Fprintf(i.Stderr, "handle %s is already in use\n", handle)
+		i.Log.Printf("handle %s is already in use\n", handle)
 		return
 	}
 
@@ -76,7 +76,7 @@ func (i *Install) Install(handle, template string) (ret int) {
 	// Install from a URL
 	found = i.processLocation(handle, template)
 	if !found {
-		fmt.Fprintf(i.Stderr, "invalid template or url %s\n", template)
+		i.Log.Printf("invalid template or url %s\n", template)
 		ret = 255
 	}
 	return
@@ -86,7 +86,7 @@ func (i *Install) processLocation(handle, location string) (found bool) {
 	i.Log.Debugf("processLocation(%s, %s)", handle, location)
 
 	p, err := filepath.Abs(file.ExpandPath(location))
-	errs.Panic(err)
+	i.Err.Panic(err)
 	// Check if its a path on the local file system
 	if info, err := os.Stat(p); err == nil && info.IsDir() {
 		t := config.Template{
@@ -213,18 +213,18 @@ func (i *Install) promptEntry(handle string, entries []config.Template) {
 		fmt.Fprintf(i.Stdout, "  Select an entry between 1-%d: ", l)
 		reader := bufio.NewReader(i.Stdin)
 		text, err := reader.ReadString('\n')
-		errs.Panic(err)
+		i.Err.Panic(err)
 
 		match = re.FindStringSubmatch(text)
 		if len(match) == 0 {
-			fmt.Print("\nInvalid entry\n\n")
+			fmt.Fprint(i.Stdout, "\nInvalid entry\n\n")
 		} else {
 			selected, err = strconv.Atoi(match[1])
-			errs.Panic(err)
+			i.Err.Panic(err)
 		}
 
 		if selected < 1 || selected > l {
-			fmt.Print("\nInvalid entry\n\n")
+			fmt.Fprint(i.Stdout, "\nInvalid entry\n\n")
 		} else {
 			break
 		}
@@ -235,30 +235,21 @@ func (i *Install) promptEntry(handle string, entries []config.Template) {
 // createEntry creates a entry
 func (i *Install) createEntry(handle string, entry config.Template) {
 	_, err := i.getRepo(entry.URL)
-	if err != nil {
-		fmt.Fprintf(i.Stderr, "Error installing %s: %s\n", entry.Handle, err.Error())
-		exit.Exit(255)
-	}
+	i.Err.FatalF("Error installing %s: %v\n", entry.Handle, err)
 
 	entry.Handle = handle
 	err = i.ConfigFile.AppendTemplate(entry)
-	if err != nil {
-		fmt.Fprintf(i.Stderr, "%s\n", err.Error())
-		exit.Exit(255)
-	}
+	i.Err.Fatal(err)
 	err = i.ConfigFile.SaveTemplates()
-	if err != nil {
-		fmt.Fprintf(i.Stderr, "%s\n", err.Error())
-		exit.Exit(255)
-	}
+	i.Err.Fatal(err)
 	i.Sync.Files()
 	switch {
 	case entry.Template == "":
-		fmt.Fprintf(i.Stdout, "Installed %s -> %s\n", entry.Handle, entry.URL)
+		i.Log.Printf("installed handle:%s -> location:%s\n", entry.Handle, entry.URL)
 	case entry.Origin == "":
-		fmt.Fprintf(i.Stdout, "Installed %s %s -> %s\n", entry.Handle, entry.Template, entry.URL)
+		i.Log.Printf("installed handle:%s template:%s -> location:%s\n", entry.Handle, entry.Template, entry.URL)
 	default:
-		fmt.Fprintf(i.Stdout, "Installed %s %s/%s -> %s\n", entry.Handle, entry.Template, entry.Origin, entry.URL)
+		i.Log.Printf("installed handle:%s template:%s/%s -> location:%s\n", entry.Handle, entry.Template, entry.Origin, entry.URL)
 	}
 }
 

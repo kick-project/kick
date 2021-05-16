@@ -1,20 +1,22 @@
 package remove
 
 import (
-	"fmt"
 	"io"
 
 	"github.com/kick-project/kick/internal/resources/config"
 	"github.com/kick-project/kick/internal/resources/errs"
+	"github.com/kick-project/kick/internal/resources/logger"
 )
 
 // Remove remove installed templates
 type Remove struct {
-	Conf             *config.File `validate:"required"`
-	PathTemplateConf string       `validate:"required"`
-	PathUserConf     string       `validate:"required"`
-	Stderr           io.Writer    `validate:"required"`
-	Stdout           io.Writer    `validate:"required"`
+	Conf             *config.File       `validate:"required"`
+	Err              *errs.Handler      `validate:"required"`
+	Log              logger.OutputIface `validate:"required"`
+	PathTemplateConf string             `validate:"required"`
+	PathUserConf     string             `validate:"required"`
+	Stderr           io.Writer          `validate:"required"`
+	Stdout           io.Writer          `validate:"required"`
 }
 
 // Remove removes a handle from installed templates
@@ -31,7 +33,7 @@ func (r *Remove) Remove(handle string) int {
 	}
 
 	if item == -1 {
-		fmt.Fprintf(r.Stderr, "can not uninstall handle %s. handle not installed\n", handle)
+		r.Log.Printf("can not uninstall handle %s. handle not installed\n", handle)
 		return 255
 	}
 
@@ -52,7 +54,7 @@ func (r *Remove) Remove(handle string) int {
 	}
 	r.Conf.Templates = templates
 	err := r.Conf.SaveTemplates()
-	errs.Panic(err)
-
+	r.Err.Panic(err)
+	r.Log.Printf(`removed handle:%s`, handle)
 	return 0
 }

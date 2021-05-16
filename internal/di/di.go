@@ -7,7 +7,9 @@ import (
 	"io"
 	"log"
 	"os"
+	"path/filepath"
 	fp "path/filepath"
+	"runtime"
 
 	"github.com/go-playground/validator"
 	"github.com/kick-project/kick/internal/env"
@@ -75,6 +77,7 @@ type DI struct {
 	cacheCheck            *check.Check
 	cacheSetup            *setup.Setup
 	cacheList             *list.List
+	cacheLogFile          *os.File
 	cacheInit             *initialize.Init
 	cacheInstall          *install.Install
 	cachePlumbingRepo     *plumbing.Plumbing
@@ -202,9 +205,11 @@ func (s *DI) MakeORM() *gorm.DB {
 	return db
 }
 
-// MakeLogger inject logger object.
-func (s *DI) MakeLogger(prefix string) *logger.Log {
-	return logger.New(s.Stderr, prefix, s.StdLogFlags, s.logLevel, s.MakeExitHandler())
+// MakeLoggerOutput inject logger.OutputIface.
+func (s *DI) MakeLoggerOutput(prefix string) *logger.Router {
+	toFile := logger.New(s.MakeLogFile(), prefix, log.Ldate|log.Ltime|log.Lshortfile|log.Lmsgprefix, s.logLevel, s.MakeExitHandler())
+	toStderr := logger.New(s.Stderr, prefix, log.Lmsgprefix, s.logLevel, s.MakeExitHandler())
+	return logger.NewRouter(toFile, toStderr)
 }
 
 // MakeErrorHandler dependency injector
@@ -212,11 +217,7 @@ func (s *DI) MakeErrorHandler() *errs.Handler {
 	if s.cacheErrHandler != nil {
 		return s.cacheErrHandler
 	}
-	handler := &errs.Handler{
-		Logger: s.MakeLogger(""),
-		Ex:     s.MakeExitHandler(),
-	}
-	s.validate(handler)
+	handler := errs.New(s.MakeExitHandler(), s.MakeLoggerOutput(""))
 	s.cacheErrHandler = handler
 	return handler
 }
@@ -295,7 +296,8 @@ func (s *DI) MakeInstall() *install.Install {
 	i := &install.Install{
 		ConfigFile: s.ConfigFile(),
 		ORM:        s.MakeORM(),
-		Log:        s.MakeLogger(""),
+		Err:        s.MakeErrorHandler(),
+		Log:        s.MakeLoggerOutput(""),
 		Plumb:      s.MakePlumbingTemplate(),
 		Stderr:     s.Stderr,
 		Stdin:      s.Stdin,
@@ -319,6 +321,38 @@ func (s *DI) MakeList() *list.List {
 	s.validate(l)
 	s.cacheList = l
 	return l
+}
+
+// MakeLogFile create a logfile and return the interface
+func (s *DI) MakeLogFile() *os.File {
+	if s.cacheLogFile != nil {
+		return s.cacheLogFile
+	}
+	var (
+		tmpDir string
+		f      *os.File
+		err    error
+	)
+	if runtime.GOOS == "darwin" {
+		tmpDir = "/tmp"
+	} else {
+		tmpDir = os.TempDir()
+	}
+	logPath := filepath.Join(tmpDir, "kick.log")
+
+	fInfo, err := os.Stat(logPath)
+	if err != nil && !os.IsNotExist(err) {
+		panic(err)
+	} else if err == nil && fInfo.Size() > 1024*1024*2 {
+		// Remove files greater than 2M
+		os.Remove(logPath)
+	}
+	f, err = os.OpenFile(logPath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
+	if err != nil {
+		panic(err)
+	}
+	s.cacheLogFile = f
+	return f
 }
 
 // MakePlumbingRepo injects di for plumbing.Plumb
@@ -352,6 +386,8 @@ func (s *DI) MakeRemove() *remove.Remove {
 	}
 	r := &remove.Remove{
 		Conf:             s.ConfigFile(),
+		Err:              s.MakeErrorHandler(),
+		Log:              s.MakeLoggerOutput(""),
 		PathTemplateConf: s.PathTemplateConf,
 		PathUserConf:     s.PathUserConf,
 		Stderr:           s.Stderr,
@@ -370,7 +406,7 @@ func (s *DI) MakeRepo() *repo.Repo {
 		Plumb:      s.MakePlumbingTemplate(),
 		Validate:   s.MakeValidate(),
 		ErrHandler: s.MakeErrorHandler(),
-		Log:        s.MakeLogger(""),
+		Log:        s.MakeLoggerOutput(""),
 	}
 	return r
 }
@@ -397,7 +433,7 @@ func (s *DI) MakeSync() *sync.Sync {
 		ORM:                s.MakeORM(),
 		Config:             s.ConfigFile(),
 		ConfigTemplatePath: s.PathTemplateConf,
-		Log:                s.MakeLogger(""),
+		Log:                s.MakeLoggerOutput(""),
 		PlumbRepo:          s.MakePlumbingRepo(),
 		PlumbTemplates:     s.MakePlumbingTemplate(),
 		Stderr:             s.Stderr,
@@ -416,7 +452,9 @@ func (s *DI) MakeTemplate() *template.Template {
 	vars.ProjectVariable("NAME", s.ProjectName)
 	t := &template.Template{
 		Config:        s.ConfigFile(),
-		Log:           s.MakeLogger(""),
+		Log:           s.MakeLoggerOutput(""),
+		Errs:          s.MakeErrorHandler(),
+		Exit:          s.MakeExitHandler(),
 		Stderr:        s.Stderr,
 		Stdout:        s.Stdout,
 		TemplateDir:   s.PathTemplateDir,
@@ -439,7 +477,7 @@ func (s *DI) MakeUpdate() *update.Update {
 	u := &update.Update{
 		ConfigFile:  s.ConfigFile(),
 		ORM:         s.MakeORM(),
-		Log:         s.MakeLogger(""),
+		Log:         s.MakeLoggerOutput(""),
 		MetadataDir: s.PathMetadataDir,
 	}
 	s.cacheUpdate = u

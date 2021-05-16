@@ -37,7 +37,9 @@ const (
 // Template the template itself
 type Template struct {
 	Config         *config.File                 `validate:"required"`
-	Log            logger.LogIface              `validate:"required"`
+	Errs           *errs.Handler                `validate:"required"`
+	Exit           *exit.Handler                `validate:"required"`
+	Log            logger.OutputIface           `validate:"required"`
 	ModeLineLen    uint8                        `validate:"required"`
 	RenderCurrent  string                       `validate:"required"`
 	RenderersAvail map[string]renderer.Renderer `validate:"required"`
@@ -61,9 +63,9 @@ func (t *Template) SetRender(renderer string) {
 	if _, ok := t.RenderersAvail[t.RenderCurrent]; !ok {
 		t.Log.Errorf("No such renderer %s. Valid options are...\n", t.RenderCurrent)
 		for r := range t.RenderersAvail {
-			fmt.Println(r)
+			fmt.Fprintln(t.Stdout, r)
 		}
-		exit.Exit(255)
+		t.Exit.Exit(255)
 	}
 	t.RenderCurrent = renderer
 }
@@ -77,14 +79,14 @@ func (t *Template) renderer() renderer.Renderer {
 	if ok {
 		return render
 	}
-	fmt.Fprintf(t.Stderr, "No such renderer %s\n", t.RenderCurrent)
-	exit.Exit(255)
+	t.Log.Printf("No such renderer %s\n", t.RenderCurrent)
+	t.Exit.Exit(255)
 	return nil
 }
 
 func (t *Template) buildDir(id string) {
 	d, err := ioutil.TempDir(os.Getenv("TEMP"), fmt.Sprintf("kick-%s-", id))
-	errs.PanicF("Build Error: %v", err)
+	errs.PanicF("build error: %v", err)
 	t.builddir = d
 }
 
@@ -109,18 +111,18 @@ func (t *Template) SetSrc(name string) {
 	g := plumb.New(t.TemplateDir)
 	localpath, err := gitclient.Get(tmpl.URL, g)
 
-	errs.FatalF(`template "%s" not found: %v`, name, err)
+	t.Errs.FatalF(`template "%s" not found: %v`, name, err)
 
 	// Set renderer from conf
 	confPath := filepath.Join(localpath, ".kick.yml")
 	t.loadTempateConf(confPath)
 
 	stat, err := os.Stat(localpath)
-	errs.FatalF(`error: %w`, err)
+	t.Errs.FatalF(`error: %w`, err)
 
 	if !stat.IsDir() {
 		fmt.Fprintf(os.Stderr, `%s is not a directory`, localpath)
-		exit.Exit(-1)
+		t.Exit.Exit(-1)
 	}
 
 	t.src = name
@@ -137,7 +139,7 @@ func (t *Template) Run() int {
 	path := t.localpath
 	base := t.localpath
 	skipRegex, err := regexp.Compile(fmt.Sprintf(`^%s/.git(?:/|$)`, base))
-	errs.PanicF("build error: %v", err)
+	t.Errs.PanicF("build error: %v", err)
 	t.checkDstExists()
 	errWalk := filepath.Walk(path, func(srcPath string, info os.FileInfo, err error) error {
 		if skipRegex.MatchString(srcPath) {
@@ -153,6 +155,7 @@ func (t *Template) Run() int {
 		}
 
 		pair := filePair{
+			errs:      t.Errs,
 			srcInfo:   info,
 			srcPath:   srcPath,
 			dstPath:   dstPath,
@@ -161,7 +164,7 @@ func (t *Template) Run() int {
 			renderer:  t.renderer(),
 		}
 		err = pair.route()
-		errs.PanicF("Build Error: %v", err)
+		t.Errs.PanicF("build error: %v", err)
 
 		return nil
 	})
@@ -171,18 +174,19 @@ func (t *Template) Run() int {
 	}
 
 	err = file.Move(t.builddir, t.dest)
-	errs.PanicF("Build Error: %v", err)
+	t.Errs.PanicF("build error: %v", err)
+	t.Log.Printf(`created project handle:%s -> project:%s`, t.src, t.dest)
 	return 0
 }
 
 func (t *Template) checkDstExists() {
 	stat, err := os.Stat(t.dest)
 	if !os.IsNotExist(err) {
-		errs.PanicF("Build Error: %v", err)
+		t.Errs.PanicF("build error: %v", err)
 	}
 	if stat != nil {
-		fmt.Printf("Path '%s' exists. Aborting.\n", t.dest) // nolint
-		exit.Exit(255)
+		t.Log.Printf("path '%s' exists. aborting.\n", t.dest) // nolint
+		t.Exit.Exit(255)
 	}
 }
 
@@ -193,7 +197,7 @@ func (t *Template) renderDir(path string) string {
 		return path
 	}
 	path, err := t.renderer().Text2String(path, t.Variables, true, true)
-	errs.FatalF("can not substitute path string \"%s\": %v", path, err)
+	t.Errs.FatalF("can not substitute path string \"%s\": %v", path, err)
 	return path
 }
 
@@ -208,13 +212,13 @@ func (t *Template) loadTempateConf(path string) {
 	c := &templateConf{}
 	if !strings.HasSuffix(path, ".yml") {
 		fmt.Fprintf(t.Stderr, "Invalid file %s\n", path)
-		exit.Exit(255)
+		t.Exit.Exit(255)
 	}
 	t.Log.Debugf("Unmarshal file %s\n", path)
 	err := marshal.FromFile(c, path)
 	if err != nil {
 		fmt.Fprintf(t.Stderr, "Can not unmarshal file %s: %s\n", path, err.Error())
-		exit.Exit(255)
+		t.Exit.Exit(255)
 	}
 	t.Log.Debugf("%#v", c)
 
@@ -229,6 +233,7 @@ func (t *Template) loadTempateConf(path string) {
 type filePair struct {
 	dstPath   string // Destination path
 	mlen      uint8  // Mode line length
+	errs      *errs.Handler
 	mu        sync.Mutex
 	renderer  renderer.Renderer
 	srcInfo   os.FileInfo
@@ -245,7 +250,7 @@ func (fp *filePair) route() error {
 		return nil
 	case lnum > 0 && action == MLrender:
 		err := fp.render(lnum)
-		errs.Panic(err)
+		fp.errs.Panic(err)
 	case lnum > 0 && action == MLnorender:
 		return nil
 	case fp.srcInfo.Mode().IsRegular():
@@ -272,7 +277,7 @@ func (fp *filePair) mkdir() error {
 	defer fp.mu.Unlock()
 	if _, err := os.Stat(fp.dstPath); os.IsNotExist(err) {
 		err = os.Mkdir(fp.dstPath, 0755)
-		errs.PanicF("Build Error: %v", err)
+		fp.errs.PanicF("build error: %v", err)
 	}
 	return nil
 }
@@ -306,13 +311,13 @@ func (fp *filePair) copy() error {
 
 func (fp *filePair) stripModeline(lnum uint8) string {
 	inF, err := os.Open(fp.srcPath)
-	errs.PanicF("Can not open '%s': %s", fp.srcPath, err) // nolint
-	defer inF.Close()                                     // nolint
+	fp.errs.PanicF("Can not open '%s': %s", fp.srcPath, err) // nolint
+	defer inF.Close()                                        // nolint
 
 	tmpdir := os.Getenv("TMPDIR")
 	outF, err := ioutil.TempFile(tmpdir, "kick-")
-	errs.PanicF("Can not create tempfile: %s", err) // nolint
-	defer outF.Close()                              // nolint
+	fp.errs.PanicF("Can not create tempfile: %s", err) // nolint
+	defer outF.Close()                                 // nolint
 
 	var cnt uint8
 	scner := bufio.NewScanner(inF)
@@ -327,7 +332,7 @@ func (fp *filePair) stripModeline(lnum uint8) string {
 			}
 		}
 		_, err := outF.Write(b)
-		errs.PanicF("Error writing to file '%s': %s", outF.Name(), err) // nolint
+		fp.errs.PanicF("Error writing to file '%s': %s", outF.Name(), err) // nolint
 	}
 	return outF.Name()
 }
@@ -343,7 +348,7 @@ func (fp *filePair) render(mline uint8) error {
 	}()
 
 	err := fp.renderer.File2File(tempPath, fp.dstPath, fp.variables, false, false)
-	errs.Panic(err)
+	fp.errs.Panic(err)
 	return nil
 }
 
@@ -354,7 +359,7 @@ func (fp *filePair) hasModeLine() (action int, lnum uint8) {
 	len := fp.mlen
 	mlactions := hasML{}.Init()
 	source, err := os.Open(fp.srcPath)
-	errs.FatalF("Can not open file %s: %v", fp.srcPath, err)
+	fp.errs.FatalF("Can not open file %s: %v", fp.srcPath, err)
 
 	defer source.Close()
 	scner := bufio.NewScanner(source)

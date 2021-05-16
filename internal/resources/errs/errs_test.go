@@ -19,12 +19,9 @@ func setup() (*errs.Handler, *bytes.Buffer) {
 	eh := &exit.Handler{
 		Mode: exit.MPanic,
 	}
-	e := errs.Handler{
-		Ex:     eh,
-		Logger: logger.New(buf, "", log.LstdFlags, logger.ErrorLevel, eh),
-	}
+	e := errs.New(eh, logger.New(buf, "", log.LstdFlags, logger.ErrorLevel, eh))
 
-	return &e, buf
+	return e, buf
 }
 
 func expectPanic(t *testing.T, r interface{}, msg string) {

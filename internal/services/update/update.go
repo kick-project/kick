@@ -19,10 +19,10 @@ import (
 
 // Update build metadata
 type Update struct {
-	ConfigFile  *config.File    `validate:"required"`
-	ORM         *gorm.DB        `validate:"required"`
-	Log         logger.LogIface `validate:"required"`
-	MetadataDir string          `validate:"required"`
+	ConfigFile  *config.File       `validate:"required"`
+	ORM         *gorm.DB           `validate:"required"`
+	Log         logger.OutputIface `validate:"required"`
+	MetadataDir string             `validate:"required"`
 }
 
 // Build metadata. Conf defaults to globals.Config if Conf is nil.
@@ -52,7 +52,7 @@ func (m *Update) Build() error {
 }
 
 type workers struct {
-	log  logger.LogIface
+	log  logger.OutputIface
 	wait *sync.WaitGroup
 }
 

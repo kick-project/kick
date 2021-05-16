@@ -30,6 +30,16 @@ func main() {
 	errs.FatalF("error: %w", err)
 	inject := di.Setup(home)
 
+	// open log file and close on exit
+	lf := inject.MakeLogFile()
+	defer func() {
+		lf.Close()
+		info, err := os.Stat(lf.Name())
+		if err != nil && info.Size() == 0 {
+			os.Remove(lf.Name())
+		}
+	}()
+
 	if os.Getenv("KICK_DEBUG") == "true" {
 		inject.LogLevel(logger.DebugLevel)
 	}

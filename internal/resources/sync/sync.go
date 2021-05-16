@@ -27,7 +27,7 @@ type Sync struct {
 	ORM                *gorm.DB               `validate:"required"`
 	Config             *config.File           `validate:"required"`
 	ConfigTemplatePath string                 `validate:"required"`
-	Log                logger.LogIface        `validate:"required"`
+	Log                logger.OutputIface     `validate:"required"`
 	PlumbTemplates     plumbing.PlumbingIface `validate:"required"`
 	PlumbRepo          plumbing.PlumbingIface `validate:"required"`
 	Stderr             io.Writer              `validate:"required"`

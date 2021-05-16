@@ -3,6 +3,7 @@ package errs
 import (
 	"fmt"
 	"os"
+	"sync"
 
 	"log"
 
@@ -12,8 +13,18 @@ import (
 
 // Handler error handling
 type Handler struct {
-	Ex     exit.HandlerIface `validate:"required"` // Exit handler
-	Logger logger.LogIface   `validate:"required"` // Default logger
+	ex     exit.HandlerIface  `validate:"required"` // Exit handler
+	Logger logger.OutputIface `validate:"required"` // Default logger
+	mu     *sync.Mutex
+}
+
+// New return a *Handler object.
+func New(eh *exit.Handler, lgr logger.OutputIface) *Handler {
+	return &Handler{
+		ex:     eh,
+		Logger: lgr,
+		mu:     &sync.Mutex{},
+	}
 }
 
 // Panic will log an error and panic if err is not nil.
@@ -45,7 +56,7 @@ func (e *Handler) Fatal(err error) {
 	if !has {
 		return
 	}
-	e.Ex.Exit(255)
+	e.ex.Exit(255)
 }
 
 // FatalF will log an error and exit if any argument passed to fatal is an error
@@ -54,19 +65,17 @@ func (e *Handler) FatalF(format string, v ...interface{}) { // nolint
 	if !hasErr {
 		return
 	}
-	e.Ex.Exit(255)
+	e.ex.Exit(255)
 }
 
 func (e *Handler) hasErrPrint(err error) bool {
 	if err == nil {
 		return false
 	}
-	e.Logger.SetFlags(log.LstdFlags | log.Lshortfile)
 	o := e.Logger.Output(3, err.Error())
 	if o != nil {
 		panic(o)
 	}
-	e.Logger.SetFlags(log.LstdFlags)
 	return true
 }
 
@@ -81,10 +90,8 @@ func (e *Handler) hasErrPrintf(format string, v ...interface{}) bool {
 	if !hasError {
 		return false
 	}
-	e.Logger.SetFlags(log.LstdFlags | log.Lshortfile)
 	out := fmt.Errorf(format, v...)
 	e.Logger.Output(3, out.Error()) // nolint
-	e.Logger.SetFlags(log.LstdFlags)
 	return true
 }
 
@@ -121,7 +128,7 @@ func Fatal(err error) {
 	if !has {
 		return
 	}
-	e.Ex.Exit(255)
+	e.ex.Exit(255)
 }
 
 // FatalF will log an error and exit if any argument passed to fatal is an error
@@ -131,7 +138,7 @@ func FatalF(format string, v ...interface{}) { // nolint
 	if !hasErr {
 		return
 	}
-	e.Ex.Exit(255)
+	e.ex.Exit(255)
 }
 
 func makeErrors() *Handler {
@@ -139,7 +146,7 @@ func makeErrors() *Handler {
 		Mode: exit.ExitMode,
 	}
 	e := &Handler{
-		Ex:     eh,
+		ex:     eh,
 		Logger: logger.New(os.Stderr, "", log.LstdFlags, logger.ErrorLevel, eh),
 	}
 	return e

@@ -22,7 +22,7 @@ type Repo struct {
 	Serialized serialize.RepoMain     // Serialized config
 	Validate   *validator.Validate    // Validation
 	ErrHandler errs.HandlerIface      // Error handler
-	Log        logger.LogIface        // Logger
+	Log        logger.OutputIface     // Logger
 }
 
 // Build build repo
@@ -73,7 +73,7 @@ func (m *Repo) download() {
 			for _, err := range err.(validator.ValidationErrors) {
 				invalid = append(invalid, err.StructField())
 			}
-			m.Log.Printf("Can not load %s invalid fields: ", strings.Join(invalid, `,`))
+			m.Log.Errorf("Can not load %s invalid fields: ", strings.Join(invalid, `,`))
 			continue
 		}
 

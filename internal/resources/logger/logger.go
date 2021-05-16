@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"sync"
 
 	"github.com/kick-project/kick/internal/resources/exit"
 )
@@ -23,6 +24,16 @@ const (
 type LogIface interface {
 	LoggerIface
 	LogLevelIface
+}
+
+// OutputIface router interface
+type OutputIface interface {
+	Debug(string)
+	Debugf(string, ...interface{})
+	Error(string)
+	Errorf(string, ...interface{})
+	Output(int, string) error
+	Printf(string, ...interface{})
 }
 
 // LoggerIface A interface that matches log.Logger
@@ -59,6 +70,7 @@ type Log struct {
 	lvl       Level
 	stdLogger *log.Logger
 	eh        exit.HandlerIface
+	mu        *sync.Mutex
 }
 
 // New creates a new Logger. The out variable sets the
@@ -71,6 +83,7 @@ func New(out io.Writer, prefix string, flag int, level Level, eh exit.HandlerIfa
 		lvl:       level,
 		stdLogger: log.New(out, prefix, flag),
 		eh:        eh,
+		mu:        &sync.Mutex{},
 	}
 }
 
@@ -174,10 +187,37 @@ func (l *Log) Writer() io.Writer {
 //
 
 func (l *Log) levelOutput(level Level, s string) {
-	if l.lvl < level {
+	oldPrefix := l.Prefix()
+	l.mu.Lock()
+	defer func() {
+		l.SetPrefix(oldPrefix)
+		l.mu.Unlock()
+	}()
+	if l.lvl > level {
 		return
 	}
+	prefix := l.levelText(level)
+	l.SetPrefix(prefix)
+
 	_ = l.Output(3, s)
+}
+
+func (l *Log) levelText(level Level) (newPrefix string) {
+	switch level {
+	case DebugLevel:
+		newPrefix = "DEBUG "
+	case InfoLevel:
+		newPrefix = "INFO "
+	case WarnLevel:
+		newPrefix = "WARN "
+	case ErrorLevel:
+		newPrefix = "ERROR "
+	case FatalLevel:
+		newPrefix = "FATAL "
+	default:
+		panic("Unknown debug level")
+	}
+	return
 }
 
 // Error error level message.

@@ -41,7 +41,7 @@ func (f *File) AppendTemplate(t Template) (err error) {
 	// Check if template is installed
 	for _, cur := range f.Templates {
 		if t.Handle == cur.Handle {
-			return fmt.Errorf("template handle %s already in use", t.Handle)
+			return fmt.Errorf("handle %s already in use", t.Handle)
 		}
 	}
 
