@@ -3,20 +3,19 @@ package initialize
 
 import (
 	"fmt"
-	"io"
 	"os"
 	"path/filepath"
 
 	"github.com/kick-project/kick/internal/resources/errs"
+	"github.com/kick-project/kick/internal/resources/logger"
 	"github.com/kick-project/kick/internal/resources/marshal"
 	"github.com/kick-project/kick/internal/resources/serialize"
 )
 
 // Init create repositories and templates
 type Init struct {
-	ErrHandler errs.HandlerIface `validate:"required"`
-	Stdout     io.Writer         `validate:"required"`
-	Stderr     io.Writer         `validate:"required"`
+	ErrHandler errs.HandlerIface  `validate:"required"`
+	Log        logger.OutputIface `validate:"required"`
 }
 
 // CreateRepo create repository
@@ -46,6 +45,12 @@ func (i *Init) CreateRepo(name, path string) int {
 	if i.ErrHandler.LogF(`can not create repo "%s": %v`, name, err) {
 		return 255
 	}
+
+	if path == "" {
+		i.Log.Printf(`generated %s`, `repo.yml`)
+	} else {
+		i.Log.Printf(`generated %s`, filepath.Join(path, `repo.yml`))
+	}
 	return 0
 }
 
@@ -73,6 +78,12 @@ func (i *Init) CreateTemplate(name, path string) int {
 	err = marshal.ToFile(tmpl, filepath.Join(wd, ".kick.yml"))
 	if i.ErrHandler.LogF(`can not create template "%s": %v`, name, err) {
 		return 255
+	}
+
+	if path == "" {
+		i.Log.Printf(`created %s`, `.kick.yml`)
+	} else {
+		i.Log.Printf(`created %s`, filepath.Join(path, `.kick.yml`))
 	}
 	return 0
 }

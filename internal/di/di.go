@@ -280,8 +280,7 @@ func (s *DI) MakeInit() *initialize.Init {
 	}
 	i := &initialize.Init{
 		ErrHandler: s.MakeErrorHandler(),
-		Stdout:     s.Stdout,
-		Stderr:     s.Stderr,
+		Log:        s.MakeLoggerOutput(""),
 	}
 	s.validate(i)
 	s.cacheInit = i
