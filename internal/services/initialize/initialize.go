@@ -20,10 +20,19 @@ type Init struct {
 }
 
 // CreateRepo create repository
-func (i *Init) CreateRepo(name string) int {
-	err := os.Mkdir(name, 0755)
-	if i.ErrHandler.LogF(`can not create repo "%s": %v`, name, err) {
-		return 255
+func (i *Init) CreateRepo(name, path string) int {
+	var (
+		wd  string
+		err error
+	)
+	if path != "" {
+		err = os.Mkdir(name, 0755)
+		if i.ErrHandler.LogF(`can not create repo "%s": %v`, name, err) {
+			return 255
+		}
+		wd = name
+	} else {
+		wd = "."
 	}
 
 	repo := &serialize.RepoMain{
@@ -33,7 +42,7 @@ func (i *Init) CreateRepo(name string) int {
 			`http://example.template.host/template.git`,
 		},
 	}
-	err = marshal.ToFile(repo, filepath.Join(name, "repo.yml"))
+	err = marshal.ToFile(repo, filepath.Join(wd, "repo.yml"))
 	if i.ErrHandler.LogF(`can not create repo "%s": %v`, name, err) {
 		return 255
 	}
@@ -41,17 +50,27 @@ func (i *Init) CreateRepo(name string) int {
 }
 
 // CreateTemplate create template
-func (i *Init) CreateTemplate(name string) int {
-	err := os.Mkdir(name, 0755)
-	if i.ErrHandler.LogF(`can not create repo "%s": %v`, name, err) {
-		return 255
+func (i *Init) CreateTemplate(name, path string) int {
+	var (
+		wd  string
+		err error
+	)
+	if path != "" {
+		err := os.Mkdir(name, 0755)
+		if i.ErrHandler.LogF(`can not create repo "%s": %v`, name, err) {
+			return 255
+		}
+		wd = name
+	} else {
+		wd, err = os.Getwd()
+		i.ErrHandler.FatalF(`can not find current directory: %v`, err)
 	}
 
 	tmpl := &serialize.TemplateMain{
 		Name: name,
 		Desc: fmt.Sprintf(`Template %s`, name),
 	}
-	err = marshal.ToFile(tmpl, filepath.Join(name, ".kick.yml"))
+	err = marshal.ToFile(tmpl, filepath.Join(wd, ".kick.yml"))
 	if i.ErrHandler.LogF(`can not create template "%s": %v`, name, err) {
 		return 255
 	}

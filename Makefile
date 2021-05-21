@@ -231,17 +231,17 @@ endif
 	cat goinstalls.txt | egrep -v '^#' | xargs -t -n1 go install
 
 .PHONY: bumpmajor
-bumpmajor: ## Version - major bump
+bumpmajor: ## Version ${major}.0.0 - major bump
 	git fetch --tags
 	versionbump --checktags major VERSION
 
 .PHONY: bumpminor
-bumpminor: ## Version - minor bump
+bumpminor: ## Version 0.${minor}.0 - minor bump
 	git fetch --tags
 	versionbump --checktags minor VERSION
 
 .PHONY: bumppatch
-bumppatch: ## Version - patch bump
+bumppatch: ## Version 0.0.${patch} - patch bump
 	git fetch --tags
 	versionbump --checktags patch VERSION
 

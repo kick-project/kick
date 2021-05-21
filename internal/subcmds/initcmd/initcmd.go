@@ -12,14 +12,15 @@ import (
 var UsageDoc = `Create a repo or template
 
 Usage:
-    kick init repo <name>
-    kick init template <name>
+    kick init repo <name> [<path>]
+    kick init template <name> [<path>]
 
 Options:
     -h --help    print help
     repo         create repository       
     template     create a template
     <name>       template or repo name
+	<path>       directory path. if not set creates files in working directory
 `
 
 // OptInit initialize configuration file
@@ -28,6 +29,7 @@ type OptInit struct {
 	Repo     bool   `docopt:"repo"`
 	Template bool   `docopt:"template"`
 	Name     string `docopt:"<name>"`
+	Path     string `docopt:"<path>"`
 }
 
 // Init install a template
@@ -37,9 +39,9 @@ func Init(args []string, inject *di.DI) int {
 	inst := inject.MakeInit()
 	switch {
 	case opts.Repo:
-		return inst.CreateRepo(opts.Name)
+		return inst.CreateRepo(opts.Name, opts.Path)
 	case opts.Template:
-		return inst.CreateTemplate(opts.Name)
+		return inst.CreateTemplate(opts.Name, opts.Path)
 	}
 	errs.Panic(errors.New(`Unknown error creating repo`))
 	return 255
