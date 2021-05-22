@@ -10,7 +10,7 @@ import (
 	"github.com/kick-project/kick/internal/resources/options"
 )
 
-var usageDoc = `Remove an installed template
+var UsageDoc = `Remove an installed template
 
 Usage:
     kick remove <handle>
@@ -29,7 +29,7 @@ type OptRemove struct {
 // Remove remove a template
 func Remove(args []string, inject *di.DI) int {
 	opts := &OptRemove{}
-	options.Bind(usageDoc, args, opts)
+	options.Bind(UsageDoc, args, opts)
 	if !opts.Remove {
 		errs.Panic(errors.New("Remove set to false"))
 		return 256
