@@ -20,7 +20,7 @@ Options:
     repo         create repository       
     template     create a template
     <name>       template or repo name
-	<path>       directory path. if not set creates files in working directory
+    <path>       directory path. if not set creates files in working directory
 `
 
 // OptInit initialize configuration file
