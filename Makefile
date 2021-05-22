@@ -92,6 +92,7 @@ test: ## Test
 	$(MAKE) cx
 	$(MAKE) cc
 	@# Combined the return codes of all the tests
+	@echo "Exit codes, unit tests: $$(cat reports/exitcode-unit.txt), golangci-lint: $$(cat reports/exitcode-golangci-lint.txt), golint: $$(reports/exitcode-golint.txt)"
 	@exit $$(( $$(cat reports/exitcode-unit.txt) + $$(cat reports/exitcode-golangci-lint.txt) + $$(cat reports/exitcode-golint.txt) ))
 
 .PHONY: goversion
