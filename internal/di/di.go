@@ -12,8 +12,11 @@ import (
 	"runtime"
 
 	"github.com/go-playground/validator"
+	"github.com/kick-project/kick/internal/di/callbacks"
 	"github.com/kick-project/kick/internal/env"
 	"github.com/kick-project/kick/internal/resources/check"
+	"github.com/kick-project/kick/internal/resources/client"
+	"github.com/kick-project/kick/internal/resources/client/plumb"
 	"github.com/kick-project/kick/internal/resources/config"
 	"github.com/kick-project/kick/internal/resources/errs"
 	"github.com/kick-project/kick/internal/resources/exit"
@@ -180,6 +183,28 @@ func (s *DI) validate(item interface{}) {
 }
 
 //
+// Callback Injectors
+//
+
+// CallMakePlumbRepo dependency injector
+func (s *DI) CallMakePlumbRepo() callbacks.MakePlumb {
+	fn := func(url, ref string) *plumb.Plumb {
+		p := plumb.New(s.PathTemplateDir, url, ref)
+		return p
+	}
+	return fn
+}
+
+// CallMakePlumbTemplate dependency injector
+func (s *DI) CallMakePlumbTemplate() callbacks.MakePlumb {
+	fn := func(url, ref string) *plumb.Plumb {
+		p := plumb.New(s.PathRepoDir, url, ref)
+		return p
+	}
+	return fn
+}
+
+//
 // Dependency Injectors
 //
 
@@ -253,6 +278,15 @@ func (s *DI) MakeCheck() *check.Check {
 	s.validate(chk)
 	s.cacheCheck = chk
 	return chk
+}
+
+// MakeClient dependency injector
+func (s *DI) MakeClient() *client.Client {
+	opts := &client.Options{
+		Err:    s.MakeErrorHandler(),
+		Stdout: s.Stdout,
+	}
+	return client.New(opts)
 }
 
 // MakeSetup dependency injector
@@ -398,15 +432,13 @@ func (s *DI) MakeRemove() *remove.Remove {
 
 // MakeRepo dependency injector
 func (s *DI) MakeRepo() *repo.Repo {
-	wd, err := os.Getwd()
-	errs.Panic(err)
-	r := &repo.Repo{
-		WD:         wd,
-		Plumb:      s.MakePlumbingTemplate(),
-		Validate:   s.MakeValidate(),
+	o := &repo.Options{
+		Client:     s.MakeClient(),
+		MakePlumb:  s.CallMakePlumbRepo(),
 		ErrHandler: s.MakeErrorHandler(),
 		Log:        s.MakeLoggerOutput(""),
 	}
+	r := repo.New(o)
 	return r
 }
 

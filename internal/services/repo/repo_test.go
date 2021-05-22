@@ -2,18 +2,12 @@ package repo_test
 
 import (
 	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
 	"testing"
 
-	"github.com/go-playground/validator"
-	"github.com/kick-project/kick/internal/resources/errs"
-	"github.com/kick-project/kick/internal/resources/exit"
-	"github.com/kick-project/kick/internal/resources/gitclient/plumbing"
-	"github.com/kick-project/kick/internal/resources/logger"
+	"github.com/kick-project/kick/internal/di"
 	"github.com/kick-project/kick/internal/resources/testtools"
-	"github.com/kick-project/kick/internal/services/repo"
 )
 
 func TestRepo_Build(t *testing.T) {
@@ -44,15 +38,13 @@ templates:
 		return
 	}
 
-	eh := &exit.Handler{Mode: exit.MPanic}
-	lgr := logger.New(os.Stderr, "", log.LstdFlags, logger.ErrorLevel, eh)
-	m := repo.Repo{
-		WD: dirPath,
-		Plumb: &plumbing.Plumbing{
-			Base: filepath.Join(testtools.TempDir(), "home", ".kick", "metadata"),
-		},
-		Validate:   validator.New(),
-		ErrHandler: errs.New(eh, lgr),
+	wd, err := os.Getwd()
+	if err != nil {
+		t.Error(err)
 	}
+	_ = os.Chdir(dirPath)
+	defer func() { _ = os.Chdir(wd) }()
+	inject := di.Setup(filepath.Join(testtools.TempDir(), "home"))
+	m := inject.MakeRepo()
 	m.Build()
 }
