@@ -86,8 +86,7 @@ func (d *Client) Clone(url, path string) {
 	_, err := os.Stat(path)
 	if os.IsNotExist(err) {
 		_, err := git.PlainClone(path, false, &git.CloneOptions{
-			URL:      url,
-			Progress: os.Stdout,
+			URL: url,
 		})
 		errs.FatalF("Can not clone %s: %v", url, err)
 	}
