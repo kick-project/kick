@@ -109,7 +109,8 @@ _unit: _test_setup ## Unit testing
 .PHONY: _cc
 _cc: _test_setup ## Code coverage
 	### Code Coverage
-	@go tool cover -func=./reports/coverage.out | tee ./reports/coverage.txt
+	@go-acc -o ./reports/coverage.out ./... > /dev/null
+	@go tool cover -func=./reports/coverage.out | tee reports/coverage.txt
 	@go tool cover -html=reports/coverage.out -o reports/html/coverage.html
 
 .PHONY: _cx
