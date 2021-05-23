@@ -9,10 +9,10 @@ import (
 	"time"
 
 	"github.com/jinzhu/copier"
+	"github.com/kick-project/kick/internal/di/callbacks"
+	"github.com/kick-project/kick/internal/resources/client"
 	"github.com/kick-project/kick/internal/resources/config"
 	"github.com/kick-project/kick/internal/resources/errs"
-	"github.com/kick-project/kick/internal/resources/gitclient"
-	"github.com/kick-project/kick/internal/resources/gitclient/plumbing"
 	"github.com/kick-project/kick/internal/resources/logger"
 	"github.com/kick-project/kick/internal/resources/marshal"
 	"github.com/kick-project/kick/internal/resources/model"
@@ -24,14 +24,44 @@ import (
 
 // Sync synchronize database tables
 type Sync struct {
-	ORM                *gorm.DB               `validate:"required"`
-	Config             *config.File           `validate:"required"`
-	ConfigTemplatePath string                 `validate:"required"`
-	Log                logger.OutputIface     `validate:"required"`
-	PlumbTemplates     plumbing.PlumbingIface `validate:"required"`
-	PlumbRepo          plumbing.PlumbingIface `validate:"required"`
-	Stderr             io.Writer              `validate:"required"`
-	Stdout             io.Writer              `validate:"required"`
+	client             *client.Client
+	orm                *gorm.DB
+	config             *config.File
+	configTemplatePath string
+	log                logger.OutputIface
+	makePlumbRepo      callbacks.MakePlumb
+	makePlumbTemplate  callbacks.MakePlumb
+	stderr             io.Writer
+	stdout             io.Writer
+}
+
+// Options options to constructor
+type Options struct {
+	Client             *client.Client      `validate:"required"`
+	Config             *config.File        `validate:"required"`
+	ConfigTemplatePath string              `validate:"required"`
+	Log                logger.OutputIface  `validate:"required"`
+	MakePlumbRepo      callbacks.MakePlumb `validate:"required"`
+	MakePlumbTemplate  callbacks.MakePlumb `validate:"required"`
+	ORM                *gorm.DB            `validate:"required"`
+	Stderr             io.Writer           `validate:"required"`
+	Stdout             io.Writer           `validate:"required"`
+}
+
+// New construct Sync object
+func New(opts *Options) *Sync {
+	return &Sync{
+		client:             opts.Client,
+		config:             opts.Config,
+		configTemplatePath: opts.ConfigTemplatePath,
+		log:                opts.Log,
+		makePlumbRepo:      opts.MakePlumbRepo,
+		makePlumbTemplate:  opts.MakePlumbTemplate,
+		orm:                opts.ORM,
+		stderr:             opts.Stderr,
+		stdout:             opts.Stdout,
+	}
+
 }
 
 // Repo syncs repo data
@@ -41,15 +71,15 @@ func (s *Sync) Repo() {
 }
 
 func (s *Sync) processRepos() (repos []*model.Repo) {
-	rows, err := s.ORM.Model(&model.Repo{}).Rows()
+	rows, err := s.orm.Model(&model.Repo{}).Rows()
 	errs.Panic(err)
 
 	defer rows.Close()
 	for rows.Next() {
 		var repo model.Repo
-		err := s.ORM.ScanRows(rows, &repo)
+		err := s.orm.ScanRows(rows, &repo)
 		if err != nil {
-			fmt.Fprintf(s.Stderr, "warning. can not scan table row from `global`: %v\n", err)
+			fmt.Fprintf(s.stderr, "warning. can not scan table row from `repo`: %v\n", err)
 		}
 
 		if repo.URL == "none" {
@@ -78,11 +108,11 @@ func (s *Sync) processTemplates(repos []*model.Repo) {
 		if errs.LogF("Can not copy object: %v", err) {
 			continue
 		}
-		result := s.ORM.Clauses(clauses.OrIgnore).Create(&repo)
+		result := s.orm.Clauses(clauses.OrIgnore).Create(&repo)
 		if errs.LogF("Can not insert into repo: %v", result.Error) {
 			continue
 		} else if result.RowsAffected == 0 {
-			result2 := s.ORM.Model(&model.Repo{}).Updates(&repo)
+			result2 := s.orm.Model(&model.Repo{}).Updates(&repo)
 			if errs.LogF("Can not update repo table: %v", result2.Error) {
 				continue
 			} else if result2.RowsAffected == 0 {
@@ -97,11 +127,12 @@ func (s *Sync) processTemplates(repos []*model.Repo) {
 
 // downloadRepo downloads repo repo
 func (s *Sync) downloadRepo(url string) (path string, err error) {
-	path, err = gitclient.Get(url, s.PlumbRepo)
+	p := s.makePlumbRepo(url, "")
+	err = s.client.GetPlumb(p)
 	if errs.LogF("warning. can not download %s: %v\n", url, err) {
 		return
 	}
-
+	path = p.Path()
 	return
 }
 
@@ -138,7 +169,7 @@ func (s *Sync) loadTemplates(repo *model.Repo, templatedir string) {
 
 		templateModel.Repo = append(templateModel.Repo, *repo)
 
-		result := s.ORM.Clauses(clauses.OrReplace).Create(&templateModel)
+		result := s.orm.Clauses(clauses.OrReplace).Create(&templateModel)
 		if errs.LogF("Can not load template file \"%s\" into database: %v", match, result.Error) {
 			continue
 		}
@@ -150,14 +181,15 @@ func (s *Sync) loadTemplates(repo *model.Repo, templatedir string) {
 func (s *Sync) Files() {
 	key := "installed"
 	// Reload configuration incase the file changed after creation of self.
-	err := s.Config.Load()
+	err := s.config.Load()
 	errs.Panic(err)
 	t := time.Now()
 	ts := t.Format("2006-01-02T15:04:05")
-	for _, item := range s.Config.Templates {
-		_, err := gitclient.Get(item.URL, s.PlumbTemplates)
+	for _, item := range s.config.Templates {
+		p := s.makePlumbTemplate(item.URL, "")
+		err := s.client.GetPlumb(p)
 		if err != nil {
-			fmt.Fprintf(s.Stderr, "warning. can not download %s: %s\n", item.URL, err.Error())
+			fmt.Fprintf(s.stderr, "warning. can not download %s: %s\n", item.URL, err.Error())
 		}
 		inst := model.Installed{
 			Handle:   item.Handle,
@@ -167,21 +199,21 @@ func (s *Sync) Files() {
 			Desc:     item.Desc,
 			Time:     t,
 		}
-		result := s.ORM.Clauses(clause.Insert{Modifier: "OR REPLACE"}).Create(&inst)
+		result := s.orm.Clauses(clause.Insert{Modifier: "OR REPLACE"}).Create(&inst)
 		errs.Panic(result.Error)
 		if result.RowsAffected != 1 {
 			panic("failed to insert into 'installed' table")
 		}
 	}
 
-	result := s.ORM.Raw(`DELETE FROM installed WHERE time < ?`, ts)
+	result := s.orm.Raw(`DELETE FROM installed WHERE time < ?`, ts)
 	errs.Panic(result.Error)
 
 	syn := model.Sync{
 		Key:        key,
 		LastUpdate: t,
 	}
-	result = s.ORM.Clauses(clause.Insert{Modifier: "OR REPLACE"}).Create(&syn)
+	result = s.orm.Clauses(clause.Insert{Modifier: "OR REPLACE"}).Create(&syn)
 	errs.Panic(result.Error)
 	if result.RowsAffected != 1 {
 		panic("failed to insert into 'sync' table")

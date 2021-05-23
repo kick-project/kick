@@ -189,7 +189,7 @@ func (s *DI) validate(item interface{}) {
 // CallMakePlumbRepo dependency injector
 func (s *DI) CallMakePlumbRepo() callbacks.MakePlumb {
 	fn := func(url, ref string) *plumb.Plumb {
-		p := plumb.New(s.PathTemplateDir, url, ref)
+		p := plumb.New(s.PathRepoDir, url, ref)
 		return p
 	}
 	return fn
@@ -198,7 +198,7 @@ func (s *DI) CallMakePlumbRepo() callbacks.MakePlumb {
 // CallMakePlumbTemplate dependency injector
 func (s *DI) CallMakePlumbTemplate() callbacks.MakePlumb {
 	fn := func(url, ref string) *plumb.Plumb {
-		p := plumb.New(s.PathRepoDir, url, ref)
+		p := plumb.New(s.PathTemplateDir, url, ref)
 		return p
 	}
 	return fn
@@ -460,16 +460,18 @@ func (s *DI) MakeSync() *sync.Sync {
 	if s.cacheSync != nil {
 		return s.cacheSync
 	}
-	syn := &sync.Sync{
-		ORM:                s.MakeORM(),
+	o := &sync.Options{
+		Client:             s.MakeClient(),
 		Config:             s.ConfigFile(),
 		ConfigTemplatePath: s.PathTemplateConf,
 		Log:                s.MakeLoggerOutput(""),
-		PlumbRepo:          s.MakePlumbingRepo(),
-		PlumbTemplates:     s.MakePlumbingTemplate(),
+		MakePlumbRepo:      s.CallMakePlumbRepo(),
+		MakePlumbTemplate:  s.CallMakePlumbTemplate(),
+		ORM:                s.MakeORM(),
 		Stderr:             s.Stderr,
 		Stdout:             s.Stdout,
 	}
+	syn := sync.New(o)
 	s.cacheSync = syn
 	return syn
 }

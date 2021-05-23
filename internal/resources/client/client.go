@@ -1,6 +1,7 @@
 package client
 
 import (
+	"fmt"
 	"io"
 	"os"
 
@@ -39,12 +40,19 @@ func New(opts *Options) *Client {
 // Get get url and clone/sync to path using ref.
 // Defaults to default branch if ref is nil.
 func (c *Client) Get(url, path, ref string) error {
+	c.Sync(url, path, ref)
 	return nil
 }
 
 // GetPlumb same as get but url, path and ref are fetch from plumb.Plumb
 func (c *Client) GetPlumb(p *plumb.Plumb) error {
-	return c.Get(p.URL(), p.Path(), p.Ref())
+	switch p.Method() {
+	case plumb.NOOP:
+		return nil
+	case plumb.SYNC:
+		return c.Get(p.URL(), p.Path(), p.Ref())
+	}
+	return fmt.Errorf(`Unrecognized  method %d`, p.Method())
 }
 
 // Sync will download/synchronize with the upstream git repo
