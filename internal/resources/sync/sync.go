@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/jinzhu/copier"
-	"github.com/kick-project/kick/internal/di/callbacks"
 	"github.com/kick-project/kick/internal/resources/client"
 	"github.com/kick-project/kick/internal/resources/config"
 	"github.com/kick-project/kick/internal/resources/errs"
@@ -29,23 +28,19 @@ type Sync struct {
 	config             *config.File
 	configTemplatePath string
 	log                logger.OutputIface
-	makePlumbRepo      callbacks.MakePlumb
-	makePlumbTemplate  callbacks.MakePlumb
 	stderr             io.Writer
 	stdout             io.Writer
 }
 
 // Options options to constructor
 type Options struct {
-	Client             *client.Client      `validate:"required"`
-	Config             *config.File        `validate:"required"`
-	ConfigTemplatePath string              `validate:"required"`
-	Log                logger.OutputIface  `validate:"required"`
-	MakePlumbRepo      callbacks.MakePlumb `validate:"required"`
-	MakePlumbTemplate  callbacks.MakePlumb `validate:"required"`
-	ORM                *gorm.DB            `validate:"required"`
-	Stderr             io.Writer           `validate:"required"`
-	Stdout             io.Writer           `validate:"required"`
+	Client             *client.Client     `validate:"required"`
+	Config             *config.File       `validate:"required"`
+	ConfigTemplatePath string             `validate:"required"`
+	Log                logger.OutputIface `validate:"required"`
+	ORM                *gorm.DB           `validate:"required"`
+	Stderr             io.Writer          `validate:"required"`
+	Stdout             io.Writer          `validate:"required"`
 }
 
 // New construct Sync object
@@ -55,8 +50,6 @@ func New(opts *Options) *Sync {
 		config:             opts.Config,
 		configTemplatePath: opts.ConfigTemplatePath,
 		log:                opts.Log,
-		makePlumbRepo:      opts.MakePlumbRepo,
-		makePlumbTemplate:  opts.MakePlumbTemplate,
 		orm:                opts.ORM,
 		stderr:             opts.Stderr,
 		stdout:             opts.Stdout,
@@ -127,8 +120,7 @@ func (s *Sync) processTemplates(repos []*model.Repo) {
 
 // downloadRepo downloads repo repo
 func (s *Sync) downloadRepo(url string) (path string, err error) {
-	p := s.makePlumbRepo(url, "")
-	err = s.client.GetPlumb(p)
+	p, err := s.client.GetRepo(url, "")
 	if errs.LogF("warning. can not download %s: %v\n", url, err) {
 		return
 	}
@@ -186,8 +178,7 @@ func (s *Sync) Files() {
 	t := time.Now()
 	ts := t.Format("2006-01-02T15:04:05")
 	for _, item := range s.config.Templates {
-		p := s.makePlumbTemplate(item.URL, "")
-		err := s.client.GetPlumb(p)
+		_, err := s.client.GetTemplate(item.URL, "")
 		if err != nil {
 			fmt.Fprintf(s.stderr, "warning. can not download %s: %s\n", item.URL, err.Error())
 		}

@@ -410,7 +410,6 @@ func (s *DI) MakeRemove() *remove.Remove {
 func (s *DI) MakeRepo() *repo.Repo {
 	o := &repo.Options{
 		Client:     s.MakeClient(),
-		MakePlumb:  s.CallMakePlumbRepo(),
 		ErrHandler: s.MakeErrorHandler(),
 		Log:        s.MakeLoggerOutput(""),
 	}
@@ -441,8 +440,6 @@ func (s *DI) MakeSync() *sync.Sync {
 		Config:             s.ConfigFile(),
 		ConfigTemplatePath: s.PathTemplateConf,
 		Log:                s.MakeLoggerOutput(""),
-		MakePlumbRepo:      s.CallMakePlumbRepo(),
-		MakePlumbTemplate:  s.CallMakePlumbTemplate(),
 		ORM:                s.MakeORM(),
 		Stderr:             s.Stderr,
 		Stdout:             s.Stdout,

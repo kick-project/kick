@@ -7,7 +7,6 @@ import (
 
 	"github.com/go-playground/validator"
 	"github.com/jinzhu/copier"
-	"github.com/kick-project/kick/internal/di/callbacks"
 	"github.com/kick-project/kick/internal/resources/client"
 	"github.com/kick-project/kick/internal/resources/errs"
 	"github.com/kick-project/kick/internal/resources/logger"
@@ -17,19 +16,17 @@ import (
 
 // Repo build a repository repo
 type Repo struct {
-	client     *client.Client      // Git client
-	makePlumb  callbacks.MakePlumb // Dependency Injector
-	serialized serialize.RepoMain  // Serialized config
-	errs       errs.HandlerIface   // Error handler
-	log        logger.OutputIface  // Logger
+	client     *client.Client     // Git client
+	serialized serialize.RepoMain // Serialized config
+	errs       errs.HandlerIface  // Error handler
+	log        logger.OutputIface // Logger
 }
 
 // Options options for New
 type Options struct {
-	Client     *client.Client      `validate:"required"` // Git client
-	MakePlumb  callbacks.MakePlumb `validate:"required"` // Dependency Injector
-	ErrHandler errs.HandlerIface   `validate:"required"` // Error handler
-	Log        logger.OutputIface  `validate:"required"` // Logger
+	Client     *client.Client     `validate:"required"` // Git client
+	ErrHandler errs.HandlerIface  `validate:"required"` // Error handler
+	Log        logger.OutputIface `validate:"required"` // Logger
 }
 
 // New construct a Repo object
@@ -39,10 +36,9 @@ func New(opts *Options) *Repo {
 		panic(err)
 	}
 	r := &Repo{
-		client:    opts.Client,
-		makePlumb: opts.MakePlumb,
-		errs:      opts.ErrHandler,
-		log:       opts.Log,
+		client: opts.Client,
+		errs:   opts.ErrHandler,
+		log:    opts.Log,
 	}
 	return r
 }
@@ -83,8 +79,7 @@ func (m *Repo) download() {
 		}
 
 		// Get URL
-		plumb := m.makePlumb(url, "")
-		err = m.client.GetPlumb(plumb)
+		plumb, err := m.client.GetRepo(url, "")
 		if m.errs.LogF("Can not download \"%s\": %v", url, err) {
 			continue
 		}
