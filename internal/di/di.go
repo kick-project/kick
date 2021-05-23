@@ -328,17 +328,18 @@ func (s *DI) MakeInstall() *install.Install {
 	if s.cacheInstall != nil {
 		return s.cacheInstall
 	}
-	i := &install.Install{
+	o := &install.Options{
+		Client:     s.MakeClient(),
 		ConfigFile: s.ConfigFile(),
 		ORM:        s.MakeORM(),
 		Err:        s.MakeErrorHandler(),
 		Log:        s.MakeLoggerOutput(""),
-		Plumb:      s.MakePlumbingTemplate(),
 		Stderr:     s.Stderr,
 		Stdin:      s.Stdin,
 		Stdout:     s.Stdout,
 		Sync:       s.MakeSync(),
 	}
+	i := install.New(o)
 	s.cacheInstall = i
 	return i
 }

@@ -10,11 +10,10 @@ import (
 	"regexp"
 	"strconv"
 
+	"github.com/kick-project/kick/internal/resources/client"
 	"github.com/kick-project/kick/internal/resources/config"
 	"github.com/kick-project/kick/internal/resources/errs"
 	"github.com/kick-project/kick/internal/resources/file"
-	"github.com/kick-project/kick/internal/resources/gitclient"
-	"github.com/kick-project/kick/internal/resources/gitclient/plumbing"
 	"github.com/kick-project/kick/internal/resources/logger"
 	"github.com/kick-project/kick/internal/resources/parse"
 	"github.com/kick-project/kick/internal/resources/sync"
@@ -23,15 +22,43 @@ import (
 
 // Install manage installation of templates
 type Install struct {
-	ConfigFile *config.File           `validate:"required"`
-	ORM        *gorm.DB               `validate:"required"`
-	Log        logger.OutputIface     `validate:"required"`
-	Err        *errs.Handler          `validate:"required"`
-	Plumb      plumbing.PlumbingIface `validate:"required"`
-	Stderr     io.Writer              `validate:"required"`
-	Stdin      io.Reader              `validate:"required"`
-	Stdout     io.Writer              `validate:"required"`
-	Sync       sync.SyncIface         `validate:"required"`
+	client     *client.Client
+	ConfigFile *config.File
+	ORM        *gorm.DB
+	Log        logger.OutputIface
+	Err        *errs.Handler
+	Stderr     io.Writer
+	Stdin      io.Reader
+	Stdout     io.Writer
+	Sync       sync.SyncIface
+}
+
+// Options options to constructor
+type Options struct {
+	Client     *client.Client     `validate:"required"`
+	ConfigFile *config.File       `validate:"required"`
+	ORM        *gorm.DB           `validate:"required"`
+	Log        logger.OutputIface `validate:"required"`
+	Err        *errs.Handler      `validate:"required"`
+	Stderr     io.Writer          `validate:"required"`
+	Stdin      io.Reader          `validate:"required"`
+	Stdout     io.Writer          `validate:"required"`
+	Sync       sync.SyncIface     `validate:"required"`
+}
+
+// New constructor
+func New(opts *Options) *Install {
+	return &Install{
+		client:     opts.Client,
+		ConfigFile: opts.ConfigFile,
+		ORM:        opts.ORM,
+		Log:        opts.Log,
+		Err:        opts.Err,
+		Stderr:     opts.Stderr,
+		Stdin:      opts.Stdin,
+		Stdout:     opts.Stdout,
+		Sync:       opts.Sync,
+	}
 }
 
 var selectWithOrigin = `
@@ -255,7 +282,10 @@ func (i *Install) createEntry(handle string, entry config.Template) {
 
 // getRepo get version control system repository or set a location to a template.
 // returns the local path location.
-func (i *Install) getRepo(url string) (path string, err error) {
-	path, err = gitclient.Get(url, i.Plumb)
-	return
+func (i *Install) getRepo(url string) (string, error) {
+	p, err := i.client.GetRepo(url, "")
+	if err != nil {
+		return "", err
+	}
+	return p.Path(), err
 }
