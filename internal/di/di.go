@@ -20,7 +20,6 @@ import (
 	"github.com/kick-project/kick/internal/resources/config"
 	"github.com/kick-project/kick/internal/resources/errs"
 	"github.com/kick-project/kick/internal/resources/exit"
-	"github.com/kick-project/kick/internal/resources/gitclient/plumbing"
 	"github.com/kick-project/kick/internal/resources/logger"
 	"github.com/kick-project/kick/internal/resources/sync"
 	"github.com/kick-project/kick/internal/resources/template"
@@ -73,23 +72,21 @@ type DI struct {
 	Stdout           io.Writer
 
 	// Cached objects
-	cacheConfigFile       *config.File
-	cacheORM              *gorm.DB
-	cacheErrHandler       *errs.Handler
-	cacheExitHandler      *exit.Handler
-	cacheCheck            *check.Check
-	cacheSetup            *setup.Setup
-	cacheList             *list.List
-	cacheLogFile          *os.File
-	cacheInit             *initialize.Init
-	cacheInstall          *install.Install
-	cachePlumbingRepo     *plumbing.Plumbing
-	cachePlumbingTemplate *plumbing.Plumbing
-	cacheRemove           *remove.Remove
-	cacheSearch           *search.Search
-	cacheSync             *sync.Sync
-	cacheTemplate         *template.Template
-	cacheUpdate           *update.Update
+	cacheConfigFile  *config.File
+	cacheORM         *gorm.DB
+	cacheErrHandler  *errs.Handler
+	cacheExitHandler *exit.Handler
+	cacheCheck       *check.Check
+	cacheSetup       *setup.Setup
+	cacheList        *list.List
+	cacheLogFile     *os.File
+	cacheInit        *initialize.Init
+	cacheInstall     *install.Install
+	cacheRemove      *remove.Remove
+	cacheSearch      *search.Search
+	cacheSync        *sync.Sync
+	cacheTemplate    *template.Template
+	cacheUpdate      *update.Update
 }
 
 // Setup get di using the supplied "home" directory option. Any
@@ -391,30 +388,6 @@ func (s *DI) MakeLogFile() *os.File {
 	return f
 }
 
-// MakePlumbingRepo injects di for plumbing.Plumb
-func (s *DI) MakePlumbingRepo() *plumbing.Plumbing {
-	if s.cachePlumbingRepo != nil {
-		return s.cachePlumbingRepo
-	}
-	p := &plumbing.Plumbing{
-		Base: s.PathRepoDir,
-	}
-	s.cachePlumbingRepo = p
-	return p
-}
-
-// MakePlumbingTemplate injects di for plumbing.Plumb
-func (s *DI) MakePlumbingTemplate() *plumbing.Plumbing {
-	if s.cachePlumbingTemplate != nil {
-		return s.cachePlumbingTemplate
-	}
-	p := &plumbing.Plumbing{
-		Base: s.PathTemplateDir,
-	}
-	s.cachePlumbingTemplate = p
-	return p
-}
-
 // MakeRemove dependency injector
 func (s *DI) MakeRemove() *remove.Remove {
 	if s.cacheRemove != nil {
@@ -512,12 +485,14 @@ func (s *DI) MakeUpdate() *update.Update {
 	if s.cacheUpdate != nil {
 		return s.cacheUpdate
 	}
-	u := &update.Update{
+	o := &update.Options{
+		Client:      s.MakeClient(),
 		ConfigFile:  s.ConfigFile(),
 		ORM:         s.MakeORM(),
 		Log:         s.MakeLoggerOutput(""),
 		MetadataDir: s.PathMetadataDir,
 	}
+	u := update.New(o)
 	s.cacheUpdate = u
 	return u
 }

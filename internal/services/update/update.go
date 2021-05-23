@@ -5,10 +5,9 @@ import (
 	"path/filepath"
 	"sync"
 
+	"github.com/kick-project/kick/internal/resources/client"
 	"github.com/kick-project/kick/internal/resources/config"
 	"github.com/kick-project/kick/internal/resources/errs"
-	"github.com/kick-project/kick/internal/resources/gitclient"
-	"github.com/kick-project/kick/internal/resources/gitclient/plumbing"
 	"github.com/kick-project/kick/internal/resources/logger"
 	"github.com/kick-project/kick/internal/resources/marshal"
 	"github.com/kick-project/kick/internal/resources/model"
@@ -19,26 +18,47 @@ import (
 
 // Update build metadata
 type Update struct {
+	client      *client.Client
+	configFile  *config.File       `validate:"required"`
+	orm         *gorm.DB           `validate:"required"`
+	log         logger.OutputIface `validate:"required"`
+	metadataDir string             `validate:"required"`
+}
+
+// Options constructor options
+type Options struct {
+	Client      *client.Client     `validate:"required"`
 	ConfigFile  *config.File       `validate:"required"`
 	ORM         *gorm.DB           `validate:"required"`
 	Log         logger.OutputIface `validate:"required"`
 	MetadataDir string             `validate:"required"`
 }
 
+// New constructor
+func New(opts *Options) *Update {
+	return &Update{
+		client:      opts.Client,
+		configFile:  opts.ConfigFile,
+		orm:         opts.ORM,
+		log:         opts.Log,
+		metadataDir: opts.MetadataDir,
+	}
+}
+
 // Build metadata. Conf defaults to globals.Config if Conf is nil.
 func (m *Update) Build() error {
-	conf := m.ConfigFile
+	conf := m.configFile
 
 	c := workers{
-		wait: &sync.WaitGroup{},
-		log:  m.Log,
+		client: m.client,
+		wait:   &sync.WaitGroup{},
+		log:    m.log,
 	}
 
 	churl := make(chan string, 64)
 	chtemplates := make(chan *Template, 64)
-	p := plumbing.New(m.MetadataDir)
-	c.concurClones(6, p, churl, chtemplates)
-	c.concurInserts(m.ORM, chtemplates)
+	c.concurClones(6, churl, chtemplates)
+	c.concurInserts(m.orm, chtemplates)
 
 	for _, url := range conf.RepoURLs {
 		c.wait.Add(1)
@@ -52,13 +72,14 @@ func (m *Update) Build() error {
 }
 
 type workers struct {
-	log  logger.OutputIface
-	wait *sync.WaitGroup
+	client *client.Client
+	log    logger.OutputIface
+	wait   *sync.WaitGroup
 }
 
 // concurClones concurrent cloning of git repositories.
 // where num is the number of concurrent downloads, churl is a string url and tchan is a channel of resulting templates.
-func (c *workers) concurClones(num int, p *plumbing.Plumbing, churl <-chan string, tchan chan<- *Template) {
+func (c *workers) concurClones(num int, churl <-chan string, tchan chan<- *Template) {
 	for i := 0; i < num; i++ {
 		go func() {
 			for {
@@ -67,7 +88,7 @@ func (c *workers) concurClones(num int, p *plumbing.Plumbing, churl <-chan strin
 				case !ok:
 					return
 				default:
-					c.processURL(url, p, tchan)
+					c.processURL(url, tchan)
 					c.wait.Done()
 				}
 			}
@@ -75,11 +96,12 @@ func (c *workers) concurClones(num int, p *plumbing.Plumbing, churl <-chan strin
 	}
 }
 
-func (c *workers) processURL(url string, p *plumbing.Plumbing, chtemplate chan<- *Template) {
-	localpath, err := gitclient.Get(url, p)
+func (c *workers) processURL(url string, chtemplate chan<- *Template) {
+	p, err := c.client.GetTemplate(url, "")
 	if errs.LogF("error: cloning repository: %w: skipping %s", err, url) {
 		return
 	}
+	localpath := p.Path()
 
 	mpath := filepath.Clean(fmt.Sprintf("%s/repo.yml", localpath))
 	if errs.LogF("error: can not open %s: %w: skipping %s", mpath, err, url) {
