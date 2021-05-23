@@ -8,20 +8,25 @@ import (
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-playground/validator"
+	"github.com/kick-project/kick/internal/di/callbacks"
 	"github.com/kick-project/kick/internal/resources/client/plumb"
 	"github.com/kick-project/kick/internal/resources/errs"
 )
 
 // Client
 type Client struct {
-	err    errs.HandlerIface
-	stdout io.Writer
+	err            errs.HandlerIface
+	stdout         io.Writer
+	plumbRepos     callbacks.MakePlumb
+	plumbTemplates callbacks.MakePlumb
 }
 
 // Options for New function
 type Options struct {
-	Err    errs.HandlerIface `validate:"required"`
-	Stdout io.Writer         `validate:"required"`
+	Err                errs.HandlerIface   `validate:"required"`
+	Stdout             io.Writer           `validate:"required"`
+	CallPlumbRepos     callbacks.MakePlumb `validate:"required"`
+	CallPlumbTemplates callbacks.MakePlumb `validate:"required"`
 }
 
 // New Client constructor
@@ -32,8 +37,10 @@ func New(opts *Options) *Client {
 		panic(err)
 	}
 	return &Client{
-		err:    opts.Err,
-		stdout: opts.Stdout,
+		err:            opts.Err,
+		stdout:         opts.Stdout,
+		plumbRepos:     opts.CallPlumbRepos,
+		plumbTemplates: opts.CallPlumbTemplates,
 	}
 }
 
@@ -53,6 +60,18 @@ func (c *Client) GetPlumb(p *plumb.Plumb) error {
 		return c.Get(p.URL(), p.Path(), p.Ref())
 	}
 	return fmt.Errorf(`Unrecognized  method %d`, p.Method())
+}
+
+// GetTemplate fetch template and store in template store
+func (c *Client) GetTemplate(url, ref string) (*plumb.Plumb, error) {
+	p := c.plumbTemplates(url, ref)
+	return p, c.GetPlumb(p)
+}
+
+// GetRepo fetch repo and store in repo store
+func (c *Client) GetRepo(url, ref string) (*plumb.Plumb, error) {
+	p := c.plumbRepos(url, ref)
+	return p, c.GetPlumb(p)
 }
 
 // Sync will download/synchronize with the upstream git repo

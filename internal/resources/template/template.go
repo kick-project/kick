@@ -13,12 +13,12 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/go-playground/validator"
+	"github.com/kick-project/kick/internal/resources/client"
 	"github.com/kick-project/kick/internal/resources/config"
 	"github.com/kick-project/kick/internal/resources/errs"
 	"github.com/kick-project/kick/internal/resources/exit"
 	"github.com/kick-project/kick/internal/resources/file"
-	"github.com/kick-project/kick/internal/resources/gitclient"
-	plumb "github.com/kick-project/kick/internal/resources/gitclient/plumbing"
 	"github.com/kick-project/kick/internal/resources/logger"
 	"github.com/kick-project/kick/internal/resources/marshal"
 	"github.com/kick-project/kick/internal/resources/template/renderer"
@@ -36,57 +36,105 @@ const (
 
 // Template the template itself
 type Template struct {
-	Config         *config.File                 `validate:"required"`
-	Errs           *errs.Handler                `validate:"required"`
-	Exit           *exit.Handler                `validate:"required"`
-	Log            logger.OutputIface           `validate:"required"`
-	ModeLineLen    uint8                        `validate:"required"`
-	RenderCurrent  string                       `validate:"required"`
-	RenderersAvail map[string]renderer.Renderer `validate:"required"`
-	Stderr         io.Writer                    `validate:"required"`
-	Stdout         io.Writer                    `validate:"required"`
-	TemplateDir    string                       `validate:"required"`
-	Variables      *variables.Variables         `validate:"required"`
+	client         *client.Client
+	config         *config.File
+	errs           *errs.Handler
+	exit           *exit.Handler
+	log            logger.OutputIface
+	modeLineLen    uint8
+	renderCurrent  string
+	renderersAvail map[string]renderer.Renderer
+	stderr         io.Writer
+	stdout         io.Writer
+	templateDir    string
+	vars           *variables.Variables
 	builddir       string
 	dest           string
 	localpath      string
 	src            string
 }
 
+// Options options to constructor
+type Options struct {
+	Client         *client.Client               `validate:"required"`
+	Config         *config.File                 `validate:"required"`
+	Errs           *errs.Handler                `validate:"required"`
+	Exit           *exit.Handler                `validate:"required"`
+	Log            logger.OutputIface           `validate:"required"`
+	RenderCurrent  string                       `validate:"required"`
+	RenderersAvail map[string]renderer.Renderer `validate:"required"`
+	Stderr         io.Writer                    `validate:"required"`
+	Stdout         io.Writer                    `validate:"required"`
+	TemplateDir    string                       `validate:"required"`
+	Variables      *variables.Variables         `validate:"required"`
+	ModeLineLen    uint8
+}
+
+// New *Template constructor
+func New(opts *Options) *Template {
+	var (
+		modeLineLen uint8
+		err         error
+	)
+	err = validator.New().Struct(opts)
+	if err != nil {
+		panic(err)
+	}
+	if opts.ModeLineLen == 0 {
+		modeLineLen = 5
+	} else {
+		modeLineLen = opts.ModeLineLen
+	}
+	return &Template{
+		client:         opts.Client,
+		config:         opts.Config,
+		errs:           opts.Errs,
+		exit:           opts.Exit,
+		log:            opts.Log,
+		modeLineLen:    modeLineLen,
+		renderCurrent:  opts.RenderCurrent,
+		renderersAvail: opts.RenderersAvail,
+		stderr:         opts.Stderr,
+		stdout:         opts.Stdout,
+		templateDir:    opts.TemplateDir,
+		vars:           opts.Variables,
+	}
+}
+
 // SetRender set rendering engine
 func (t *Template) SetRender(renderer string) {
 	if renderer == "" {
-		t.Log.Error("No renderer provided\n")
+		t.log.Error("No renderer provided\n")
 		exit.Exit(255)
 	}
 
-	if _, ok := t.RenderersAvail[t.RenderCurrent]; !ok {
-		t.Log.Errorf("No such renderer %s. Valid options are...\n", t.RenderCurrent)
-		for r := range t.RenderersAvail {
-			fmt.Fprintln(t.Stdout, r)
+	if _, ok := t.renderersAvail[t.renderCurrent]; !ok {
+		t.log.Errorf("No such renderer %s. Valid options are...\n", t.renderCurrent)
+		for r := range t.renderersAvail {
+			fmt.Fprintln(t.stdout, r)
 		}
-		t.Exit.Exit(255)
+		t.exit.Exit(255)
 	}
-	t.RenderCurrent = renderer
+	t.renderCurrent = renderer
 }
 
 func (t *Template) renderer() renderer.Renderer {
-	if t.RenderCurrent == "" {
+	if t.renderCurrent == "" {
 		panic("no render")
 	}
 
-	render, ok := t.RenderersAvail[t.RenderCurrent]
+	render, ok := t.renderersAvail[t.renderCurrent]
 	if ok {
 		return render
 	}
-	t.Log.Printf("No such renderer %s\n", t.RenderCurrent)
-	t.Exit.Exit(255)
+	t.log.Printf("No such renderer %s\n", t.renderCurrent)
+	t.exit.Exit(255)
 	return nil
 }
 
 func (t *Template) buildDir(id string) {
 	d, err := ioutil.TempDir(os.Getenv("TEMP"), fmt.Sprintf("kick-%s-", id))
-	errs.PanicF("build error: %v", err)
+	t.errs.PanicF("build error: %v", err)
 	t.builddir = d
 }
 
@@ -102,27 +150,26 @@ func (t *Template) SetSrcDest(src, dest string) {
 func (t *Template) SetSrc(name string) {
 	t.buildDir(name)
 	var tmpl config.Template
-	for _, tconf := range t.Config.Templates {
+	for _, tconf := range t.config.Templates {
 		if tconf.Handle == name {
 			tmpl = tconf
 			break
 		}
 	}
-	g := plumb.New(t.TemplateDir)
-	localpath, err := gitclient.Get(tmpl.URL, g)
-
-	t.Errs.FatalF(`template "%s" not found: %v`, name, err)
+	p, err := t.client.GetTemplate(tmpl.URL, "")
+	t.errs.FatalF(`template "%s" not found: %v`, name, err)
+	localpath := p.Path()
 
 	// Set renderer from conf
 	confPath := filepath.Join(localpath, ".kick.yml")
 	t.loadTempateConf(confPath)
 
 	stat, err := os.Stat(localpath)
-	t.Errs.FatalF(`error: %w`, err)
+	t.errs.FatalF(`error: %w`, err)
 
 	if !stat.IsDir() {
 		fmt.Fprintf(os.Stderr, `%s is not a directory`, localpath)
-		t.Exit.Exit(-1)
+		t.exit.Exit(-1)
 	}
 
 	t.src = name
@@ -139,7 +186,7 @@ func (t *Template) Run() int {
 	path := t.localpath
 	base := t.localpath
 	skipRegex, err := regexp.Compile(fmt.Sprintf(`^%s/.git(?:/|$)`, base))
-	t.Errs.PanicF("build error: %v", err)
+	t.errs.PanicF("build error: %v", err)
 	t.checkDstExists()
 	errWalk := filepath.Walk(path, func(srcPath string, info os.FileInfo, err error) error {
 		if skipRegex.MatchString(srcPath) {
@@ -155,16 +202,16 @@ func (t *Template) Run() int {
 		}
 
 		pair := filePair{
-			errs:      t.Errs,
+			errs:      t.errs,
 			srcInfo:   info,
 			srcPath:   srcPath,
 			dstPath:   dstPath,
-			variables: t.Variables,
-			mlen:      t.ModeLineLen,
+			variables: t.vars,
+			mlen:      t.modeLineLen,
 			renderer:  t.renderer(),
 		}
 		err = pair.route()
-		t.Errs.PanicF("build error: %v", err)
+		t.errs.PanicF("build error: %v", err)
 
 		return nil
 	})
@@ -174,19 +221,19 @@ func (t *Template) Run() int {
 	}
 
 	err = file.Move(t.builddir, t.dest)
-	t.Errs.PanicF("build error: %v", err)
-	t.Log.Printf(`created project handle:%s -> project:%s`, t.src, t.dest)
+	t.errs.PanicF("build error: %v", err)
+	t.log.Printf(`created project handle:%s -> project:%s`, t.src, t.dest)
 	return 0
 }
 
 func (t *Template) checkDstExists() {
 	stat, err := os.Stat(t.dest)
 	if !os.IsNotExist(err) {
-		t.Errs.PanicF("build error: %v", err)
+		t.errs.PanicF("build error: %v", err)
 	}
 	if stat != nil {
-		t.Log.Printf("path '%s' exists. aborting.\n", t.dest) // nolint
-		t.Exit.Exit(255)
+		t.log.Printf("path '%s' exists. aborting.\n", t.dest) // nolint
+		t.exit.Exit(255)
 	}
 }
 
@@ -196,31 +243,31 @@ func (t *Template) renderDir(path string) string {
 	if !regex.MatchString(path) {
 		return path
 	}
-	path, err := t.renderer().Text2String(path, t.Variables, true, true)
-	t.Errs.FatalF("can not substitute path string \"%s\": %v", path, err)
+	path, err := t.renderer().Text2String(path, t.vars, true, true)
+	t.errs.FatalF("can not substitute path string \"%s\": %v", path, err)
 	return path
 }
 
 // loadTemplateConf loads template configuration
 func (t *Template) loadTempateConf(path string) {
-	t.Log.Debugf("loading template conf %s\n", path)
+	t.log.Debugf("loading template conf %s\n", path)
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		return
 	} else if err != nil {
-		fmt.Fprintf(t.Stderr, "Can not load file %s: %v\n", path, err)
+		fmt.Fprintf(t.stderr, "Can not load file %s: %v\n", path, err)
 	}
 	c := &templateConf{}
 	if !strings.HasSuffix(path, ".yml") {
-		fmt.Fprintf(t.Stderr, "Invalid file %s\n", path)
-		t.Exit.Exit(255)
+		fmt.Fprintf(t.stderr, "Invalid file %s\n", path)
+		t.exit.Exit(255)
 	}
-	t.Log.Debugf("Unmarshal file %s\n", path)
+	t.log.Debugf("Unmarshal file %s\n", path)
 	err := marshal.FromFile(c, path)
 	if err != nil {
-		fmt.Fprintf(t.Stderr, "Can not unmarshal file %s: %s\n", path, err.Error())
-		t.Exit.Exit(255)
+		fmt.Fprintf(t.stderr, "Can not unmarshal file %s: %s\n", path, err.Error())
+		t.exit.Exit(255)
 	}
-	t.Log.Debugf("%#v", c)
+	t.log.Debugf("%#v", c)
 
 	if c.Renderer != "" {
 		t.SetRender(c.Renderer)

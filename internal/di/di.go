@@ -283,8 +283,10 @@ func (s *DI) MakeCheck() *check.Check {
 // MakeClient dependency injector
 func (s *DI) MakeClient() *client.Client {
 	opts := &client.Options{
-		Err:    s.MakeErrorHandler(),
-		Stdout: s.Stdout,
+		Err:                s.MakeErrorHandler(),
+		Stdout:             s.Stdout,
+		CallPlumbRepos:     s.CallMakePlumbRepo(),
+		CallPlumbTemplates: s.CallMakePlumbTemplate(),
 	}
 	return client.New(opts)
 }
@@ -483,7 +485,8 @@ func (s *DI) MakeTemplate() *template.Template {
 	}
 	vars := variables.New()
 	vars.ProjectVariable("NAME", s.ProjectName)
-	t := &template.Template{
+	o := &template.Options{
+		Client:        s.MakeClient(),
 		Config:        s.ConfigFile(),
 		Log:           s.MakeLoggerOutput(""),
 		Errs:          s.MakeErrorHandler(),
@@ -498,6 +501,7 @@ func (s *DI) MakeTemplate() *template.Template {
 			"envsubst":     &renderer.RenderEnv{},
 		},
 	}
+	t := template.New(o)
 	s.cacheTemplate = t
 	return t
 }
