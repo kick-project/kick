@@ -12,7 +12,7 @@ import (
 var UsageDoc = `search for templates using a keyword
 
 Usage:
-    kick search [-l] <term>
+    kick search [-l] [<term>]
 
 Options:
     -h --help  print help
