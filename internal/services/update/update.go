@@ -97,7 +97,7 @@ func (c *workers) concurClones(num int, churl <-chan string, tchan chan<- *Templ
 }
 
 func (c *workers) processURL(url string, chtemplate chan<- *Template) {
-	p, err := c.client.GetTemplate(url, "")
+	p, err := c.client.GetRepo(url, "")
 	if errs.LogF("error: cloning repository: %w: skipping %s", err, url) {
 		return
 	}
