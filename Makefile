@@ -100,27 +100,27 @@ goversion:
 	@go version | grep go1.16
 
 .PHONY: _unit
-_unit: _test_setup ## Unit testing
+_unit: _test_setup
 	@$(MAKE) _test_setup_gitserver
 	### Unit Tests
 	gotestsum --jsonfile reports/unit.json --junitfile reports/junit.xml -- -timeout 5s -covermode atomic -coverprofile=./reports/coverage.out -v ./...; echo $$? > reports/exitcode-unit.txt
 	@go-test-report -t "kick unit tests" -o reports/html/unit.html < reports/unit.json > /dev/null
 
 .PHONY: _cc
-_cc: _test_setup ## Code coverage
+_cc: _test_setup
 	### Code Coverage
 	@go-acc -o ./reports/coverage.out ./... > /dev/null
 	@go tool cover -func=./reports/coverage.out | tee reports/coverage.txt
 	@go tool cover -html=reports/coverage.out -o reports/html/coverage.html
 
 .PHONY: _cx
-_cx: _test_setup ## Code complexity test
+_cx: _test_setup
 	### Cyclomatix Complexity Report
 	@gocyclo -avg $(GODIRS) | grep -v _test.go | tee reports/cyclomaticcomplexity.txt
 	@contents=$$(cat reports/cyclomaticcomplexity.txt); echo "<html><title>cyclomatic complexity</title><body><pre>$${contents}</pre></body><html>" > reports/html/cyclomaticcomplexity.html
 
 .PHONY: _package
-_package: ## Create an RPM & DEB
+_package: ## Create an RPM, Deb, Homebrew package
 	@XCOMPILE=true make build
 	@VERSION=$(VERSION) envsubst < nfpm.yaml.in > nfpm.yaml
 	$(MAKE) dist/kick.rb
@@ -133,7 +133,7 @@ interfaces: ## Generate interfaces
 	cat ifacemaker.txt | egrep -v '^#' | xargs -n5 bash -c 'ifacemaker -f $$0 -s $$1 -p $$2 -i $$3 -o $$4 -c "DO NOT EDIT: Generated using \"make interfaces\""'
 
 .PHONY: _test_setup
-_test_setup: ## Setup test directories
+_test_setup:
 	@mkdir -p tmp
 	@mkdir -p reports/html
 	@$(MAKE) _test_setup_dirs 2> /dev/null > /dev/null
@@ -168,14 +168,15 @@ _test_setup_metadata:
 	@-(for i in $$(pwd)/tmp/metadata/templates/*; do cd $$i; git init; git add .; git commit -m 'Initial commit';make release; make bumpmajor; make release; git push --set-upstream http://127.0.0.1:5000/$$(basename $$(pwd)).git master; git push --tags; done) 2> /dev/null > /dev/null
 
 .PHONY: _release
-_release: ## Trigger a release
+_release: ## Trigger a release by creating a tag and pushing to the upstream repository
 	@echo "### Releasing v$(VERSION)"
 	@$(MAKE) _isreleased 2> /dev/null
 	git tag v$(VERSION)
 	git push --tags
 
+# To be run inside a github workflow
 .PHONY: _release_github
-_release_github: _package ## To be run inside a github workflow
+_release_github: _package
 	github-release release \
 	  --user kick-project \
 	  --repo kick \
@@ -210,7 +211,7 @@ _release_github: _package ## To be run inside a github workflow
 	  --file dist/kick_$(VERSION)_amd64.deb
 
 .PHONY: lint
-lint: internal/version.go test_setup ## Lint tests
+lint: internal/version.go test_setup
 	golangci-lint run --enable=gocyclo; echo $$? > reports/exitcode-golangci-lint.txt
 	golint -set_exit_status ./..; echo $$? > reports/exitcode-golint.txt
 
@@ -252,7 +253,7 @@ report: ## Open reports in a browser
 	@$(MAKE) $(REPORTS)
 
 .PHONY: cattest
-cattest: ## Print the output of the last set of tests
+cattest:
 	### Unit Tests
 	@cat reports/test.txt
 	### Code Coverage
@@ -265,7 +266,7 @@ getversion:
 	VERSION=$(VERSION) bash -c 'echo $$VERSION'
 
 .PHONY: _catschema
-_catschema: ## Dump Schema to SQL. Used to inspect 
+_catschema:
 	test -f tmp/model_test.db && sqlite3 tmp/model_test.db ".schema --indent"
 
 #
