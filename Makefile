@@ -104,6 +104,7 @@ clean: ## Reset project to original state
 
 .PHONY: test
 test: ## Test
+	$(MAKE) test_setup
 	$(MAKE) goversion
 	$(MAKE) lint
 	$(MAKE) unit
@@ -118,21 +119,20 @@ goversion:
 	@go version | grep go1.16
 
 .PHONY: _unit
-_unit: _test_setup
-	@$(MAKE) _test_setup_gitserver
+_unit:
 	### Unit Tests
 	gotestsum --jsonfile reports/unit.json --junitfile reports/junit.xml -- -timeout 5s -covermode atomic -coverprofile=./reports/coverage.out -v ./...; echo $$? > reports/exitcode-unit.txt
 	@go-test-report -t "kick unit tests" -o reports/html/unit.html < reports/unit.json > /dev/null
 
 .PHONY: _cc
-_cc: _test_setup
+_cc:
 	### Code Coverage
 	@go-acc -o ./reports/coverage.out ./... > /dev/null
 	@go tool cover -func=./reports/coverage.out | tee reports/coverage.txt
 	@go tool cover -html=reports/coverage.out -o reports/html/coverage.html
 
 .PHONY: _cx
-_cx: _test_setup
+_cx:
 	### Cyclomatix Complexity Report
 	@gocyclo -avg $(GODIRS) | grep -v _test.go | tee reports/cyclomaticcomplexity.txt
 	@contents=$$(cat reports/cyclomaticcomplexity.txt); echo "<html><title>cyclomatic complexity</title><body><pre>$${contents}</pre></body><html>" > reports/html/cyclomaticcomplexity.html
@@ -160,30 +160,26 @@ _test_setup:
 
 .PHONY: _test_setup_dirs
 _test_setup_dirs:
-	@find test/fixtures -maxdepth 1 -type d -exec cp -r {} tmp/ \; 
+	@find test/fixtures -mindepth 1 -maxdepth 1 -type d | grep -v gitserve | xargs -I {} cp -r {} tmp/
 
 .PHONY: _test_setup_gitserver
 _test_setup_gitserver:
-	@mkdir -p tmp/gitserveclient
-	@-kill -0 $$(cat tmp/server.pid 2>/dev/null) >/dev/null 2>&1 || go run test/fixtures/testserver.go
-	@echo "Waiting for git server to launch on 5000..."
-	@bash -c 'while ! nc -z localhost 5000; do sleep 0.1; done'
-	@echo "git server launched"
-	@$(MAKE) _test_setup_gitclient
-	@$(MAKE) _test_setup_metadata 2> /dev/null
+	-kill -TERM $$(cat tmp/server.pid 2>/dev/null) >/dev/null 2>&1
+	rm -rf tmp/gitserve 2> /dev/null > /dev/null
+	set -e; find test/fixtures/gitserve -mindepth 1 -maxdepth 1 -type d | xargs -I {} basename {} | xargs -I {} bash -c "set -e; mkdir -p tmp/gitserve/{}.git; cd tmp/gitserve/{}.git; git init --bare"
+	go run test/fixtures/testserver.go
+	mkdir -p tmp/gitserveclient
+	echo "Waiting for git server to launch on 5000..."
+	bash -c 'while ! nc -z localhost 5000; do sleep 0.1; done'
+	echo "git server launched"
+	$(MAKE) _test_setup_gitclient
 
 .PHONY: _test_setup_gitclient
 _test_setup_gitclient:
-	@-(find test/fixtures/gitserve -mindepth 1 -maxdepth 1 -type d -exec cp -r {} tmp/gitserveclient \;) 2>&1 > /dev/null
-	@-(for i in $$(pwd)/tmp/gitserveclient/*; do cd $$i; git init; git add .; git commit -m "Initial commit"; git tag 7.7.7; git push --set-upstream http://127.0.0.1:5000/$$(basename $$(pwd)).git master; git push --tags; done) 2> /dev/null > /dev/null
-	@sync
-
-.PHONY: _test_setup_metadata
-_test_setup_metadata:
-	@-rm -rf tmp/metadata 2> /dev/null > /dev/null
-	@mkdir -p tmp/metadata
-	@-(find test/fixtures/metadata -mindepth 1 -maxdepth 1 -type d -exec cp -r {} tmp/metadata \;) 2>&1 > /dev/null
-	@-(for i in $$(pwd)/tmp/metadata/templates/*; do cd $$i; git init; git add .; git commit -m 'Initial commit';make release; make bumpmajor; make release; git push --set-upstream http://127.0.0.1:5000/$$(basename $$(pwd)).git master; git push --tags; done) 2> /dev/null > /dev/null
+	rm -rf tmp/gitserverclient 2> /dev/null > /dev/null
+	(set -e; find test/fixtures/gitserve -mindepth 1 -maxdepth 1 -type d -exec cp -r {} tmp/gitserveclient \;) 2>&1 > /dev/null
+	find tmp/gitserveclient -type d -mindepth 1 -maxdepth 1 | xargs -I {} -n 1 bash -c "cd {}; git init; git add .; git commit -m 'Initial commit'; git tag 7.7.7; git remote add origin http://127.0.0.1:5000/\$$(basename {}).git; git push -u origin master; git push --tags"
+	sync
 
 .PHONY: _release
 _release: ## Trigger a release by creating a tag and pushing to the upstream repository
@@ -229,7 +225,7 @@ _release_github: _package
 	  --file dist/kick_$(VERSION)_amd64.deb
 
 .PHONY: lint
-lint: internal/version.go test_setup
+lint: internal/version.go
 	golangci-lint run --enable=gocyclo; echo $$? > reports/exitcode-golangci-lint.txt
 	golint -set_exit_status ./..; echo $$? > reports/exitcode-golint.txt
 

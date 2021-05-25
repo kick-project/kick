@@ -2,14 +2,12 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"path/filepath"
 	"sync"
 
-	"github.com/kick-project/kick/internal/resources/config"
-	"github.com/kick-project/kick/internal/resources/errs"
+	"github.com/docopt/docopt-go"
 	"github.com/sevlyar/go-daemon"
 	"github.com/sosedoff/gitkit"
 )
@@ -17,13 +15,29 @@ import (
 var testServerSync sync.Mutex
 var testServerUp bool
 
+var usage string = `
+Usage:
+    testserver [-a <port>] [-s <serverpath>] [-p <pidfile>] [-l <logfile>] 
+
+Options:
+    -a <port>           Listen on port number [default: 5000]
+    -s <serverpath>     Server path to git repositories [default: tmp/gitserve]
+    -p <pidfile>        Path to pidfile [default: tmp/server.pid]
+    -l <logfile>        Path to logfile [default: tmp/server.log]
+`
+
 func main() {
+	args, _ := docopt.ParseDoc(usage)
+	port := args["-a"].(string)
+	serverpath := args["-s"].(string)
+	pidfile := args["-p"].(string)
+	logfile := args["-l"].(string)
 	home, _ := filepath.Abs("tmp/home")
-	srvpath, _ := filepath.Abs("tmp/gitserve")
+	srvpath, _ := filepath.Abs(serverpath)
 	cntxt := &daemon.Context{
-		PidFileName: "tmp/server.pid",
+		PidFileName: pidfile,
 		PidFilePerm: 0644,
-		LogFileName: "tmp/server.log",
+		LogFileName: logfile,
 		LogFilePerm: 0640,
 		WorkDir:     "./",
 		Umask:       027,
@@ -31,57 +45,39 @@ func main() {
 	}
 	d, err := cntxt.Reborn()
 	if err != nil {
-		log.Fatal("Unable to run: ", err)
+		panic(err)
 	}
 	if d != nil {
 		return
 	}
 	defer func() {
 		err = cntxt.Release()
-		errs.Panic(err)
+		if err != nil {
+			panic(err)
+		}
 	}()
 
-	startTestServer(home, srvpath)
+	startTestServer(port, srvpath, home)
 }
 
 type testServerStruct struct {
 	server *http.Server
-	config *config.File
 	home   string
 }
 
-func (s *testServerStruct) ServerUp(home string, servpath string) {
+func (s *testServerStruct) ServerUp(port, servepath, home string) {
 	testServerSync.Lock()
 	defer testServerSync.Unlock()
 	if testServerUp {
 		return
 	}
 	s.home = home
-	s.server = s.gitServer(servpath)
-	s.loadConfig()
-	spathexists := true
-	homeexists := true
-	_, err := os.Stat(servpath)
-	if os.IsNotExist(err) {
-		spathexists = false
-	}
-
-	_, err = os.Stat(home)
-	if os.IsNotExist(err) {
-		homeexists = false
-	}
+	addr := getAddr(port)
+	s.server = s.gitServer(addr, servepath)
 	testServerUp = true
-	log.Printf("HOMEDIR: %s EXISTS=%t", home, homeexists)
-	log.Printf("SERVDIR: %s EXISTS=%t", servpath, spathexists)
 }
 
-func (s *testServerStruct) GetHome() string {
-	return s.home
-}
-
-func (s *testServerStruct) gitServer(dir string) *http.Server {
-	addr := getAddr()
-
+func (s *testServerStruct) gitServer(addr string, dir string) *http.Server {
 	service := gitkit.New(gitkit.Config{
 		Dir:        dir,
 		AutoCreate: true,
@@ -91,7 +87,7 @@ func (s *testServerStruct) gitServer(dir string) *http.Server {
 	// Configure git TestServer. Will create git repos path if it does not exist.
 	// If hooks are set, it will also update all repos with new version of hook scripts.
 	if err := service.Setup(); err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 
 	http.Handle("/", service)
@@ -99,40 +95,30 @@ func (s *testServerStruct) gitServer(dir string) *http.Server {
 		Addr: addr,
 	}
 
-	m := `Starting Git server %s, path %s`
-	log.Printf(m, addr, dir)
 	err := server.ListenAndServe()
 	if err != nil {
 		if err.Error() == fmt.Sprintf("listen tcp %s: bind: address already in use", addr) {
 			return nil
 		}
-		log.Fatalf("%v", err)
+		panic(err)
 	}
 	return server
 }
 
-func (s *testServerStruct) loadConfig() {
-	conf := &config.File{
-		PathUserConf:     filepath.Join(s.home, ".kick", "config.yml"),
-		PathTemplateConf: filepath.Join(s.home, ".kick", "templates.yml"),
-	}
-	err := conf.Load()
-	errs.Panic(err)
-
-	s.config = conf
-}
-
-func startTestServer(home string, servpath string) {
+func startTestServer(port, servepath, home string) {
 	testserver := &testServerStruct{}
-	testserver.ServerUp(home, servpath)
+	testserver.ServerUp(port, servepath, home)
 }
 
-func getAddr() string {
-	addr := os.Getenv("TESTGITADDR") // Set in $PROJECT/.env
-	if addr == "" {
-		addr = "127.0.0.1:5000"
+func getAddr(port string) string {
+	var addr string
+	listen := os.Getenv("KICK_LISTEN") // Set in $PROJECT/.env
+	if port != "" {
+		addr = "127.0.0.1:" + port
+	} else if listen != "" {
+		addr = "127.0.0.1:" + listen
 	} else {
-		addr = "127.0.0.1" + addr
+		panic("Port is not set")
 	}
 	return addr
 }
