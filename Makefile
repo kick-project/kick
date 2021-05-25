@@ -302,7 +302,7 @@ up: ## Run vagrant up
 
 .PHONY: ssh
 ssh: up ## Run vagrant ssh and cd to shared directory
-	vagrant ssh -c "cd /vagrant; bash -l"
+	vagrant ssh -c 'cd /vagrant; exec $$SHELL -l'
 
 .PHONY: halt
 halt: ## Run vagrant halt
