@@ -298,7 +298,7 @@ endif
 # Vagrant targets
 #
 .PHONY: up
-up: ## Run vagrant up
+up:
 	@(vagrant status --no-color | grep running 2>&1) > /dev/null || vagrant up
 
 .PHONY: ssh
