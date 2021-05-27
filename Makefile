@@ -121,7 +121,7 @@ goversion:
 .PHONY: _unit
 _unit:
 	### Unit Tests
-	gotestsum --jsonfile reports/unit.json --junitfile reports/junit.xml -- -timeout 5s -covermode atomic -coverprofile=./reports/coverage.out -v ./...; echo $$? > reports/exitcode-unit.txt
+	gotestsum --jsonfile reports/unit.json --junitfile reports/junit.xml -- -timeout 30s -covermode atomic -coverprofile=./reports/coverage.out -v ./...; echo $$? > reports/exitcode-unit.txt
 	@go-test-report -t "kick unit tests" -o reports/html/unit.html < reports/unit.json > /dev/null
 
 .PHONY: _cc
@@ -383,3 +383,14 @@ _go.mod_err:
 #
 %:
 	@egrep -q '^_$@:' Makefile && $(DOTENV) $(MAKE) _$@
+
+.PHONY: _env
+_env:
+	@echo "DEVELOPMENT:"
+	@echo "    XCOMPILE=$(XCOMPILE)"
+	@echo "    KICK_DEBUG=$(XDEBUG)"
+	@echo "TESTING:"
+	@echo "    KICK_LISTEN=$(KICK_LISTEN)"
+	@echo "    KICK_TEST_PRIVATE=$(KICK_TEST_PRIVATE)"
+	@echo "FEATURE FLAGS"
+	@echo "    FF_ENABLED=$(FF_ENABLED)"
