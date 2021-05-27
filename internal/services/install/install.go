@@ -283,7 +283,7 @@ func (i *Install) createEntry(handle string, entry config.Template) {
 // getRepo get version control system repository or set a location to a template.
 // returns the local path location.
 func (i *Install) getRepo(url string) (string, error) {
-	p, err := i.client.GetRepo(url, "")
+	p, err := i.client.GetTemplate(url, "")
 	if err != nil {
 		return "", err
 	}
