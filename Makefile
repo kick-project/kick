@@ -191,38 +191,11 @@ _release: ## Trigger a release by creating a tag and pushing to the upstream rep
 # To be run inside a github workflow
 .PHONY: _release_github
 _release_github: _package
-	github-release release \
-	  --user kick-project \
-	  --repo kick \
-	  --tag v$(VERSION)
-
-	github-release upload \
-	  --name kick-$(VERSION).tar.gz \
-	  --user kick-project \
-	  --repo kick \
-	  --tag v$(VERSION) \
-	  --file dist/kick-$(VERSION).tar.gz
-
-	github-release upload \
-	  --name kick.rb \
-	  --user kick-project \
-	  --repo kick \
-	  --tag v$(VERSION) \
-	  --file dist/kick.rb
-
-	github-release upload \
-	  --name kick-$(VERSION).x86_64.rpm \
-	  --user kick-project \
-	  --repo kick \
-	  --tag v$(VERSION) \
-	  --file dist/kick-$(VERSION).x86_64.rpm
-
-	github-release upload \
-	  --name kick_$(VERSION)_amd64.deb \
-	  --user kick-project \
-	  --repo kick \
-	  --tag v$(VERSION) \
-	  --file dist/kick_$(VERSION)_amd64.deb
+	gh release create v$(VERSION)
+	gh release upload v$(VERSION) dist/kick-$(VERSION).tar.gz
+	gh release upload v$(VERSION) dist/kick.rb
+	gh release upload v$(VERSION) dist/kick-$(VERSION).x86_64.rpm
+	gh release upload v$(VERSION) dist/kick_$(VERSION)_amd64.deb
 
 .PHONY: lint
 lint: internal/version.go
