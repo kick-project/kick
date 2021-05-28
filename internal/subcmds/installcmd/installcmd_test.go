@@ -6,7 +6,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/joho/godotenv"
 	"github.com/kick-project/kick/internal/di"
 	"github.com/kick-project/kick/internal/resources/exit"
 	"github.com/kick-project/kick/internal/resources/file"
@@ -42,22 +41,17 @@ func TestInstallTemplateURL(t *testing.T) {
 }
 
 func TestInstallSSHPublic(t *testing.T) {
+	if os.Getenv("KICK_TEST_SSH") != "true" {
+		t.Skip(`SSH git repo tests are disabled`)
+	}
 	handle := "public1"
 	template := "git@github.com:kick-fixtures/template-public.git"
 	installTest(t, "TestInstallSSHPublic", handle, template)
 }
 
 func TestInstallSSHPrivate(t *testing.T) {
-	// Workaround as gotestsum does not pass on environment variables
-	homeDotEnv := filepath.Join(os.Getenv("HOME"), ".env")
-	err := godotenv.Load(homeDotEnv)
-	if err != nil {
-		t.Error(err)
-	}
-
-	testPrivate := os.Getenv("KICK_TEST_PRIVATE")
-	if testPrivate != "true" {
-		t.Skip(`Private git repo templates are disabled`)
+	if os.Getenv("KICK_TEST_SSH") != "true" {
+		t.Skip(`SSH git repo tests are disabled`)
 	}
 	handle := "private1"
 	template := "git@github.com:kick-fixtures/template-private.git"

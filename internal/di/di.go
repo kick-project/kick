@@ -7,9 +7,7 @@ import (
 	"io"
 	"log"
 	"os"
-	"path/filepath"
 	fp "path/filepath"
-	"runtime"
 
 	"github.com/go-playground/validator"
 	"github.com/kick-project/kick/internal/di/callbacks"
@@ -74,6 +72,7 @@ type DI struct {
 	// Cached objects
 	cacheConfigFile  *config.File
 	cacheORM         *gorm.DB
+	cacheEnvVars     *env.Vars
 	cacheErrHandler  *errs.Handler
 	cacheExitHandler *exit.Handler
 	cacheCheck       *check.Check
@@ -123,9 +122,7 @@ func Setup(home string) *DI {
 	pathTemplateDir := fp.Clean(fmt.Sprintf("%s/.kick/templates", home))
 	pathMetadataDir := fp.Clean(fmt.Sprintf("%s/.kick/metadata", home))
 	logLvl := logger.ErrorLevel
-	if env.Debug() {
-		logLvl = logger.DebugLevel
-	}
+
 	s := &DI{
 		SqliteDB:         sqlitedb,
 		Home:             home,
@@ -141,6 +138,10 @@ func Setup(home string) *DI {
 		StdLogFlags:      log.LstdFlags,
 		StdLogPrefix:     "",
 		ExitMode:         exit.MNone,
+	}
+	envs := s.MakeEnvs()
+	if envs.Debug() {
+		s.logLevel = logger.DebugLevel
 	}
 	return s
 }
@@ -229,9 +230,23 @@ func (s *DI) MakeORM() *gorm.DB {
 
 // MakeLoggerOutput inject logger.OutputIface.
 func (s *DI) MakeLoggerOutput(prefix string) *logger.Router {
-	toFile := logger.New(s.MakeLogFile(), prefix, log.Ldate|log.Ltime|log.Lshortfile|log.Lmsgprefix, s.logLevel, s.MakeExitHandler())
 	toStderr := logger.New(s.Stderr, prefix, log.Lmsgprefix, s.logLevel, s.MakeExitHandler())
-	return logger.NewRouter(toFile, toStderr)
+	envs := s.MakeEnvs()
+	kickLog := envs.LogFile()
+	if kickLog != "" {
+		toFile := logger.New(s.MakeLogFile(kickLog), prefix, log.Ldate|log.Ltime|log.Lshortfile|log.Lmsgprefix, s.logLevel, s.MakeExitHandler())
+		return logger.NewRouter(toFile, toStderr)
+	}
+	return logger.NewRouter(toStderr)
+}
+
+// MakeEnvs dependency injector
+func (s *DI) MakeEnvs() *env.Vars {
+	if s.cacheEnvVars != nil {
+		return s.cacheEnvVars
+	}
+	s.cacheEnvVars = &env.Vars{}
+	return s.cacheEnvVars
 }
 
 // MakeErrorHandler dependency injector
@@ -357,32 +372,26 @@ func (s *DI) MakeList() *list.List {
 }
 
 // MakeLogFile create a logfile and return the interface
-func (s *DI) MakeLogFile() *os.File {
+func (s *DI) MakeLogFile(logfile string) *os.File {
 	if s.cacheLogFile != nil {
 		return s.cacheLogFile
 	}
 	var (
-		tmpDir string
-		f      *os.File
-		err    error
+		f   *os.File
+		err error
 	)
-	if runtime.GOOS == "darwin" {
-		tmpDir = "/tmp"
-	} else {
-		tmpDir = os.TempDir()
-	}
-	logPath := filepath.Join(tmpDir, "kick.log")
 
-	fInfo, err := os.Stat(logPath)
+	fInfo, err := os.Stat(logfile)
 	if err != nil && !os.IsNotExist(err) {
-		panic(err)
+		// Simple output because logging is not available
+		fmt.Printf(`can not open log file %s: %v`, logfile, err)
 	} else if err == nil && fInfo.Size() > 1024*1024*2 {
 		// Remove files greater than 2M
-		os.Remove(logPath)
+		os.Remove(logfile)
 	}
-	f, err = os.OpenFile(logPath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
+	f, err = os.OpenFile(logfile, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
 	if err != nil {
-		panic(err)
+		s.MakeErrorHandler().FatalF(`can not open logfile %s: %v`, logfile, err)
 	}
 	s.cacheLogFile = f
 	return f

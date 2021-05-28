@@ -74,7 +74,7 @@ export PRINT_HELP_PYSCRIPT
 .PHONY: help
 ifneq (, ${PYTHON})
 help: ## Print Help
-	@$(PYTHON) -c "$$PRINT_HELP_PYSCRIPT" < $(MAKEFILE_LIST)
+	@$(PYTHON) -c "$(PRINT_HELP_PYSCRIPT)" < $(MAKEFILE_LIST)
 else
 help:
 	$(error python required for 'make help', executable not found)
@@ -391,6 +391,6 @@ _env:
 	@echo "    KICK_DEBUG=$(XDEBUG)"
 	@echo "TESTING:"
 	@echo "    KICK_LISTEN=$(KICK_LISTEN)"
-	@echo "    KICK_TEST_PRIVATE=$(KICK_TEST_PRIVATE)"
+	@echo "    KICK_TEST_SSH=$(KICK_TEST_SSH)"
 	@echo "FEATURE FLAGS"
 	@echo "    FF_ENABLED=$(FF_ENABLED)"

@@ -5,7 +5,22 @@ package env
 
 import "os"
 
+type Vars struct {
+}
+
+//
+// Options
+//
+
+func (v *Vars) LogFile() string {
+	return os.Getenv("KICK_LOG")
+}
+
+//
+// Development
+//
+
 // Debug Turn debug logging on. See di.DI
-func Debug() bool {
+func (v *Vars) Debug() bool {
 	return os.Getenv("KICK_DEBUG") == "true"
 }
