@@ -74,7 +74,7 @@ export PRINT_HELP_PYSCRIPT
 .PHONY: help
 ifneq (, ${PYTHON})
 help: ## Print Help
-	@$(PYTHON) -c "$(PRINT_HELP_PYSCRIPT)" < $(MAKEFILE_LIST)
+	@$(PYTHON) -c "$$PRINT_HELP_PYSCRIPT" < $(MAKEFILE_LIST)
 else
 help:
 	$(error python required for 'make help', executable not found)
