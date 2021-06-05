@@ -8,18 +8,51 @@ import (
 	"os"
 
 	"github.com/kick-project/kick/internal/resources/errs"
+	"github.com/kick-project/kick/internal/resources/logger"
 )
 
 // Check runs a series of checks
 type Check struct {
-	ConfigPath         string    `validate:"required"`
-	ConfigTemplatePath string    `validate:"required"`
-	HomeDir            string    `validate:"required"`
-	MetadataDir        string    `validate:"required"`
-	SQLiteFile         string    `validate:"required"`
-	Stderr             io.Writer `validate:"required"`
-	Stdout             io.Writer `validate:"required"`
-	TemplateDir        string    `validate:"required"`
+	configPath         string             `validate:"required"`
+	configTemplatePath string             `validate:"required"`
+	home               string             `validate:"required"`
+	err                *errs.Handler      `validate:"required"`
+	log                logger.OutputIface `validate:"required"`
+	metadataDir        string             `validate:"required"`
+	sqliteFile         string             `validate:"required"`
+	stderr             io.Writer          `validate:"required"`
+	stdout             io.Writer          `validate:"required"`
+	templateDir        string             `validate:"required"`
+}
+
+// Options options for constructor
+type Options struct {
+	ConfigPath         string             `validate:"required"`
+	ConfigTemplatePath string             `validate:"required"`
+	Err                *errs.Handler      `validate:"required"`
+	HomeDir            string             `validate:"required"`
+	Log                logger.OutputIface `validate:"required"`
+	MetadataDir        string             `validate:"required"`
+	SQLiteFile         string             `validate:"required"`
+	Stderr             io.Writer          `validate:"required"`
+	Stdout             io.Writer          `validate:"required"`
+	TemplateDir        string             `validate:"required"`
+}
+
+// New constructor
+func New(opts *Options) *Check {
+	return &Check{
+		configPath:         opts.ConfigPath,
+		configTemplatePath: opts.ConfigTemplatePath,
+		err:                opts.Err,
+		home:               opts.HomeDir,
+		log:                opts.Log,
+		metadataDir:        opts.MetadataDir,
+		sqliteFile:         opts.SQLiteFile,
+		stderr:             opts.Stderr,
+		stdout:             opts.Stdout,
+		templateDir:        opts.TemplateDir,
+	}
 }
 
 // Init checks to see if an initialization has been performed. This function
@@ -27,13 +60,13 @@ type Check struct {
 func (c *Check) Init() error {
 	msg := "not initialized. please run \"kick setup\" to initialize configuration"
 	// Directory checks
-	dirs := []string{c.HomeDir, c.MetadataDir, c.TemplateDir}
+	dirs := []string{c.home, c.metadataDir, c.templateDir}
 	for _, d := range dirs {
 		info, err := os.Stat(d)
 		if os.IsNotExist(err) {
 			return errors.New(msg)
 		}
-		errs.Panic(err)
+		c.err.Panic(err)
 
 		if !info.IsDir() {
 			return fmt.Errorf("warning %s is not a directory. please remove then run \"kick init\" to initialize", d)
@@ -41,13 +74,13 @@ func (c *Check) Init() error {
 	}
 
 	// File checks
-	files := []string{c.ConfigPath, c.ConfigTemplatePath, c.SQLiteFile}
+	files := []string{c.configPath, c.configTemplatePath, c.sqliteFile}
 	for _, f := range files {
 		info, err := os.Stat(f)
 		if os.IsNotExist(err) {
 			return errors.New(msg)
 		}
-		errs.Panic(err)
+		c.err.Panic(err)
 
 		if info.IsDir() {
 			return fmt.Errorf("expected a normal file %s got a directory. please remove then run \"kick init\" to initialize", f)

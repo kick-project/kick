@@ -277,16 +277,19 @@ func (s *DI) MakeCheck() *check.Check {
 	if s.cacheCheck != nil {
 		return s.cacheCheck
 	}
-	chk := &check.Check{
+	o := &check.Options{
 		ConfigPath:         s.PathUserConf,
 		ConfigTemplatePath: s.PathTemplateConf,
+		Err:                s.MakeErrorHandler(),
 		HomeDir:            s.Home,
+		Log:                s.MakeLoggerOutput(""),
 		MetadataDir:        s.PathMetadataDir,
 		SQLiteFile:         s.SqliteDB,
 		Stderr:             s.Stderr,
 		Stdout:             s.Stdout,
 		TemplateDir:        s.PathTemplateDir,
 	}
+	chk := check.New(o)
 	s.validate(chk)
 	s.cacheCheck = chk
 	return chk
