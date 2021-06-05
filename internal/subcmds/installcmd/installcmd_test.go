@@ -61,13 +61,31 @@ func TestInstallSSHPrivate(t *testing.T) {
 func TestInstallSSHNoRepo(t *testing.T) {
 	handle := "norepo1"
 	template := "git@github.com:kick-fixtures/template-norepo.git"
-	defer func() {
-		if r := recover(); r == nil {
-			// Expecting a panic
-			t.Fail()
-		}
-	}()
-	installTest(t, "TestInstallSSHNoRepo", handle, template)
+	id := "TestInstallSSHNoRepo"
+
+	// Home Directory
+	home := filepath.Join(testtools.TempDir(), id)
+
+	// Make kick config dir
+	kickDir := filepath.Join(home, ".kick")
+	err := os.MkdirAll(kickDir, 0755)
+	if err != nil {
+		t.Errorf("Can not create directory \"%s\": %v", kickDir, err)
+		return
+	}
+
+	inject := di.Setup(home)
+	inject.LogLevel(logger.DebugLevel)
+	inject.ExitMode = exit.MPanic
+
+	ec := setupcmd.SetupCmd([]string{"setup"}, inject)
+	assert.Equal(t, 0, ec)
+
+	ec = updatecmd.Update([]string{"update"}, inject)
+	assert.Equal(t, 0, ec)
+
+	ec = installcmd.Install([]string{"install", handle, template}, inject)
+	assert.NotEqual(t, 0, ec)
 }
 
 func TestInstallPath(t *testing.T) {

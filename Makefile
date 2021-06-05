@@ -119,7 +119,7 @@ goversion:
 .PHONY: _unit
 _unit:
 	### Unit Tests
-	gotestsum --jsonfile reports/unit.json --junitfile reports/junit.xml -- -timeout 30s -covermode atomic -coverprofile=./reports/coverage.out -v ./...; echo $$? > reports/exitcode-unit.txt
+	gotestsum --jsonfile reports/unit.json --junitfile reports/junit.xml -- -timeout 60s -covermode atomic -coverprofile=./reports/coverage.out -v ./...; echo $$? > reports/exitcode-unit.txt
 	@go-test-report -t "kick unit tests" -o reports/html/unit.html < reports/unit.json > /dev/null
 
 .PHONY: _cc

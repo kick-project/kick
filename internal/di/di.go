@@ -344,6 +344,7 @@ func (s *DI) MakeInstall() *install.Install {
 		Client:     s.MakeClient(),
 		ConfigFile: s.ConfigFile(),
 		ORM:        s.MakeORM(),
+		Exit:       s.MakeExitHandler(),
 		Err:        s.MakeErrorHandler(),
 		Log:        s.MakeLoggerOutput(""),
 		Stderr:     s.Stderr,
