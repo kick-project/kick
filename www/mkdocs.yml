@@ -10,5 +10,4 @@ nav:
   - installation: install.md
   - quick start: quickstart.md
   - repositories: repos.md
-  - manual: manual.md
   - cli: cli.md

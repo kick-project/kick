@@ -4,8 +4,8 @@
 
 Project templates are folders that contain other directories and files.
 
-Given the following directory tree, lets create a `Project Template` which contains the
-same files and folders.
+Given the following directory tree, lets create a `Project Template` which
+contains the same files and folders.
 
 ```
 mytemplate
@@ -26,10 +26,15 @@ cd ~/templates
 ```
 
 Create the Project Template `mytemplate`.
+
+Start be creating a project path
 ```bash
 mkdir mytemplate
 mkdir -p 'mytemplate/cmd/${PROJECT_NAME}/'
 touch 'mytemplate/cmd/${PROJECT_NAME}/main.go'
+```
+One will notice the `${PROJECT_NAME}` variable which is interpolated when
+creating new projects.
 
 # Create git ignore
 cat <<'EOF' > mytemplate/.gitignore
@@ -134,8 +139,8 @@ any other program in the same way that `~/.profile` is not for just one tool.
 
 ## Template files
 
-Templates files are any text file which contains a modeline. A modeline is a piece
-of text that informs kick that the file is a template. A modeline takes up
+Templates files are any text file which contains a modeline. A modeline is a
+piece of text that informs kick that the file is a template. A modeline takes up
 the form `kick:render` and should be placed within the first 5 lines of a text
 file. Modeline lines are stripped from the file and can be placed inside any
 comment type.
@@ -157,10 +162,12 @@ kick:render
 <!--- kick:render -->
 ```
 
-The next exercise is to add 4 template variables to the `README.md` file in our template.  
+The next exercise is to add 4 template variables to the `README.md` file in our
+template.  
 
 * `${PROJECT_NAME}` - Predefined variable
-* `${USER}`         - Environment variable built into shells (E.G. Bash) which contains the current username.
+* `${USER}`         - Environment variable built into shells (E.G. Bash) which
+                      contains the current username.
 * `${author}`       - Variable from "~/.env"
 * `${email}`        - Variable from "~/.env"
 
