@@ -159,6 +159,10 @@ _test_setup:
 .PHONY: _test_setup_dirs
 _test_setup_dirs:
 	@find test/fixtures -mindepth 1 -maxdepth 1 -type d | grep -v gitserve | xargs -I {} cp -r {} tmp/
+	@rm -rf tmp/TestInfo
+	@mkdir -p tmp/TestInfo/testrepo
+	@touch tmp/TestInfo/testrepo/empty
+	@cd tmp/TestInfo/testrepo; (git init -q; git add .; git commit -m 'Initial commit'; git tag 1.0.0; git tag 1.1.0; git tag 2.0.0; git tag 2.1.0; git tag 2.1.1) > /dev/null
 
 .PHONY: _test_setup_gitserver
 _test_setup_gitserver:

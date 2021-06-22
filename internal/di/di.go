@@ -23,6 +23,7 @@ import (
 	"github.com/kick-project/kick/internal/resources/template"
 	"github.com/kick-project/kick/internal/resources/template/renderer"
 	"github.com/kick-project/kick/internal/resources/template/variables"
+	"github.com/kick-project/kick/internal/resources/vcs"
 	"github.com/kick-project/kick/internal/services/initialize"
 	"github.com/kick-project/kick/internal/services/install"
 	"github.com/kick-project/kick/internal/services/list"
@@ -86,6 +87,7 @@ type DI struct {
 	cacheSync        *sync.Sync
 	cacheTemplate    *template.Template
 	cacheUpdate      *update.Update
+	cacheVCS         *vcs.VCS
 }
 
 // Setup get di using the supplied "home" directory option. Any
@@ -298,10 +300,11 @@ func (s *DI) MakeCheck() *check.Check {
 // MakeClient dependency injector
 func (s *DI) MakeClient() *client.Client {
 	opts := &client.Options{
-		Err:                s.MakeErrorHandler(),
-		Stdout:             s.Stdout,
 		CallPlumbRepos:     s.CallMakePlumbRepo(),
 		CallPlumbTemplates: s.CallMakePlumbTemplate(),
+		Err:                s.MakeErrorHandler(),
+		Stdout:             s.Stdout,
+		VCS:                s.MakeVCS(),
 	}
 	return client.New(opts)
 }
@@ -511,4 +514,15 @@ func (s *DI) MakeUpdate() *update.Update {
 func (s *DI) MakeValidate() *validator.Validate {
 	v := validator.New()
 	return v
+}
+
+// MakeVCS dependency injector
+func (s *DI) MakeVCS() *vcs.VCS {
+	if s.cacheVCS != nil {
+		return s.cacheVCS
+	}
+	s.cacheVCS = vcs.New(&vcs.Options{
+		Err: s.MakeErrorHandler(),
+	})
+	return s.cacheVCS
 }
