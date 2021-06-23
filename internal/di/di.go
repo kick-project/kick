@@ -428,6 +428,8 @@ func (s *DI) MakeRepo() *repo.Repo {
 		Client:     s.MakeClient(),
 		ErrHandler: s.MakeErrorHandler(),
 		Log:        s.MakeLoggerOutput(""),
+		Valid:      s.MakeValidate(),
+		VCS:        s.MakeVCS(),
 	}
 	r := repo.New(o)
 	return r
