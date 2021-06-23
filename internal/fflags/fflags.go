@@ -26,3 +26,8 @@ func GitClone() bool {
 func ORM() bool {
 	return enabled() && os.Getenv("FF_KICK_ORM") == "true"
 }
+
+// RepoExtension is the extension of the kick repo command
+func RepoExtension() bool {
+	return enabled() && os.Getenv("FF_KICK_REPO_EXTENSION") == "true"
+}
