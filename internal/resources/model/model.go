@@ -59,9 +59,9 @@ type Sync struct {
 // Versions template versions
 type Versions struct {
 	gorm.Model
-	ID         uint `gorm:"primaryKey;not null"`
-	Version    string
-	TemplateID uint
+	ID         uint     `gorm:"primaryKey;not null"`
+	Version    string   `gorm:"index:idx_version_template,unique"`
+	TemplateID uint     `gorm:"index:idx_version_template,unique"`
 	Template   Template `gorm:"foreignKey:TemplateID"`
 }
 

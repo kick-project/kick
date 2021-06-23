@@ -126,7 +126,7 @@ func fakeJSON(t *testing.T) (path, name, url, desc string) {
 	name = faker.App().Name()
 	url = faker.Internet().Url()
 	desc = faker.Internet().Slug()
-	template := fmt.Sprintf(`{"name": "%s", "URL": "%s", "description": "%s"}`, name, url, desc)
+	template := fmt.Sprintf(`{"name": "%s", "URL": "%s", "description": "%s", "versions": ["1.0.0", "1.1.0", "2.0.0", "2.0.1"]}`, name, url, desc)
 
 	tf, err := ioutil.TempFile("", "*.json")
 	if err != nil {

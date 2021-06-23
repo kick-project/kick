@@ -502,6 +502,7 @@ func (s *DI) MakeUpdate() *update.Update {
 	}
 	o := &update.Options{
 		Client:      s.MakeClient(),
+		Err:         s.MakeErrorHandler(),
 		ConfigFile:  s.ConfigFile(),
 		ORM:         s.MakeORM(),
 		Log:         s.MakeLoggerOutput(""),

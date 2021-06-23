@@ -20,6 +20,7 @@ import (
 type Update struct {
 	client      *client.Client
 	configFile  *config.File       `validate:"required"`
+	err         errs.HandlerIface  `validate:"required"`
 	orm         *gorm.DB           `validate:"required"`
 	log         logger.OutputIface `validate:"required"`
 	metadataDir string             `validate:"required"`
@@ -29,6 +30,7 @@ type Update struct {
 type Options struct {
 	Client      *client.Client     `validate:"required"`
 	ConfigFile  *config.File       `validate:"required"`
+	Err         errs.HandlerIface  `validate:"required"`
 	ORM         *gorm.DB           `validate:"required"`
 	Log         logger.OutputIface `validate:"required"`
 	MetadataDir string             `validate:"required"`
@@ -39,6 +41,7 @@ func New(opts *Options) *Update {
 	return &Update{
 		client:      opts.Client,
 		configFile:  opts.ConfigFile,
+		err:         opts.Err,
 		orm:         opts.ORM,
 		log:         opts.Log,
 		metadataDir: opts.MetadataDir,
@@ -51,6 +54,7 @@ func (m *Update) Build() error {
 
 	c := workers{
 		client: m.client,
+		err:    m.err,
 		wait:   &sync.WaitGroup{},
 		log:    m.log,
 	}
@@ -73,6 +77,7 @@ func (m *Update) Build() error {
 
 type workers struct {
 	client *client.Client
+	err    errs.HandlerIface
 	log    logger.OutputIface
 	wait   *sync.WaitGroup
 }
@@ -98,31 +103,32 @@ func (c *workers) concurClones(num int, churl <-chan string, tchan chan<- *Templ
 
 func (c *workers) processURL(url string, chtemplate chan<- *Template) {
 	p, err := c.client.GetRepo(url, "")
-	if errs.LogF("error: cloning repository: %w: skipping %s", err, url) {
+	if c.err.LogF("error: cloning repository: %w: skipping %s", err, url) {
 		return
 	}
 	localpath := p.Path()
 
 	mpath := filepath.Clean(fmt.Sprintf("%s/repo.yml", localpath))
-	if errs.LogF("error: can not open %s: %w: skipping %s", mpath, err, url) {
+	if c.err.LogF("error: can not open %s: %w: skipping %s", mpath, err, url) {
 		return
 	}
 
 	repo := &Repo{URL: url}
 	err = repo.Load(mpath)
-	if errs.LogF("error: %w: skipping %s\n", err, url) {
+	if c.err.LogF("error: %w: skipping %s\n", err, url) {
 		return
 	}
 
 	paths, err := filepath.Glob(filepath.Clean(fmt.Sprintf("%s/templates/*.yml", localpath)))
-	if errs.LogF("error: getting a lists of paths: %w: skipping %s\n", err, url) {
+	if c.err.LogF("error: getting a lists of paths: %w: skipping %s\n", err, url) {
 		return
 	}
 
 	for _, curpath := range paths {
 		t := &Template{}
+		fmt.Println(curpath)
 		err := t.Load(curpath)
-		if errs.LogF("error: loading template metadata from %s: %w: skipping", curpath, err) {
+		if c.err.LogF("error: loading template metadata from %s: %w: skipping", curpath, err) {
 			continue
 		}
 		t.Repo = *repo
@@ -159,7 +165,7 @@ func (c *workers) insert(orm *gorm.DB, t *Template) {
 	if result.RowsAffected != 1 {
 		result = orm.First(&modRepo, "url = ?", t.Repo.URL)
 		if result.Error != nil {
-			errs.Panic(result.Error)
+			c.err.Panic(result.Error)
 		}
 		modRepo.Name = t.Repo.Name
 		modRepo.URL = t.Repo.URL
@@ -178,7 +184,7 @@ func (c *workers) insert(orm *gorm.DB, t *Template) {
 	if result.RowsAffected != 1 {
 		result = orm.First(&modTemplate, "url = ?", t.URL)
 		if result.Error != nil {
-			errs.Panic(result.Error)
+			c.err.Panic(result.Error)
 		}
 		modTemplate.Name = t.Name
 		modTemplate.URL = t.URL
@@ -186,6 +192,18 @@ func (c *workers) insert(orm *gorm.DB, t *Template) {
 		modTemplate.Repo = append(modTemplate.Repo, modRepo)
 
 		orm.Model(&modTemplate).Updates(&modTemplate)
+	}
+
+	modVersion := model.Versions{
+		Template: modTemplate,
+	}
+	for _, version := range t.Versions {
+		modVersion.ID = 0
+		modVersion.Version = version
+		result = orm.Clauses(clause.Insert{Modifier: "OR IGNORE"}).Create(&modVersion)
+		if result.Error != nil {
+			c.err.Panic(result.Error)
+		}
 	}
 }
 
@@ -208,9 +226,10 @@ func (m *Repo) Save(path string) error {
 
 // Template is a template creator
 type Template struct {
-	Name        string `json:"name" yaml:"name"`
-	URL         string `json:"url" yaml:"url"`
-	Description string `json:"description" yaml:"description"`
+	Name        string   `json:"name" yaml:"name"`
+	URL         string   `json:"url" yaml:"url"`
+	Description string   `json:"description" yaml:"description"`
+	Versions    []string `json:"versions" yaml:"versions"`
 	Repo        Repo
 }
 
