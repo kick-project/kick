@@ -105,12 +105,25 @@ test: ## Test
 	$(MAKE) test_setup
 	$(MAKE) goversion
 	$(MAKE) lint
-	$(MAKE) unit
-	$(MAKE) cx
-	$(MAKE) cc
+	@echo FEATURE FLAGS ENABLED
+	FF_ENABLED=true $(MAKE) _test_fflags
+	@echo FEATURE FLAGS DISABLED
+	FF_ENABLED=false $(MAKE) _test_std
 	@# Combined the return codes of all the tests
 	@echo "Exit codes, unit tests: $$(cat reports/exitcode-unit.txt), golangci-lint: $$(cat reports/exitcode-golangci-lint.txt), golint: $$(cat reports/exitcode-golint.txt)"
 	@exit $$(( $$(cat reports/exitcode-unit.txt) + $$(cat reports/exitcode-golangci-lint.txt) + $$(cat reports/exitcode-golint.txt) ))
+
+# Test without feature flags
+.PHONY: _test_std
+_test_std:
+	$(MAKE) unit
+	$(MAKE) cx
+	$(MAKE) cc
+
+# Test with feature flags
+.PHONY: _test_fflags
+_test_fflags:
+	$(MAKE) unit
 
 .PHONY: goversion
 goversion:
