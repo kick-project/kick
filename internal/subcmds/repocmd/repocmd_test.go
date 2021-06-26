@@ -1,9 +1,11 @@
 package repocmd_test
 
 import (
+	"bytes"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"regexp"
 	"testing"
 
 	"github.com/kick-project/kick/internal/di"
@@ -14,7 +16,6 @@ import (
 
 func TestUsageDoc(t *testing.T) {
 	assert.NotRegexp(t, "\t", repocmd.UsageDoc)
-	assert.NotRegexp(t, "\t", repocmd.UsageDocExtended)
 }
 
 func TestRepocmd_Build(t *testing.T) {
@@ -59,5 +60,25 @@ templates:
 func TestRepocmd_List(t *testing.T) {
 	home := filepath.Join(testtools.TempDir(), "home")
 	inject := di.Setup(home)
+	stdout := bytes.NewBufferString(``)
+	inject.Stdout = stdout
 	repocmd.Repo([]string{"repo", "list"}, inject)
+
+	mustMatch := regexp.MustCompile(`\| repo1 \| http://127.0.0.1:5000/repo1.git \|`)
+	mustNotMatch := regexp.MustCompile(`local`)
+	assert.Regexp(t, mustMatch, stdout.String())
+	assert.NotRegexp(t, mustNotMatch, stdout.String())
+}
+
+func TestRepocmd_Info(t *testing.T) {
+	home := filepath.Join(testtools.TempDir(), "home")
+	inject := di.Setup(home)
+	stdout := bytes.NewBufferString(``)
+	inject.Stdout = stdout
+	repocmd.Repo([]string{"repo", "info", "repo1"}, inject)
+
+	mustMatch1 := regexp.MustCompile(`name: repo1`)
+	mustMatch2 := regexp.MustCompile(`url: http://127.0.0.1:5000/repo1.git`)
+	assert.Regexp(t, mustMatch1, stdout)
+	assert.Regexp(t, mustMatch2, stdout)
 }

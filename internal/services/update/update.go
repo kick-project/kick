@@ -103,7 +103,7 @@ func (c *workers) concurClones(num int, churl <-chan string, tchan chan<- *Templ
 
 func (c *workers) processURL(url string, chtemplate chan<- *Template) {
 	p, err := c.client.GetRepo(url, "")
-	if c.err.LogF("error: cloning repository: %w: skipping %s", err, url) {
+	if c.err.LogF(`error cloning "%s": %w`, url, err) {
 		return
 	}
 	localpath := p.Path()
@@ -126,7 +126,6 @@ func (c *workers) processURL(url string, chtemplate chan<- *Template) {
 
 	for _, curpath := range paths {
 		t := &Template{}
-		fmt.Println(curpath)
 		err := t.Load(curpath)
 		if c.err.LogF("error: loading template metadata from %s: %w: skipping", curpath, err) {
 			continue

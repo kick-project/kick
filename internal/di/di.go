@@ -33,6 +33,7 @@ import (
 	"github.com/kick-project/kick/internal/services/setup"
 	"github.com/kick-project/kick/internal/services/update"
 	_ "github.com/mattn/go-sqlite3" // Driver for database/sql
+	"github.com/olekukonko/tablewriter"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
@@ -425,11 +426,15 @@ func (s *DI) MakeRemove() *remove.Remove {
 // MakeRepo dependency injector
 func (s *DI) MakeRepo() *repo.Repo {
 	o := &repo.Options{
-		Client:     s.MakeClient(),
-		ErrHandler: s.MakeErrorHandler(),
-		Log:        s.MakeLoggerOutput(""),
-		Valid:      s.MakeValidate(),
-		VCS:        s.MakeVCS(),
+		Conf:        s.ConfigFile(),
+		Client:      s.MakeClient(),
+		ErrHandler:  s.MakeErrorHandler(),
+		Log:         s.MakeLoggerOutput(""),
+		ORM:         s.MakeORM(),
+		Stdout:      s.Stdout,
+		TableWriter: s.MakeTableWriter(),
+		Valid:       s.MakeValidate(),
+		VCS:         s.MakeVCS(),
 	}
 	r := repo.New(o)
 	return r
@@ -465,6 +470,13 @@ func (s *DI) MakeSync() *sync.Sync {
 	syn := sync.New(o)
 	s.cacheSync = syn
 	return syn
+}
+
+// MakeTabwritter dependency injector
+func (s *DI) MakeTableWriter() *tablewriter.Table {
+	return tablewriter.NewWriter(
+		s.Stdout,
+	)
 }
 
 // MakeTemplate dependency injector

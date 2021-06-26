@@ -31,6 +31,15 @@
             "envFile": "${workspaceFolder}/.env"
         },
         {
+            "name": "kick repo list",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/cmd/kick",
+            "args": ["repo", "list"],
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
             "name": "kick start go /tmp/fooo",
             "type": "go",
             "request": "launch",
