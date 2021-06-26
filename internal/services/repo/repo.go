@@ -55,8 +55,8 @@ func New(opts *Options) *Repo {
 
 // Build build repo
 func (r *Repo) Build() {
-	r.load()
-	r.process()
+	r.loadRepo()
+	r.buildRepo()
 }
 
 func (r *Repo) wd() string {
@@ -65,7 +65,7 @@ func (r *Repo) wd() string {
 	return wd
 }
 
-func (r *Repo) load() {
+func (r *Repo) loadRepo() {
 	fp := filepath.Join(r.wd(), "repo.yml")
 	err := marshal.FromFile(&r.serialized, fp)
 	r.errs.FatalF("Can not load file \"%s\": %v", fp, err)
@@ -75,21 +75,21 @@ func (r *Repo) load() {
 	r.errs.FatalF("Can not load file \"%s\", invalid fields: %v", fp, err)
 }
 
-func (r *Repo) process() {
+func (r *Repo) buildRepo() {
 	destDir := filepath.Join(r.wd(), "templates")
 	err := os.MkdirAll(destDir, 0755)
 	errs.FatalF("Can create directory \"%s\": %v", destDir, err)
 
 	for _, url := range r.serialized.TemplateURLs {
-		plu, ok := r.download(url)
+		plu, ok := r.downloadRepo(url)
 		if !ok {
 			continue
 		}
-		r.construct(destDir, plu)
+		r.constructRepo(destDir, plu)
 	}
 }
 
-func (r *Repo) download(url string) (plu *plumb.Plumb, ok bool) {
+func (r *Repo) downloadRepo(url string) (plu *plumb.Plumb, ok bool) {
 	// Validate url
 	err := r.valid.Var(url, "url")
 	if r.errs.LogF("Invalid url \"%s\": %v", url, err) {
@@ -104,7 +104,7 @@ func (r *Repo) download(url string) (plu *plumb.Plumb, ok bool) {
 	return plumb, true
 }
 
-func (r *Repo) construct(destDir string, plu *plumb.Plumb) bool {
+func (r *Repo) constructRepo(destDir string, plu *plumb.Plumb) bool {
 	// Load .kick.yml
 	var templateMain serialize.TemplateMain
 	srcTemplate := filepath.Join(plu.Path(), ".kick.yml")
@@ -161,4 +161,9 @@ func (r *Repo) versions(plu *plumb.Plumb) []string {
 		versStr = append(versStr, v.String())
 	}
 	return versStr
+}
+
+// List list repositories
+func (r *Repo) List() {
+	_ = "noop"
 }

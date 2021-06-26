@@ -19,20 +19,20 @@ Options:
 `
 
 // UsageDocExtended help document passed to docopts
-var UsageDocExtended = `Build a repo from repo.yml
+var UsageDocExtended = `Buid/list/inform on repositories WIP
 
 Usage:
     kick repo build
-	kick repo list
-	kick repo info [--tver] <repo> [<template>]
+    kick repo list
+    kick repo info [--tver] <repo> [<template>]
 
 Options:
     -h --help    print help
-	--tver       template versions  
+    --tver       template versions  
     repo         repo subcommand
     build        build repo by downloading the URLS defined in repo.yml and creating the files templates/*.yml
-	list         list repositories
-	info         repository and/or template information
+    list         list repositories
+    info         repository and/or template information
 `
 
 // OptRepo initialize configuration file
@@ -67,7 +67,7 @@ func repoOrig(args []string, inject *di.DI) int {
 
 func repoExtension(args []string, inject *di.DI) int {
 	opts := &OptRepo{}
-	options.Bind(UsageDoc, args, opts)
+	options.Bind(UsageDocExtended, args, opts)
 	r := inject.MakeRepo()
 	switch {
 	case opts.Build:
