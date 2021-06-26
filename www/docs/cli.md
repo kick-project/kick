@@ -86,15 +86,20 @@ Options:
 ## kick repo
 
 ```bash
-Build a repo from repo.yml
+Buid/list/inform on repositories WIP
 
 Usage:
     kick repo build
+    kick repo list
+    kick repo info <repo>
 
 Options:
     -h --help    print help
     repo         repo subcommand
     build        build repo by downloading the URLS defined in repo.yml and creating the files templates/*.yml
+    list         list repositories
+    info         repository and/or template information
+    <repo>       name of repository
 ```
 
 ## kick init
