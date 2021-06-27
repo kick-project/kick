@@ -72,12 +72,18 @@ func (c *Client) GetPlumb(p *plumb.Plumb) error {
 
 // GetTemplate fetch template and store in template store
 func (c *Client) GetTemplate(url, ref string) (*plumb.Plumb, error) {
-	p := c.plumbTemplates(url, ref)
+	p, err := c.plumbTemplates(url, ref)
+	if err != nil {
+		return nil, err
+	}
 	return p, c.GetPlumb(p)
 }
 
 // GetRepo fetch repo and store in repo store
 func (c *Client) GetRepo(url, ref string) (*plumb.Plumb, error) {
-	p := c.plumbRepos(url, ref)
+	p, err := c.plumbRepos(url, ref)
+	if err != nil {
+		return nil, err
+	}
 	return p, c.GetPlumb(p)
 }

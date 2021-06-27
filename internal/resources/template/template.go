@@ -157,7 +157,7 @@ func (t *Template) SetSrc(name string) {
 		}
 	}
 	p, err := t.client.GetTemplate(tmpl.URL, "")
-	t.errs.FatalF(`template "%s" not found: %v`, name, err)
+	t.errs.FatalF(`handle "%s" not found: %v`, name, err)
 	localpath := p.Path()
 
 	// Set renderer from conf

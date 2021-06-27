@@ -189,18 +189,18 @@ func (s *DI) validate(item interface{}) {
 
 // CallMakePlumbRepo dependency injector
 func (s *DI) CallMakePlumbRepo() callbacks.MakePlumb {
-	fn := func(url, ref string) *plumb.Plumb {
-		p := plumb.New(s.PathRepoDir, url, ref)
-		return p
+	fn := func(url, ref string) (*plumb.Plumb, error) {
+		p, err := plumb.New(s.PathRepoDir, url, ref)
+		return p, err
 	}
 	return fn
 }
 
 // CallMakePlumbTemplate dependency injector
 func (s *DI) CallMakePlumbTemplate() callbacks.MakePlumb {
-	fn := func(url, ref string) *plumb.Plumb {
-		p := plumb.New(s.PathTemplateDir, url, ref)
-		return p
+	fn := func(url, ref string) (*plumb.Plumb, error) {
+		p, err := plumb.New(s.PathTemplateDir, url, ref)
+		return p, err
 	}
 	return fn
 }

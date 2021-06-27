@@ -26,7 +26,7 @@ type Plumb struct {
 }
 
 // New is a Plumb constructor
-func New(basedir, url, ref string) *Plumb {
+func New(basedir, url, ref string) (*Plumb, error) {
 	p := &Plumb{
 		base: basedir,
 		url:  url,
@@ -34,9 +34,9 @@ func New(basedir, url, ref string) *Plumb {
 	}
 	err := p.parse(url)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	return p
+	return p, nil
 }
 
 // parse parse url
