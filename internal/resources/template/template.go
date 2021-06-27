@@ -42,6 +42,8 @@ type Template struct {
 	exit           *exit.Handler
 	log            logger.OutputIface
 	modeLineLen    uint8
+	nounset        bool
+	noempty        bool
 	renderCurrent  string
 	renderersAvail map[string]renderer.Renderer
 	stderr         io.Writer
@@ -61,6 +63,8 @@ type Options struct {
 	Errs           *errs.Handler                `validate:"required"`
 	Exit           *exit.Handler                `validate:"required"`
 	Log            logger.OutputIface           `validate:"required"`
+	NoUnset        bool                         // No unset variables
+	NoEmpty        bool                         // No empty variables
 	RenderCurrent  string                       `validate:"required"`
 	RenderersAvail map[string]renderer.Renderer `validate:"required"`
 	Stderr         io.Writer                    `validate:"required"`
@@ -92,6 +96,8 @@ func New(opts *Options) *Template {
 		exit:           opts.Exit,
 		log:            opts.Log,
 		modeLineLen:    modeLineLen,
+		nounset:        opts.NoUnset,
+		noempty:        opts.NoEmpty,
 		renderCurrent:  opts.RenderCurrent,
 		renderersAvail: opts.RenderersAvail,
 		stderr:         opts.Stderr,
@@ -282,6 +288,8 @@ type filePair struct {
 	mlen      uint8  // Mode line length
 	errs      *errs.Handler
 	mu        sync.Mutex
+	nounset   bool
+	noempty   bool
 	renderer  renderer.Renderer
 	srcInfo   os.FileInfo
 	srcPath   string // Source path
@@ -394,7 +402,7 @@ func (fp *filePair) render(mline uint8) error {
 		os.Remove(tempPath)
 	}()
 
-	err := fp.renderer.File2File(tempPath, fp.dstPath, fp.variables, false, false)
+	err := fp.renderer.File2File(tempPath, fp.dstPath, fp.variables, fp.nounset, fp.noempty)
 	fp.errs.Panic(err)
 	return nil
 }
