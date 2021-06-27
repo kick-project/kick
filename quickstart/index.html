@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../img/favicon.ico">
+        <title>quick start - Kick template tool</title>
+        <link href="../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+
+        <script src="../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../js/bootstrap.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/bash.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="..">Kick template tool</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="navitem">
+                                <a href=".." class="nav-link">home</a>
+                            </li>
+                            <li class="navitem">
+                                <a href="../install/" class="nav-link">installation</a>
+                            </li>
+                            <li class="navitem active">
+                                <a href="./" class="nav-link">quick start</a>
+                            </li>
+                            <li class="navitem">
+                                <a href="../repos/" class="nav-link">repositories</a>
+                            </li>
+                            <li class="navitem">
+                                <a href="../cli/" class="nav-link">cli</a>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a rel="prev" href="../install/" class="nav-link">
+                                    <i class="fa fa-arrow-left"></i> Previous
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a rel="next" href="../repos/" class="nav-link">
+                                    Next <i class="fa fa-arrow-right"></i>
+                                </a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-light navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-toggle="collapse" data-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-level="1"><a href="#quick-start" class="nav-link">Quick Start</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-level="1"><a href="#project-templates" class="nav-link">Project templates</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-level="1"><a href="#create-git-ignore" class="nav-link">Create git ignore</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#variables" class="nav-link">Variables</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#template-files" class="nav-link">Template files</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#git-project-templates" class="nav-link">Git Project Templates</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="quick-start">Quick Start</h1>
+<h1 id="project-templates">Project templates</h1>
+<p>Project templates are folders that contain other directories and files.</p>
+<p>Given the following directory tree, lets create a <code>Project Template</code> which
+contains the same files and folders.</p>
+<pre><code>mytemplate
+├── cmd
+│   └── ${PROJECT_NAME}
+│       └── main.go
+├── docs
+├── .gitignore
+├── README.md
+└── scripts
+    └── ${PROJECT_NAME}.sh
+</code></pre>
+<p>Create a folder to hold templates.</p>
+<pre><code class="language-bash">mkdir ~/templates
+cd ~/templates
+</code></pre>
+<p>Create the Project Template <code>mytemplate</code>.</p>
+<p>Start be creating a project path</p>
+<pre><code class="language-bash">mkdir mytemplate
+mkdir -p 'mytemplate/cmd/${PROJECT_NAME}/'
+touch 'mytemplate/cmd/${PROJECT_NAME}/main.go'
+</code></pre>
+<p>One will notice the <code>${PROJECT_NAME}</code> variable which is interpolated when
+creating new projects.</p>
+<h1 id="create-git-ignore">Create git ignore</h1>
+<p>cat &lt;&lt;'EOF' &gt; mytemplate/.gitignore
+.DS_Store # MacOS files
+.*.swp    # Vim buffer file
+EOF</p>
+<p>touch mytemplate/README.md
+mkdir -p mytemplate/docs
+mkdir -p mytemplate/scripts
+touch 'mytemplate/scripts/${PROJECT_NAME}.sh'</p>
+<pre><code>
+Verify that the structure matches the layout above.
+```bash
+tree -an mytemplate
+mytemplate
+├── cmd
+│   └── ${PROJECT_NAME}
+│       └── main.go
+├── docs
+├── .gitignore
+├── README.md
+└── scripts
+    └── ${PROJECT_NAME}.sh
+</code></pre>
+<p>Examine the <code>.gitignore</code> file in your project.</p>
+<pre><code class="language-bash">cat mytemplate/
+</code></pre>
+<p>Install the template using <code>kick</code> by specifying the path to the <code>mytemplate</code>
+directory. In the example below we will use the handle of <code>myhandle</code>.</p>
+<pre><code class="language-bash">kick install myhandle ~/templates/mytemplate
+</code></pre>
+<p>To see the installed template run the <code>kick list</code> sub command.</p>
+<pre><code class="language-bash">kick list -l
++----------+----------+-------------+------------------------------------+
+|  HANDLE  | TEMPLATE | DESCRIPTION |              LOCATION              |
++----------+----------+-------------+------------------------------------+
+| myhandle | -        | -           | /home/vagrant/templates/mytemplate |
++----------+----------+-------------+------------------------------------+
+</code></pre>
+<p>Create a projects directory to create new projects.</p>
+<pre><code class="language-bash">mkdir ~/projects
+</code></pre>
+<p>Lets now use <code>myhandle</code> to create directories</p>
+<pre><code class="language-bash">kick start myhandle ~/projects/myproject
+</code></pre>
+<p>Upon examining the folder tree, one will see that any file or folder using the
+variable <code>${PROJECT_NAME}</code> has been replaced with <code>myproject</code>. Any file or
+folder that contains a variable in its name will be interpolated by the
+variables value.</p>
+<pre><code class="language-bash">cd ~/projects
+tree -an myproject
+myproject
+├── cmd
+│   └── myproject
+│       └── main.go
+├── docs
+├── .gitignore
+├── README.md
+└── scripts
+    └── myproject.sh
+
+4 directories, 4 files
+</code></pre>
+<h2 id="variables">Variables</h2>
+<p>Variables are either...</p>
+<ol>
+<li>predefined variables</li>
+<li>environment variables</li>
+<li>variables stored in <code>~/.env</code></li>
+</ol>
+<p>The order of precedence is as above.</p>
+<p>The variables stored in <code>~/.env</code> are key value pairs and take the form
+<code>key=value</code>.</p>
+<p>Create some environment variables which will be used later. Using your favorite
+editor add the following variables to <code>~/.env</code></p>
+<pre><code class="language-text">author=&quot;JOHN SMITH&quot;
+email=john.smith@email.com
+</code></pre>
+<p>NOTE: The <code>~/.env</code> file isn't just for the <code>kick</code> utility but can be used by
+any other program in the same way that <code>~/.profile</code> is not for just one tool.</p>
+<h2 id="template-files">Template files</h2>
+<p>Templates files are any text file which contains a modeline. A modeline is a
+piece of text that informs kick that the file is a template. A modeline takes up
+the form <code>kick:render</code> and should be placed within the first 5 lines of a text
+file. Modeline lines are stripped from the file and can be placed inside any
+comment type.</p>
+<p>Example modlines</p>
+<pre><code class="language-text">kick:render
+</code></pre>
+<pre><code class="language-bash"># kick:render
+</code></pre>
+<pre><code class="language-c">// kick:render
+</code></pre>
+<pre><code class="language-html">&lt;!--- kick:render --&gt;
+</code></pre>
+<p>The next exercise is to add 4 template variables to the <code>README.md</code> file in our
+template.  </p>
+<ul>
+<li><code>${PROJECT_NAME}</code> - Predefined variable</li>
+<li><code>${USER}</code>         - Environment variable built into shells (E.G. Bash) which
+                      contains the current username.</li>
+<li><code>${author}</code>       - Variable from "~/.env"</li>
+<li><code>${email}</code>        - Variable from "~/.env"</li>
+</ul>
+<p>Change the contents of the <code>~/templates/mytemplate/README.md</code> by cutting and
+pasting the whole text below...</p>
+<pre><code class="language-bash">cat &lt;&lt;'EOF' &gt; ~/templates/mytemplate/README.md
+&lt;!--- kick:render --&gt;
+# ${PROJECT_NAME} 
+
+AUTHOR: ${author}
+EMAIL: ${email}
+USER: ${USER}
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
+incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis
+nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
+fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
+culpa qui officia deserunt mollit anim id est laborum.
+EOF
+</code></pre>
+<p>Create a new project using the same handle <code>myhandle</code> ...</p>
+<pre><code class="language-bash">kick start myhandle ~/projects/project2
+</code></pre>
+<p>Inspect the contents of the <code>README.md</code> file.</p>
+<pre><code>cat ~/projects/project2/README.md
+</code></pre>
+<pre><code class="language-markdown"># project2
+
+AUTHOR: JOHN SMITH
+EMAIL: john.smith@email.com
+USER: vagrant
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
+incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis
+nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
+fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
+culpa qui officia deserunt mollit anim id est laborum.
+</code></pre>
+<h2 id="git-project-templates">Git Project Templates</h2>
+<p>Kick can use remote git repositories as stores for project templates.  Using our
+freshly minted project template we can upload this to a git repository and use
+<code>kick install</code> to install the directory. </p>
+<p>Create a git repository and upload it to a remote repository.</p>
+<pre><code>cd ~/templates/mytemplate
+git init
+git add .
+git commit -m 'Initial commit'
+git remote add origin git@github.com/username/mytemplate.git
+git push -u origin master
+</code></pre>
+<p>Remove the old handle</p>
+<pre><code class="language-bash">kick remove mytemplate
+</code></pre>
+<p>Add a remote location</p>
+<pre><code class="language-bash">kick install mytemplate git@github.com/username/mytemplate.git
+</code></pre>
+<p>Start a new project</p>
+<pre><code class="language-bash">kick start mytemplate ~/project/project3
+</code></pre>
+<p>If you would like to find out how to create a repository of project templates,
+head to the repositories section.</p></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = "..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../js/base.js" defer></script>
+        <script src="../search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>
