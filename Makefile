@@ -265,6 +265,9 @@ getversion:
 .PHONY: builddocs
 builddocs: www/docs/cli.md ## Build documents
 
+deploydocs: builddocs ## Deploy documentaiton to github
+	cd www; mkdocs gh-deploy
+
 # docserver is a python program install using pip install mkdocs-material
 .PHONY: docserver
 docserver: builddocs ## Start document server
