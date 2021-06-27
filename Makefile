@@ -98,7 +98,7 @@ _install: $(GOPATH)/bin/$(NAME) ## Install to $(GOPATH)/bin
 .PHONY: clean
 clean: ## Reset project to original state
 	-test -f tmp/server.pid && kill -TERM $$(cat tmp/server.pid)
-	rm -rf .cache kick dist reports tmp vendor nfpm.yaml
+	rm -rf .cache kick dist reports tmp vendor nfpm.yaml www/site
 
 .PHONY: test
 test: ## Test
