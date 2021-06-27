@@ -6,7 +6,7 @@ require (
 	github.com/Microsoft/go-winio v0.4.18 // indirect
 	github.com/a8m/envsubst v1.2.0
 	github.com/anmitsu/go-shlex v0.0.0-20200514113438-38f4b401e2be // indirect
-	github.com/coreos/go-semver v0.3.0 // indirect
+	github.com/coreos/go-semver v0.3.0
 	github.com/docopt/docopt-go v0.0.0-20180111231733-ee0de3bc6815
 	github.com/gliderlabs/ssh v0.3.2 // indirect
 	github.com/go-git/go-git/v5 v5.3.0
