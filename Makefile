@@ -202,6 +202,7 @@ _release: ## Trigger a release by creating a tag and pushing to the upstream rep
 	@$(MAKE) _isreleased 2> /dev/null
 	git tag v$(VERSION)
 	git push --tags
+	$(MAKE) deploydocs
 
 # To be run inside a github workflow
 .PHONY: _release_github
