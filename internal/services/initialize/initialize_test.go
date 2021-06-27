@@ -17,7 +17,9 @@ func TestInitialize_Repo(t *testing.T) {
 	err := os.MkdirAll(home, 0755)
 	errs.Panic(err)
 
-	inject := di.Setup(home)
+	inject := di.New(
+		&di.Options{Home: home},
+	)
 
 	repo := `myrepo`
 	repoPath := filepath.Join(home, repo)
@@ -45,7 +47,9 @@ func TestInitialize_Repo_NoPath(t *testing.T) {
 	err := os.MkdirAll(home, 0755)
 	errs.Panic(err)
 
-	inject := di.Setup(home)
+	inject := di.New(
+		&di.Options{Home: home},
+	)
 
 	repo := `myrepo`
 	repoPath := filepath.Join(home, repo)
@@ -75,7 +79,9 @@ func TestInitialize_Template(t *testing.T) {
 	err := os.MkdirAll(home, 0755)
 	errs.Panic(err)
 
-	inject := di.Setup(home)
+	inject := di.New(
+		&di.Options{Home: home},
+	)
 
 	tmpl := `mytemplate`
 	tmplPath := filepath.Join(home, tmpl)
@@ -103,7 +109,9 @@ func TestInitialize_Template_NoDir(t *testing.T) {
 	err := os.MkdirAll(home, 0755)
 	errs.Panic(err)
 
-	inject := di.Setup(home)
+	inject := di.New(
+		&di.Options{Home: home},
+	)
 
 	tmpl := `mytemplate`
 	tmplPath := filepath.Join(home, tmpl)

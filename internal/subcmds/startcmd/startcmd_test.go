@@ -23,7 +23,9 @@ func TestStart(t *testing.T) {
 	path, _ := ioutil.TempDir(tmpdir, "start-")
 	path = filepath.Join(path, "tmpl")
 	args := []string{"start", "tmpl", path}
-	inject := di.Setup(home)
+	inject := di.New(&di.Options{
+		Home: home,
+	})
 	startcmd.Start(args, inject)
 	assert.DirExists(t, path)
 }

@@ -16,7 +16,9 @@ import (
 
 func TestUpdate_Build(t *testing.T) {
 	home := fp.Join(testtools.TempDir(), "home")
-	s := di.Setup(home)
+	s := di.New(&di.Options{
+		Home: home,
+	})
 	initIt(s)
 	m := s.MakeUpdate()
 	err := m.Build()

@@ -19,7 +19,9 @@ func TestUsageDoc(t *testing.T) {
 func TestList(t *testing.T) {
 	exit.Mode(exit.MPanic)
 	home := filepath.Join(testtools.TempDir(), "home")
-	s := di.Setup(home)
+	s := di.New(
+		&di.Options{Home: home},
+	)
 	i := s.MakeSetup()
 	i.Init()
 
@@ -34,7 +36,9 @@ func TestList(t *testing.T) {
 func TestListLong(t *testing.T) {
 	exit.Mode(exit.MPanic)
 	home := filepath.Join(testtools.TempDir(), "home")
-	inject := di.Setup(home)
+	inject := di.New(
+		&di.Options{Home: home},
+	)
 	i := inject.MakeSetup()
 	i.Init()
 

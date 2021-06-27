@@ -53,13 +53,13 @@ templates:
 	_ = os.Chdir(dirPath)
 	defer func() { _ = os.Chdir(wd) }()
 	home := filepath.Join(testtools.TempDir(), "home")
-	inject := di.Setup(home)
+	inject := di.New(&di.Options{Home: home})
 	repocmd.Repo([]string{"repo", "build"}, inject)
 }
 
 func TestRepocmd_List(t *testing.T) {
 	home := filepath.Join(testtools.TempDir(), "home")
-	inject := di.Setup(home)
+	inject := di.New(&di.Options{Home: home})
 	stdout := bytes.NewBufferString(``)
 	inject.Stdout = stdout
 	repocmd.Repo([]string{"repo", "list"}, inject)
@@ -72,7 +72,7 @@ func TestRepocmd_List(t *testing.T) {
 
 func TestRepocmd_Info(t *testing.T) {
 	home := filepath.Join(testtools.TempDir(), "home")
-	inject := di.Setup(home)
+	inject := di.New(&di.Options{Home: home})
 	stdout := bytes.NewBufferString(``)
 	inject.Stdout = stdout
 	repocmd.Repo([]string{"repo", "info", "repo1"}, inject)

@@ -19,7 +19,9 @@ func TestSearch(t *testing.T) {
 	exit.Mode(exit.MPanic)
 	args := []string{"search", "keyword"}
 	home := filepath.Join(testtools.TempDir(), "home")
-	inject := di.Setup(home)
+	inject := di.New(&di.Options{
+		Home: home,
+	})
 	i := inject.MakeSetup()
 	i.Init()
 	searchcmd.Search(args, inject)

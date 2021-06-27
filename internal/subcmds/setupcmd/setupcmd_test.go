@@ -21,7 +21,9 @@ func TestUsageDoc(t *testing.T) {
 func TestInit(t *testing.T) {
 	exit.Mode(exit.MPanic)
 	home := fp.Join(testtools.TempDir(), "init")
-	inject := di.Setup(home)
+	inject := di.New(
+		&di.Options{Home: home},
+	)
 	initcmd.SetupCmd([]string{"setup"}, inject)
 	dbfile := fp.Clean(fmt.Sprintf("%s/.kick/metadata/metadata.db", home))
 	assert.DirExists(t, fp.Clean(fmt.Sprintf("%s/.kick", home)))

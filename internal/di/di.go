@@ -91,7 +91,11 @@ type DI struct {
 	cacheVCS         *vcs.VCS
 }
 
-// Setup get di using the supplied "home" directory option. Any
+type Options struct {
+	Home string // Path to home directory
+}
+
+// New get di using the supplied "home" directory option. Any
 // Dependency Injection (DI) configuration created by di is then
 // contextualized by the home variable. For instance when home is
 // set the paths...
@@ -107,14 +111,15 @@ type DI struct {
 // If initialization is needed for testing then the initialize package can be
 // used. For example
 //
-//   set := Setup("/tmp/tmp_home");
+//   set := New("/tmp/tmp_home");
 //   init := set.MakeInitialize()
 //   init.Init()
 //
 // will create the structures under "/tmp/tmp_home"
 //
 // "home" must be explicitly set or a panic will ensue.
-func Setup(home string) *DI {
+func New(opts *Options) *DI {
+	home := opts.Home
 	if home == "" {
 		panic("home is set to an empty string")
 	}

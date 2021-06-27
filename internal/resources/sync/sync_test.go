@@ -22,7 +22,9 @@ import (
 
 func setup(t *testing.T, home string, models ...interface{}) (*sync.Sync, *di.DI, *gorm.DB) {
 	home = fp.Join(testtools.TempDir(), home)
-	inject := di.Setup(home)
+	inject := di.New(&di.Options{
+		Home: home,
+	})
 
 	init := inject.MakeSetup()
 	init.Init()

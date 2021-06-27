@@ -45,7 +45,7 @@ func setup() (r *remove.Remove) {
 	if err != nil {
 		panic(err)
 	}
-	inject := di.Setup(home)
+	inject := di.New(&di.Options{Home: home})
 
 	init := inject.MakeSetup()
 	init.Init()

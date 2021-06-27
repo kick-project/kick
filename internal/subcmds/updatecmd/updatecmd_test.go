@@ -20,7 +20,7 @@ func TestUpdate(t *testing.T) {
 	exit.Mode(exit.MPanic)
 
 	home := filepath.Join(testtools.TempDir(), "home")
-	inject := di.Setup(home)
+	inject := di.New(&di.Options{Home: home})
 
 	setupcmd.SetupCmd([]string{"setup"}, inject)
 

@@ -74,7 +74,7 @@ func TestInstallSSHNoRepo(t *testing.T) {
 		return
 	}
 
-	inject := di.Setup(home)
+	inject := di.New(&di.Options{Home: home})
 	inject.LogLevel(logger.DebugLevel)
 	inject.ExitMode = exit.MPanic
 
@@ -123,7 +123,7 @@ func installTest(t *testing.T, id, handle, template string) {
 		t.Error(err)
 	}
 
-	inject := di.Setup(home)
+	inject := di.New(&di.Options{Home: home})
 	inject.LogLevel(logger.DebugLevel)
 
 	ec := setupcmd.SetupCmd([]string{"setup"}, inject)

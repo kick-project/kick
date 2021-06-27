@@ -26,7 +26,11 @@ func setup() *testParams {
 	params = &testParams{}
 	params.base = filepath.Join(testtools.TempDir(), "TestInfo")
 	params.repopath = filepath.Join(params.base, "testrepo")
-	params.di = di.Setup(params.base)
+	params.di = di.New(
+		&di.Options{
+			Home: params.base,
+		},
+	)
 	params.vcs = params.di.MakeVCS()
 	return params
 }

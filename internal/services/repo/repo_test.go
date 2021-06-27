@@ -44,7 +44,12 @@ templates:
 	}
 	_ = os.Chdir(dirPath)
 	defer func() { _ = os.Chdir(wd) }()
-	inject := di.Setup(filepath.Join(testtools.TempDir(), "home"))
+	home := filepath.Join(testtools.TempDir(), "home")
+	inject := di.New(
+		&di.Options{
+			Home: home,
+		},
+	)
 	m := inject.MakeRepo()
 	m.Build()
 }

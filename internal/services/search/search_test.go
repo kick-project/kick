@@ -18,7 +18,7 @@ import (
 func TestSearch(t *testing.T) {
 	// Initialize database
 	home := filepath.Join(testtools.TempDir(), "TestSearch")
-	inject := di.Setup(home)
+	inject := di.New(&di.Options{Home: home})
 	i := inject.MakeSetup()
 	if _, err := os.Stat(inject.SqliteDB); err == nil {
 		err = os.Remove(inject.SqliteDB)

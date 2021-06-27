@@ -28,7 +28,7 @@ func main() {
 	loadDotenv()
 	home, err := os.UserHomeDir()
 	errs.FatalF("error: %w", err)
-	inject := di.Setup(home)
+	inject := di.New(&di.Options{Home: home})
 
 	// open log file and close on exit
 	logfile := os.Getenv("KICK_LOG")
