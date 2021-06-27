@@ -2,6 +2,7 @@ package repocmd_test
 
 import (
 	"bytes"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -9,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/kick-project/kick/internal/di"
+	"github.com/kick-project/kick/internal/resources/marshal"
 	"github.com/kick-project/kick/internal/resources/testtools"
 	"github.com/kick-project/kick/internal/subcmds/repocmd"
 	"github.com/stretchr/testify/assert"
@@ -55,6 +57,27 @@ templates:
 	home := filepath.Join(testtools.TempDir(), "home")
 	inject := di.New(&di.Options{Home: home})
 	repocmd.Repo([]string{"repo", "build"}, inject)
+
+	type stru struct {
+		Name     string   `yaml:"name"`
+		Desc     string   `yaml:"description"`
+		URL      string   `yaml:"url"`
+		Versions []string `yaml:"versions"`
+	}
+
+	for _, id := range []string{"tmpl", "tmpl1", "tmpl2", "tmpl3", "tmpl4"} {
+		d := &stru{}
+		y := filepath.Join(dirPath, "templates", fmt.Sprintf(`%s.yml`, id))
+		err := marshal.FromFile(d, y)
+		if err != nil {
+			t.Error(err)
+		}
+
+		assert.Equal(t, d.Name, id)
+		assert.Equal(t, d.URL, fmt.Sprintf(`http://127.0.0.1:5000/%s.git`, id))
+		assert.Equal(t, d.Desc, fmt.Sprintf(`%s template`, id))
+		assert.Greater(t, len(d.Versions), 0)
+	}
 }
 
 func TestRepocmd_List(t *testing.T) {
