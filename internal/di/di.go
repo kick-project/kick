@@ -16,6 +16,7 @@ import (
 	"github.com/kick-project/kick/internal/resources/client"
 	"github.com/kick-project/kick/internal/resources/client/plumb"
 	"github.com/kick-project/kick/internal/resources/config"
+	"github.com/kick-project/kick/internal/resources/dfaults"
 	"github.com/kick-project/kick/internal/resources/errs"
 	"github.com/kick-project/kick/internal/resources/exit"
 	"github.com/kick-project/kick/internal/resources/logger"
@@ -49,10 +50,6 @@ type DI struct {
 	// See https://pkg.go.dev/github.com/apex/log#InfoLevel for
 	// available levels.
 	logLevel logger.Level
-
-	// Standard logging
-	StdLogFlags  int    // Go standard logging flags
-	StdLogPrefix string // Go standard logging prefix
 
 	ExitMode int // Exit mode either exit.None or exit.Panic. See package exit for context
 
@@ -92,7 +89,12 @@ type DI struct {
 }
 
 type Options struct {
-	Home string // Path to home directory
+	Home     string    // Path to home directory
+	DBPath   string    // SQLite DB path
+	ExitMode int       // Valid values (exit.MNone, exit.MPanic) defaults to exit.MNone
+	Stdin    io.Reader // Stdin injected
+	Stdout   io.Writer // Stdout injected
+	Stderr   io.Writer // Stderr injected
 }
 
 // New get di using the supplied "home" directory option. Any
@@ -111,7 +113,7 @@ type Options struct {
 // If initialization is needed for testing then the initialize package can be
 // used. For example
 //
-//   set := New("/tmp/tmp_home");
+//   set := New(&Options{home: "/tmp/tmp_home"});
 //   init := set.MakeInitialize()
 //   init.Init()
 //
@@ -132,20 +134,18 @@ func New(opts *Options) *DI {
 	logLvl := logger.ErrorLevel
 
 	s := &DI{
-		SqliteDB:         sqlitedb,
+		SqliteDB:         dfaults.String(sqlitedb, opts.DBPath),
 		Home:             home,
 		PathMetadataDir:  pathMetadataDir,
 		PathTemplateConf: pathTemplateConf,
 		PathRepoDir:      pathRepoDir,
 		PathTemplateDir:  pathTemplateDir,
 		PathUserConf:     pathUserConf,
-		Stderr:           os.Stderr,
-		Stdin:            os.Stdin,
-		Stdout:           os.Stdout,
+		Stderr:           dfaults.Interface(os.Stderr, opts.Stderr).(io.Writer),
+		Stdin:            dfaults.Interface(os.Stdin, opts.Stdout).(io.Reader),
+		Stdout:           dfaults.Interface(os.Stdout, opts.Stdout).(io.Writer),
 		logLevel:         logLvl,
-		StdLogFlags:      log.LstdFlags,
-		StdLogPrefix:     "",
-		ExitMode:         exit.MNone,
+		ExitMode:         opts.ExitMode,
 	}
 	envs := s.MakeEnvs()
 	if envs.Debug() {
