@@ -92,11 +92,6 @@
             
             <li class="nav-item" data-level="1"><a href="#project-templates" class="nav-link">Project templates</a>
               <ul class="nav flex-column">
-              </ul>
-            </li>
-            
-            <li class="nav-item" data-level="1"><a href="#create-git-ignore" class="nav-link">Create git ignore</a>
-              <ul class="nav flex-column">
             <li class="nav-item" data-level="2"><a href="#variables" class="nav-link">Variables</a>
               <ul class="nav flex-column">
               </ul>
@@ -119,8 +114,8 @@
 <h1 id="quick-start">Quick Start</h1>
 <h1 id="project-templates">Project templates</h1>
 <p>Project templates are folders that contain other directories and files.</p>
-<p>Given the following directory tree, lets create a <code>Project Template</code> which
-contains the same files and folders.</p>
+<p>Given the following directory tree, lets create a <code>Project Template</code> which contains the
+same files and folders.</p>
 <pre><code>mytemplate
 ├── cmd
 │   └── ${PROJECT_NAME}
@@ -136,26 +131,23 @@ contains the same files and folders.</p>
 cd ~/templates
 </code></pre>
 <p>Create the Project Template <code>mytemplate</code>.</p>
-<p>Start be creating a project path</p>
 <pre><code class="language-bash">mkdir mytemplate
 mkdir -p 'mytemplate/cmd/${PROJECT_NAME}/'
 touch 'mytemplate/cmd/${PROJECT_NAME}/main.go'
-</code></pre>
-<p>One will notice the <code>${PROJECT_NAME}</code> variable which is interpolated when
-creating new projects.</p>
-<h1 id="create-git-ignore">Create git ignore</h1>
-<p>cat &lt;&lt;'EOF' &gt; mytemplate/.gitignore
+
+# Create git ignore
+cat &lt;&lt;'EOF' &gt; mytemplate/.gitignore
 .DS_Store # MacOS files
 .*.swp    # Vim buffer file
-EOF</p>
-<p>touch mytemplate/README.md
+EOF
+
+touch mytemplate/README.md
 mkdir -p mytemplate/docs
 mkdir -p mytemplate/scripts
-touch 'mytemplate/scripts/${PROJECT_NAME}.sh'</p>
-<pre><code>
-Verify that the structure matches the layout above.
-```bash
-tree -an mytemplate
+touch 'mytemplate/scripts/${PROJECT_NAME}.sh'
+</code></pre>
+<p>Verify that the structure matches the layout above.</p>
+<pre><code class="language-bash">tree -an mytemplate
 mytemplate
 ├── cmd
 │   └── ${PROJECT_NAME}
