@@ -9,7 +9,6 @@ import (
 	"github.com/kick-project/kick/internal"
 	"github.com/kick-project/kick/internal/di"
 	"github.com/kick-project/kick/internal/resources/errs"
-	"github.com/kick-project/kick/internal/resources/exit"
 	"github.com/kick-project/kick/internal/resources/logger"
 	"github.com/kick-project/kick/internal/subcmds/initcmd"
 	"github.com/kick-project/kick/internal/subcmds/installcmd"
@@ -29,6 +28,7 @@ func main() {
 	home, err := os.UserHomeDir()
 	errs.FatalF("error: %w", err)
 	inject := di.New(&di.Options{Home: home})
+	exitHdlr := inject.MakeExitHandler()
 
 	// open log file and close on exit
 	logfile := os.Getenv("KICK_LOG")
@@ -51,25 +51,25 @@ func main() {
 	o := internal.GetOptMain(args)
 	switch {
 	case o.Start:
-		exit.Exit(startcmd.Start(args[1:], inject))
+		exitHdlr.Exit(startcmd.Start(args[1:], inject))
 	case o.List:
-		exit.Exit(listcmd.List(args[1:], inject))
+		exitHdlr.Exit(listcmd.List(args[1:], inject))
 	case o.Search:
-		exit.Exit(searchcmd.Search(args[1:], inject))
+		exitHdlr.Exit(searchcmd.Search(args[1:], inject))
 	case o.Setup:
-		exit.Exit(setupcmd.SetupCmd(args[1:], inject))
+		exitHdlr.Exit(setupcmd.SetupCmd(args[1:], inject))
 	case o.Update:
-		exit.Exit(updatecmd.Update(args[1:], inject))
+		exitHdlr.Exit(updatecmd.Update(args[1:], inject))
 	case o.Install:
-		exit.Exit(installcmd.Install(args[1:], inject))
+		exitHdlr.Exit(installcmd.Install(args[1:], inject))
 	case o.Remove:
-		exit.Exit(removecmd.Remove(args[1:], inject))
+		exitHdlr.Exit(removecmd.Remove(args[1:], inject))
 	case o.Init:
-		exit.Exit(initcmd.Init(args[1:], inject))
+		exitHdlr.Exit(initcmd.Init(args[1:], inject))
 	case o.Repo:
-		exit.Exit(repocmd.Repo(args[1:], inject))
+		exitHdlr.Exit(repocmd.Repo(args[1:], inject))
 	}
-	exit.Exit(255)
+	exitHdlr.Exit(255)
 }
 
 func loadDotenv() {
