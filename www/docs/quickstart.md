@@ -4,8 +4,8 @@
 
 Project templates are folders that contain other directories and files.
 
-Given the following directory tree, lets create a `Project Template` which
-contains the same files and folders.
+Given the following directory tree, lets create a `Project Template` which contains the
+same files and folders.
 
 ```
 mytemplate
@@ -26,15 +26,10 @@ cd ~/templates
 ```
 
 Create the Project Template `mytemplate`.
-
-Start be creating a project path
 ```bash
 mkdir mytemplate
 mkdir -p 'mytemplate/cmd/${PROJECT_NAME}/'
 touch 'mytemplate/cmd/${PROJECT_NAME}/main.go'
-```
-One will notice the `${PROJECT_NAME}` variable which is interpolated when
-creating new projects.
 
 # Create git ignore
 cat <<'EOF' > mytemplate/.gitignore
