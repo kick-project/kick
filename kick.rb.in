@@ -1,6 +1,6 @@
 class Kick < Formula
   desc "Tool to create project templating"
-  homepage "https://github.com/kick-project/kick"
+  homepage "https://kick-project.github.io/kick/"
   url "${BASEURL}/kick-${VERSION}.tar.gz"
   version "${VERSION}"
   sha256 "${SHA256}"

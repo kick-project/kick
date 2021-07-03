@@ -2,12 +2,16 @@
 
 # Kick
 
+For docs and getting started see https://kick-project.github.io/kick/
+
+## About
+
 Kick is a cli tool to start a project using templates under version control
 or from a path on local disk.
 
 Its features include
 
-* A way to add templates using a URL or path
+* A way to add templates using a git remote location, URL or local path.
 
 ```bash
 kick install gem git@github.com:kick-project/template-gem.git    # Install a gem template
@@ -79,124 +83,3 @@ following additions that a project may include...
   - Ruby [Rake](https://github.com/ruby/rake): `Rakefile`
 
 This can all be added to a template which can be called from the command line.
-
-## Getting started
-
-### Install Software
-
-*MacOS*
-```bash
-brew install kick 
-```
-
-*RPMs RHEL/CentOS*
-```bash
-yum install -y http://github.com/kick-project/kick/archives/kick-1.0.0.rpm
-```
-
-*Debs Debian/Ubuntu*
-```bash
-curl -sLO https://github.com/kick-project/kick/archives/kick-1.0.0.deb
-sudo dpkg -i kick-1.0.0.deb
-```
-
-### Create variables
-
-Kick uses environment variables or variables defined in `~/.env` to populate
-templates. All environment variables and variables defined in `~/.env` are
-passed to the templates.
-
-Using an editor add variables to `~/.env`
-
-```dotenv
-# ~/.env
-AUTHOR=First Last
-EMAIL=email@address.com
-```
-
-### Create template 
-
-Create a project that will be used as an example to generate go projects.
-Templates are rendered using a go library that emulates the function of GNUs
-envsubst command.
-
-```bash
-mkdir template-go
-```
-
-Add an AUTHORS file with ${AUTHOR} and ${EMAIL}
-
-`template-go/AUTHORS`
-```yaml
-# kick:render <--- This modeline tells.kick to render file as a template. Line is stripped out from output file.
-${AUTHOR} ${EMAIL}
-```
-
-Add a README.md
-
-`template-go/README.md`
-```markdown
-# kick:render
-# ${PROJECT_NAME}
-```
-
-Add the main function
-
-```bash
-mkdir -p template-go/cmd/\${PROJECT_NAME}
-touch template-go/cmd/\${PROJECT_NAME}/main.go 
-```
-
-`template-go/cmd/\${PROJECT_NAME}/main.go`
-```go
-// kick:render
-package main
-
-import "fmt"
-
-func main() {
-    fmt.Println("Project ${PROJECT_NAME}")
-}
-```
-
-### Install the template
-
-```bash
-kick install go path/to/template-go
-```
-
-### Use the template
-
-```bash
-kick start go path/to/project
-```
-
-### Upload template to a git repository
-
-```bash
-cd template-go
-git init
-git add .
-git commit -m "first commit"
-git push --set-upstream git@github.com:owner/template-go.git master
-```
-
-### Install the remote template
-
-Remove the installed `go` handle
-
-```bash
-kick remove go
-```
-
-Install the template using a valid git URL
-
-```bash
-kick install go git@github.com:owner/template-go.git
-```
-
-### Use the remote template
-
-```bash
-kick start go path/to/project
-```
