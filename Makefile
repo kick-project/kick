@@ -152,7 +152,7 @@ _cx:
 _package: ## Create an RPM, Deb, Homebrew package
 	@XCOMPILE=true make build
 	@VERSION=$(VERSION) envsubst < nfpm.yaml.in > nfpm.yaml
-	$(MAKE) dist/kick.rb
+	$(MAKE) dist/kick-$(VERSION).rb
 	$(MAKE) tmp/kick.rb
 	$(MAKE) dist/$(NAME)-$(VERSION).$(ARCH).rpm
 	$(MAKE) dist/$(NAME)_$(VERSION)_$(GOARCH).deb
@@ -210,6 +210,7 @@ _release_github: _package
 	gh release create v$(VERSION)
 	gh release upload v$(VERSION) dist/kick-$(VERSION).tar.gz
 	gh release upload v$(VERSION) dist/kick.rb
+	gh release upload v$(VERSION) dist/kick-$(VERSION).rb
 	gh release upload v$(VERSION) dist/kick-$(VERSION).x86_64.rpm
 	gh release upload v$(VERSION) dist/kick_$(VERSION)_amd64.deb
 
@@ -335,6 +336,9 @@ dist/$(NAME)_$(VERSION)_$(GOARCH).deb: dist/$(NAME)_$(GOOS)_$(GOARCH)/$(NAME)
 
 internal/version.go: internal/version.go.in VERSION
 	@VERSION=$(VERSION) $(DOTENV) envsubst < $< > $@
+
+dist/kick-$(VERSION).rb: dist/kick.rb
+	@cp dist/kick{,-$(VERSION)}.rb
 
 dist/kick.rb: kick.rb.in dist/kick-$(VERSION).tar.gz
 	@BASEURL="https://github.com/kick-project/kick/archive" VERSION=$(VERSION) SHA256=$$(sha256sum dist/kick-$(VERSION).tar.gz | awk '{print $$1}') $(DOTENV) envsubst < $< > $@
