@@ -31,52 +31,14 @@ GOFILES := $(shell find cmd pkg internal src -name '*.go' 2> /dev/null)
 GODIRS = $(shell find . -maxdepth 1 -mindepth 1 -type d | egrep 'cmd|internal|pkg|api')
 
 #
-# Help Script
-#
-define PRINT_HELP_PYSCRIPT
-import re, sys
-
-SEC = 1
-CMD = 2
-
-print("Usage: make <target>\n")
-menu = []
-for line in sys.stdin:
-	matchsection = re.match(r'^### ([^#]+)\n$$', line)
-	if matchsection:
-		atoms = matchsection.groups()
-		menu.append([SEC, atoms[0], None])
-		continue
-
-	matchcmds = re.match(r'^_?([a-zA-Z_-]+):.*?## (.*)', line)
-	if matchcmds:
-	  target, help = matchcmds.groups()
-	  menu.append([CMD, target, help])
-	  continue
-
-for typ, name, desc in menu:
-	if typ == SEC:
-		print("%s%s%s" % ("\x1b[0001m", name, "\x1b[0000m"))
-	elif typ == CMD:
-		print("  %s%s%s - %s" % ("\x1b[0001m", name, "\x1b[0000m", desc))
-print("")
-endef
-export PRINT_HELP_PYSCRIPT
-
-#
 # End user targets
 #
 
 ### HELP
 
 .PHONY: help
-ifneq (, ${PYTHON})
 help: ## Print Help
-	@$(PYTHON) -c "$$PRINT_HELP_PYSCRIPT" < $(MAKEFILE_LIST)
-else
-help:
-	$(error python required for 'make help', executable not found)
-endif
+	@maker --menu=Makefile
 
 ### DEVELOPMENT
 
@@ -377,7 +339,7 @@ _go.mod_err:
 # EG 'make vmcreate' will result in the execution of 'make _vmcreate' 
 #
 %:
-	@egrep -q '^_$@:' Makefile && $(DOTENV) $(MAKE) _$@
+	@maker $@
 
 .PHONY: _env
 _env:
