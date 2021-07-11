@@ -12,5 +12,5 @@ type SearchIface interface {
 	Search(term string) <-chan *entry.Entry
 	// Search2Output searches database for term and sends the results to the formatter.Format function supplied in New.
 	// Blocks until all entries are processed.
-	Search2Output(term string) int
+	Search2Output(long bool, term string) int
 }

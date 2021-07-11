@@ -6,4 +6,8 @@ package repo
 type RepoIface interface {
 	// Build build repo
 	Build()
+	// List list repositories
+	List()
+	// Info information on repositories
+	Info(repo string)
 }

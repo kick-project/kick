@@ -5,7 +5,7 @@ package initialize
 // InitIface ...
 type InitIface interface {
 	// CreateRepo create repository
-	CreateRepo(name string) int
+	CreateRepo(name, path string) int
 	// CreateTemplate create template
-	CreateTemplate(name string) int
+	CreateTemplate(name, path string) int
 }
