@@ -67,8 +67,8 @@ test: ## Test
 	$(MAKE) test_setup
 	$(MAKE) goversion
 	$(MAKE) lint
-	@echo FEATURE FLAGS ENABLED
-	FF_ENABLED=true $(MAKE) _test_fflags
+	@#echo FEATURE FLAGS ENABLED
+	@#FF_ENABLED=true $(MAKE) _test_fflags
 	@echo FEATURE FLAGS DISABLED
 	FF_ENABLED=false $(MAKE) _test_std
 	@# Combined the return codes of all the tests
