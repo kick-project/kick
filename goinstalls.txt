@@ -6,7 +6,7 @@ github.com/fzipp/gocyclo/cmd/gocyclo@latest
 github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 github.com/goreleaser/nfpm/cmd/nfpm@latest
 github.com/joho/godotenv/cmd/godotenv@latest
-github.com/kick-project/maker@latest
+github.com/kick-project/maker/cmd/maker@latest
 github.com/ory/go-acc@latest
 github.com/vakenbolt/go-test-report@latest
 github.com/vburenin/ifacemaker@latest
