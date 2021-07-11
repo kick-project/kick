@@ -11,13 +11,11 @@ import (
 var UsageDoc = `generate project scaffolding
 
 Usage:
-    kick start [-n] <handle> <project>
+    kick start <handle> <project>
     kick start (-l|--long)
 
 Options:
     -h --help     print help
-    -n            do not check the source templates ".kick.yml" for required variables
-    -l            list templates in short format 
     --long        list templates in long format
     <handle>      template handle
     <project>     project path
@@ -28,7 +26,6 @@ type OptStart struct {
 	Start       bool   `docopt:"start"`
 	Template    string `docopt:"<handle>"`
 	ProjectPath string `docopt:"<project>"`
-	NoCheck     bool   `docopt:"-n"`
 	List        bool   `docopt:"-l"`
 	ListLong    bool   `docopt:"--long"`
 }
