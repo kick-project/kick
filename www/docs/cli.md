@@ -5,25 +5,16 @@
 generate project scaffolding
 
 Usage:
-    kick start <handle> <project>
+    kick start [-n] <handle> <project>
+    kick start (-l|--long)
 
 Options:
     -h --help     print help
+    -n            do not check the source templates ".kick.yml" for required variables
+    -l            list templates in short format 
+    --long        list templates in long format
     <handle>      template handle
     <project>     project path
-```
-
-## kick list
-
-```bash
-list handles/templates
-
-Usage:
-    kick list [-l]
-
-Options:
-    -h --help     print help
-    -l            print long output
 ```
 
 ## kick install

@@ -8,12 +8,6 @@ cat <<EOF
 $(./kick start -h)
 \`\`\`
 
-## kick list
-
-\`\`\`bash
-$(./kick list -h)
-\`\`\`
-
 ## kick install
 
 \`\`\`bash

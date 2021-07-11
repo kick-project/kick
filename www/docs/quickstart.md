@@ -69,9 +69,9 @@ directory. In the example below we will use the handle of `myhandle`.
 kick install myhandle ~/templates/mytemplate
 ```
 
-To see the installed template run the `kick list` sub command.
+To see the installed template run the `kick start -l` or `kick start --long`.
 ```bash
-kick list -l
+kick start --long
 +----------+----------+-------------+------------------------------------+
 |  HANDLE  | TEMPLATE | DESCRIPTION |              LOCATION              |
 +----------+----------+-------------+------------------------------------+
