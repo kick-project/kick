@@ -17,4 +17,5 @@ internal/services/remove/remove.go Remove remove RemoveIface internal/services/r
 internal/services/repo/repo.go Repo repo RepoIface internal/services/repo/ifacemaker.go
 internal/services/search/search.go Search search SearchIface internal/services/search/ifacemaker.go
 internal/services/setup/setup.go Setup setup SetupIface internal/services/setup/ifacemaker.go
+internal/services/start/start.go Start start StartIface internal/services/start/ifacemaker.go
 internal/services/update/update.go Update update UpdateIface internal/services/update/ifacemaker.go
