@@ -13,10 +13,11 @@ import (
 var UsageDoc = `generate project scaffolding
 
 Usage:
-    kick start <handle> <project>
+    kick start [-n] <handle> <project>
 
 Options:
     -h --help     print help
+    -n            do not check the source templates ".kick.yml" for required variables
     <handle>      template handle
     <project>     project path
 `
@@ -26,6 +27,7 @@ type OptStart struct {
 	Start       bool   `docopt:"start"`
 	Template    string `docopt:"<handle>"`
 	ProjectPath string `docopt:"<project>"`
+	NoCheck     bool   `docopt:"-n"`
 }
 
 // Start start cli option
@@ -43,6 +45,14 @@ func Start(args []string, inject *di.DI) int {
 	// Sync DB table "installed" with configuration file
 	synchro := inject.MakeSync()
 	synchro.Files()
+
+	// TODO: refactor di so that each subcommand starts its own injection
+	// HACK: this is ugly but nessesary without
+	// Use MakeCheckVars() before MakeTemplate() to check variables.
+	// See di.MakeTemplate() struct assignment for more information.
+	if !opts.NoCheck {
+		_ = inject.MakeCheckVars()
+	}
 
 	// Set project name
 	inject.ProjectName = filepath.Base(opts.ProjectPath)

@@ -14,6 +14,7 @@ import (
 	"sync"
 
 	"github.com/go-playground/validator"
+	"github.com/kick-project/kick/internal/resources/checkvars"
 	"github.com/kick-project/kick/internal/resources/client"
 	"github.com/kick-project/kick/internal/resources/config"
 	"github.com/kick-project/kick/internal/resources/errs"
@@ -36,6 +37,7 @@ const (
 
 // Template the template itself
 type Template struct {
+	checkvars      *checkvars.Check
 	client         *client.Client
 	config         *config.File
 	errs           *errs.Handler
@@ -58,6 +60,7 @@ type Template struct {
 
 // Options options to constructor
 type Options struct {
+	Checkvars      *checkvars.Check             // Not required
 	Client         *client.Client               `validate:"required"`
 	Config         *config.File                 `validate:"required"`
 	Errs           *errs.Handler                `validate:"required"`
@@ -90,6 +93,7 @@ func New(opts *Options) *Template {
 		modeLineLen = opts.ModeLineLen
 	}
 	return &Template{
+		checkvars:      opts.Checkvars,
 		client:         opts.Client,
 		config:         opts.Config,
 		errs:           opts.Errs,
@@ -104,6 +108,27 @@ func New(opts *Options) *Template {
 		stdout:         opts.Stdout,
 		templateDir:    opts.TemplateDir,
 		vars:           opts.Variables,
+	}
+}
+
+func (t *Template) chkvars(fp string) {
+	if t.checkvars == nil {
+		return
+	}
+	if _, err := os.Stat(fp); err != nil {
+		if os.IsNotExist(err) {
+			return
+		} else {
+			t.errs.FatalF(`error opening %s: %w`, fp, err)
+		}
+	}
+
+	f, err := os.Open(fp)
+	t.errs.FatalF(`error opening %s: %w`, fp, err)
+	ok, err := t.checkvars.Check(f)
+	t.errs.FatalF(`error checking vars: %w`, err)
+	if !ok {
+		t.exit.Exit(-1)
 	}
 }
 
@@ -165,6 +190,10 @@ func (t *Template) SetSrc(name string) {
 	p, err := t.client.GetTemplate(tmpl.URL, "")
 	t.errs.FatalF(`handle "%s" not found: %v`, name, err)
 	localpath := p.Path()
+
+	// Check for missing variables
+	y := filepath.Join(localpath, `.kick.yml`)
+	t.chkvars(y)
 
 	// Set renderer from conf
 	confPath := filepath.Join(localpath, ".kick.yml")

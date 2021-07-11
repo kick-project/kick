@@ -18,6 +18,7 @@ require (
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0 // indirect
 	github.com/kevinburke/ssh_config v1.1.0 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
+	github.com/mattetti/filebuffer v1.0.1
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/satori/go.uuid v1.2.0 // indirect

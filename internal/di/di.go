@@ -13,6 +13,7 @@ import (
 	"github.com/kick-project/kick/internal/di/callbacks"
 	"github.com/kick-project/kick/internal/env"
 	"github.com/kick-project/kick/internal/resources/check"
+	"github.com/kick-project/kick/internal/resources/checkvars"
 	"github.com/kick-project/kick/internal/resources/client"
 	"github.com/kick-project/kick/internal/resources/client/plumb"
 	"github.com/kick-project/kick/internal/resources/config"
@@ -75,6 +76,7 @@ type DI struct {
 	cacheErrHandler  *errs.Handler
 	cacheExitHandler *exit.Handler
 	cacheCheck       *check.Check
+	cacheCheckVars   *checkvars.Check
 	cacheSetup       *setup.Setup
 	cacheList        *list.List
 	cacheLogFile     *os.File
@@ -234,6 +236,19 @@ func (s *DI) MakeORM() *gorm.DB {
 	}
 	s.cacheORM = db
 	return db
+}
+
+// MakeCheckVars inject prompt struct
+func (s *DI) MakeCheckVars() *checkvars.Check {
+	if s.cacheCheckVars != nil {
+		return s.cacheCheckVars
+	}
+	s.cacheCheckVars = checkvars.New(checkvars.Options{
+		Err:    s.MakeErrorHandler(),
+		Log:    s.MakeLoggerOutput(""),
+		Stdout: s.Stdout,
+	})
+	return s.cacheCheckVars
 }
 
 // MakeLoggerOutput inject logger.OutputIface.
@@ -492,6 +507,9 @@ func (s *DI) MakeTemplate() *template.Template {
 	vars := variables.New()
 	vars.ProjectVariable("NAME", s.ProjectName)
 	o := &template.Options{
+		// HACK: s.cacheCheckVars can be null to inform clients not to check.
+		// To initialize call `_ = MakeCheckVars()`` before MakeTemplate()
+		Checkvars:     s.cacheCheckVars,
 		Client:        s.MakeClient(),
 		Config:        s.ConfigFile(),
 		Log:           s.MakeLoggerOutput(""),
