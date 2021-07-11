@@ -2,10 +2,15 @@
 
 package template
 
+import (
+	"github.com/kick-project/kick/internal/resources/template/variables"
+)
+
 // TemplateIface ...
 type TemplateIface interface {
 	// SetRender set rendering engine
 	SetRender(renderer string)
+	SetVars(vars *variables.Variables)
 	// SetSrcDest sets the source template and destination path where the project structure
 	// will reside.
 	SetSrcDest(src, dest string)

@@ -33,6 +33,7 @@ import (
 	"github.com/kick-project/kick/internal/services/repo"
 	"github.com/kick-project/kick/internal/services/search"
 	"github.com/kick-project/kick/internal/services/setup"
+	"github.com/kick-project/kick/internal/services/start"
 	"github.com/kick-project/kick/internal/services/update"
 	_ "github.com/mattn/go-sqlite3" // Driver for database/sql
 	"github.com/olekukonko/tablewriter"
@@ -84,6 +85,7 @@ type DI struct {
 	cacheInstall     *install.Install
 	cacheRemove      *remove.Remove
 	cacheSearch      *search.Search
+	cacheStart       *start.Start
 	cacheSync        *sync.Sync
 	cacheTemplate    *template.Template
 	cacheUpdate      *update.Update
@@ -473,6 +475,25 @@ func (s *DI) MakeSearch() *search.Search {
 	return srch
 }
 
+// MakeStart dependency injector
+func (s *DI) MakeStart() *start.Start {
+	if s.cacheStart != nil {
+		return s.cacheStart
+	}
+
+	s.cacheStart = start.New(start.Options{
+		Check:     s.MakeCheck(),
+		CheckVars: s.MakeCheckVars(),
+		Conf:      s.ConfigFile(),
+		Exit:      s.MakeExitHandler(),
+		Stderr:    s.Stderr,
+		Stdout:    s.Stdout,
+		Sync:      s.MakeSync(),
+		Template:  s.MakeTemplate(),
+	})
+	return s.cacheStart
+}
+
 // MakeSync dependency injector
 func (s *DI) MakeSync() *sync.Sync {
 	if s.cacheSync != nil {
@@ -507,9 +528,7 @@ func (s *DI) MakeTemplate() *template.Template {
 	vars := variables.New()
 	vars.ProjectVariable("NAME", s.ProjectName)
 	o := &template.Options{
-		// HACK: s.cacheCheckVars can be null to inform clients not to check.
-		// To initialize call `_ = MakeCheckVars()`` before MakeTemplate()
-		Checkvars:     s.cacheCheckVars,
+		Checkvars:     s.MakeCheckVars(),
 		Client:        s.MakeClient(),
 		Config:        s.ConfigFile(),
 		Log:           s.MakeLoggerOutput(""),

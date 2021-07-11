@@ -13,7 +13,6 @@ var usageDoc = `Generate project scaffolding from a predefined set of templates
 
 Usage:
     kick start
-    kick list
     kick install
     kick remove
     kick search
@@ -26,11 +25,10 @@ Options:
     -h --help     print help
     -v --version  print version
     start         start a project
-    list          list installed templates
     install       install a template
     remove        remove an installed template
     search        search repositories for available templates
-    update        update repository data
+    update        update local repository information 
     setup         setup configuration
     init          initialize a template or repository
     repo          tool to build a repository

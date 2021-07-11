@@ -140,6 +140,5 @@ func installTest(t *testing.T, id, handle, template string) {
 		t.Error(err)
 	}
 	p := filepath.Clean(filepath.Join(td, handle))
-	ec = startcmd.Start([]string{"start", handle, p}, inject)
-	assert.Equal(t, 0, ec)
+	startcmd.Start([]string{"start", handle, p}, inject)
 }

@@ -18,14 +18,6 @@ func TestGetOptMainStart(t *testing.T) {
 	assert.False(t, o.List)
 }
 
-func TestGetOptMainList(t *testing.T) {
-	args := []string{"kick", "list"}
-	o := GetOptMain(args)
-	assert.True(t, o.List)
-	assert.False(t, o.Start)
-	assert.False(t, o.Install)
-}
-
 func TestGetOptMainInstall(t *testing.T) {
 	args := []string{"kick", "install"}
 	o := GetOptMain(args)

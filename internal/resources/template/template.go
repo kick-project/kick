@@ -73,7 +73,7 @@ type Options struct {
 	Stderr         io.Writer                    `validate:"required"`
 	Stdout         io.Writer                    `validate:"required"`
 	TemplateDir    string                       `validate:"required"`
-	Variables      *variables.Variables         `validate:"required"`
+	Variables      *variables.Variables         // Not required
 	ModeLineLen    uint8
 }
 
@@ -112,9 +112,6 @@ func New(opts *Options) *Template {
 }
 
 func (t *Template) chkvars(fp string) {
-	if t.checkvars == nil {
-		return
-	}
 	if _, err := os.Stat(fp); err != nil {
 		if os.IsNotExist(err) {
 			return
@@ -147,6 +144,10 @@ func (t *Template) SetRender(renderer string) {
 		t.exit.Exit(255)
 	}
 	t.renderCurrent = renderer
+}
+
+func (t *Template) SetVars(vars *variables.Variables) {
+	t.vars = vars
 }
 
 func (t *Template) renderer() renderer.Renderer {

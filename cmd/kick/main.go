@@ -12,7 +12,6 @@ import (
 	"github.com/kick-project/kick/internal/resources/logger"
 	"github.com/kick-project/kick/internal/subcmds/initcmd"
 	"github.com/kick-project/kick/internal/subcmds/installcmd"
-	"github.com/kick-project/kick/internal/subcmds/listcmd"
 	"github.com/kick-project/kick/internal/subcmds/removecmd"
 	"github.com/kick-project/kick/internal/subcmds/repocmd"
 	"github.com/kick-project/kick/internal/subcmds/searchcmd"
@@ -51,9 +50,7 @@ func main() {
 	o := internal.GetOptMain(args)
 	switch {
 	case o.Start:
-		exitHdlr.Exit(startcmd.Start(args[1:], inject))
-	case o.List:
-		exitHdlr.Exit(listcmd.List(args[1:], inject))
+		startcmd.Start(args[1:], inject)
 	case o.Search:
 		exitHdlr.Exit(searchcmd.Search(args[1:], inject))
 	case o.Setup:

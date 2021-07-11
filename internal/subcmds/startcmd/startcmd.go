@@ -1,11 +1,9 @@
 package startcmd
 
 import (
-	"fmt"
-	"path/filepath"
+	"path"
 
 	"github.com/kick-project/kick/internal/di"
-	"github.com/kick-project/kick/internal/resources/exit"
 	"github.com/kick-project/kick/internal/resources/options"
 )
 
@@ -14,10 +12,13 @@ var UsageDoc = `generate project scaffolding
 
 Usage:
     kick start [-n] <handle> <project>
+    kick start (-l|--long)
 
 Options:
     -h --help     print help
     -n            do not check the source templates ".kick.yml" for required variables
+    -l            list templates in short format 
+    --long        list templates in long format
     <handle>      template handle
     <project>     project path
 `
@@ -28,36 +29,23 @@ type OptStart struct {
 	Template    string `docopt:"<handle>"`
 	ProjectPath string `docopt:"<project>"`
 	NoCheck     bool   `docopt:"-n"`
+	List        bool   `docopt:"-l"`
+	ListLong    bool   `docopt:"--long"`
 }
 
 // Start start cli option
-func Start(args []string, inject *di.DI) int {
+func Start(args []string, inject *di.DI) {
 	opts := &OptStart{}
 	options.Bind(UsageDoc, args, opts)
+	start := inject.MakeStart()
 
-	chk := inject.MakeCheck()
-
-	if err := chk.Init(); err != nil {
-		fmt.Fprintf(inject.Stderr, "%s\n", err.Error())
-		exit.Exit(255)
+	switch {
+	case opts.List:
+		start.List(false)
+	case opts.ListLong:
+		start.List(true)
+	default:
+		name := path.Base(opts.ProjectPath)
+		start.Start(name, opts.Template, opts.ProjectPath)
 	}
-
-	// Sync DB table "installed" with configuration file
-	synchro := inject.MakeSync()
-	synchro.Files()
-
-	// TODO: refactor di so that each subcommand starts its own injection
-	// HACK: this is ugly but nessesary without
-	// Use MakeCheckVars() before MakeTemplate() to check variables.
-	// See di.MakeTemplate() struct assignment for more information.
-	if !opts.NoCheck {
-		_ = inject.MakeCheckVars()
-	}
-
-	// Set project name
-	inject.ProjectName = filepath.Base(opts.ProjectPath)
-	t := inject.MakeTemplate()
-	t.SetSrcDest(opts.Template, opts.ProjectPath)
-	ret := t.Run()
-	return ret
 }

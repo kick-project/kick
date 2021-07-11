@@ -6,30 +6,87 @@ import (
 	"sort"
 	"text/tabwriter"
 
+	"github.com/kick-project/kick/internal/resources/check"
+	"github.com/kick-project/kick/internal/resources/checkvars"
 	"github.com/kick-project/kick/internal/resources/config"
+	"github.com/kick-project/kick/internal/resources/exit"
+	"github.com/kick-project/kick/internal/resources/sync"
+	"github.com/kick-project/kick/internal/resources/template"
+	"github.com/kick-project/kick/internal/resources/template/variables"
 	"github.com/olekukonko/tablewriter"
 	terminal "github.com/wayneashleyberry/terminal-dimensions"
 )
 
 // Start manage listing of installed templates
 type Start struct {
-	Stderr io.Writer    `validate:"required"`
-	Stdout io.Writer    `validate:"required"`
-	Conf   *config.File `validate:"required"`
+	check     *check.Check
+	checkvars *checkvars.Check
+	conf      *config.File
+	exit      exit.HandlerIface
+	stderr    io.Writer
+	stdout    io.Writer
+	sync      sync.SyncIface
+	tmpl      template.TemplateIface
+}
+
+// Options contructor options
+type Options struct {
+	Check     *check.Check           `validate:"required"`
+	CheckVars *checkvars.Check       `validate:"required"`
+	Conf      *config.File           `validate:"required"`
+	Exit      exit.HandlerIface      `validate:"required"`
+	Stderr    io.Writer              `validate:"required"`
+	Stdout    io.Writer              `validate:"required"`
+	Sync      sync.SyncIface         `validate:"required"`
+	Template  template.TemplateIface `validate:"required"`
+}
+
+// New consructor
+func New(opts Options) *Start {
+	s := &Start{
+		check:     opts.Check,
+		checkvars: opts.CheckVars,
+		conf:      opts.Conf,
+		exit:      opts.Exit,
+		stderr:    opts.Stderr,
+		stdout:    opts.Stdout,
+		sync:      opts.Sync,
+		tmpl:      opts.Template,
+	}
+	return s
+}
+
+// Start start command
+func (s Start) Start(projectname, template, path string) {
+	if err := s.check.Init(); err != nil {
+		fmt.Fprintf(s.stderr, "%s\n", err.Error())
+		s.exit.Exit(255)
+	}
+
+	// Sync DB table "installed" with configuration file
+	s.sync.Files()
+
+	// Set varaibles
+	vars := variables.New()
+	vars.ProjectVariable("NAME", projectname)
+	s.tmpl.SetVars(vars)
+
+	// Set project name
+	s.tmpl.SetSrcDest(template, path)
+	_ = s.tmpl.Run()
 }
 
 // List lists the output
-func (l *Start) List(long bool) int {
+func (s *Start) List(long bool) {
 	if long {
-		l.longFmt()
+		s.longFmt()
 	} else {
-		l.shortFmt()
+		s.shortFmt()
 	}
-	return 0
 }
 
-func (l *Start) shortFmt() {
-	templates := l.sort(l.Conf.Templates)
+func (s *Start) shortFmt() {
+	templates := s.sort(s.conf.Templates)
 	sort.Sort(config.SortByName(templates))
 	data := []string{}
 	for _, t := range templates {
@@ -37,7 +94,7 @@ func (l *Start) shortFmt() {
 		data = append(data, name)
 	}
 	termwidth, _ := terminal.Width()
-	w := tabwriter.NewWriter(l.Stdout, 0, 0, 1, ' ', tabwriter.TabIndent)
+	w := tabwriter.NewWriter(s.stdout, 0, 0, 1, ' ', tabwriter.TabIndent)
 	outstring := ""
 	for _, name := range data {
 		l := uint(0)
@@ -60,13 +117,13 @@ func (l *Start) shortFmt() {
 	w.Flush()
 }
 
-func (l *Start) longFmt() {
+func (s *Start) longFmt() {
 	var (
 		header []string
 		table  [][]string
 	)
 	header = []string{"Handle", "Template", "Description", "Location"}
-	for _, row := range l.sort(l.Conf.Templates) {
+	for _, row := range s.sort(s.conf.Templates) {
 		var (
 			templateName string
 			desc         string
@@ -85,7 +142,7 @@ func (l *Start) longFmt() {
 		}
 		table = append(table, []string{row.Handle, templateName, desc, row.URL})
 	}
-	writer := tablewriter.NewWriter(l.Stdout)
+	writer := tablewriter.NewWriter(s.stdout)
 	writer.SetAlignment(tablewriter.ALIGN_LEFT)
 	writer.SetHeader(header)
 	for _, v := range table {
@@ -94,7 +151,7 @@ func (l *Start) longFmt() {
 	writer.Render()
 }
 
-func (l *Start) sort(in []config.Template) (out []config.Template) {
+func (s *Start) sort(in []config.Template) (out []config.Template) {
 	sort.Sort(config.SortByName(in))
 	out = append(out, in...)
 	return
