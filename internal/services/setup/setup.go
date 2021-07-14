@@ -9,6 +9,7 @@ import (
 )
 
 // Setup is responsible for initializing all disk paths
+//go:generate ifacemaker -f setup.go -s Setup -p setup -i SetupIface -o setup_interfaces.go -c "AUTO GENERATED. DO NOT EDIT."
 type Setup struct {
 	ConfigPath         string `validate:"required"`
 	ConfigTemplatePath string `validate:"required"`

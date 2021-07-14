@@ -17,6 +17,7 @@ import (
 )
 
 // Update build metadata
+//go:generate ifacemaker -f update.go -s Update -p update -i UpdateIface -o update_interfaces.go -c "AUTO GENERATED. DO NOT EDIT."
 type Update struct {
 	client      *client.Client
 	configFile  *config.File       `validate:"required"`

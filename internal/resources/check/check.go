@@ -11,6 +11,8 @@ import (
 	"github.com/kick-project/kick/internal/resources/logger"
 )
 
+//go:generate ifacemaker -f check.go -s Check -p check -i CheckIface -o check_interfaces.go -c "AUTO GENERATED"
+
 // Check runs a series of checks
 type Check struct {
 	configPath         string             `validate:"required"`

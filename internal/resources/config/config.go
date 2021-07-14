@@ -9,6 +9,8 @@ import (
 	"github.com/kick-project/kick/internal/resources/marshal"
 )
 
+//go:generate ifacemaker -f config.go -s File -p config -i FileIface -o config_interfaces.go -c "AUTO GENERATED. DO NOT EDIT"
+
 // File configuration as loaded from the configuration file
 type File struct {
 	PathTemplateConf string     `yaml:"-" validate:"required,file"`

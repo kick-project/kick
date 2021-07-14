@@ -7,6 +7,7 @@ import (
 )
 
 // URLx take a URI or Something Specific to this project and break it into parts
+//go:generate ifacemaker -f parse.go -s URLx -p parse -i URLxIface -o parse_interfaces.go -c "AUTO GENERATED. DO NOT EDIT."
 type URLx struct {
 	URL     string
 	Scheme  string

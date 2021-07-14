@@ -22,6 +22,7 @@ import (
 )
 
 // Install manage installation of templates
+//go:generate ifacemaker -f install.go -s Install -p install -i InstalIface -o install_interfaces.go -c "AUTO GENERATED. DO NOT EDIT."
 type Install struct {
 	client     *client.Client
 	ConfigFile *config.File

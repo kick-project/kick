@@ -36,6 +36,7 @@ const (
 )
 
 // Template the template itself
+//go:generate ifacemaker -f template.go -s Template -p template -i TemplateIface -o template_interfaces.go -c "AUTO GENERATED. DO NOT EDIT."
 type Template struct {
 	checkvars      *checkvars.Check
 	client         *client.Client

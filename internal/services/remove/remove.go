@@ -9,6 +9,7 @@ import (
 )
 
 // Remove remove installed templates
+//go:generate ifacemaker -f remove.go -s Remove -p remove -i RemoveIface -o remote_interfaces.go -c "AUTO GENERATED. DO NOT EDIT."
 type Remove struct {
 	Conf             *config.File       `validate:"required"`
 	Err              *errs.Handler      `validate:"required"`

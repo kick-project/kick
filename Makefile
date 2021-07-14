@@ -119,10 +119,6 @@ _package: ## Create an RPM, Deb, Homebrew package
 	$(MAKE) dist/$(NAME)-$(VERSION).$(ARCH).rpm
 	$(MAKE) dist/$(NAME)_$(VERSION)_$(GOARCH).deb
 
-.PHONY: interfaces
-interfaces: ## Generate interfaces
-	cat ifacemaker.txt | egrep -v '^#' | xargs -n5 bash -c 'ifacemaker -f $$0 -s $$1 -p $$2 -i $$3 -o $$4 -c "DO NOT EDIT: Generated using \"make interfaces\""'
-
 .PHONY: _test_setup
 _test_setup:
 	@mkdir -p tmp
@@ -283,6 +279,7 @@ $(NAME): dist/$(NAME)_$(GOOS)_$(GOARCH)/$(NAME)
 
 dist/$(NAME)_$(GOOS)_$(GOARCH)/$(NAME) dist/$(NAME)_$(GOOS)_$(GOARCH)/$(NAME).exe: $(GOFILES) internal/version.go
 	@mkdir -p $$(dirname $@)
+	go generate ./...
 	go build -o $@ ./cmd/kick
 
 dist/$(NAME)-$(VERSION).$(ARCH).rpm: dist/$(NAME)_$(GOOS)_$(GOARCH)/$(NAME)

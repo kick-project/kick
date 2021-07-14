@@ -12,6 +12,7 @@ import (
 )
 
 // List manage listing of installed templates
+//go:generate ifacemaker -f list.go -s List -p list -i ListIface -o list_interfaces.go -c "AUTO GENERATED. DO NOT EDIT."
 type List struct {
 	Stderr io.Writer    `validate:"required"`
 	Stdout io.Writer    `validate:"required"`

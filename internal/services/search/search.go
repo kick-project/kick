@@ -52,6 +52,7 @@ FROM
 `
 
 // Search search for templates
+//go:generate ifacemaker -f search.go -s Search -p search -i SearchIface -o search_interfaces.go -c "AUTO GENERATED. DO NOT EDIT."
 type Search struct {
 	ORM    *gorm.DB  `validate:"required"`
 	Writer io.Writer `validate:"required"`

@@ -21,6 +21,7 @@ var (
 )
 
 // Handler exit handling
+//go:generate ifacemaker -f exit.go -s Handler -p exit -i HandlerIface -o exit_interfaces.go -c "AUTO GENERATED. DO NOT EDIT."
 type Handler struct {
 	Mode int `validate:"gte=0|lte=1"`
 }

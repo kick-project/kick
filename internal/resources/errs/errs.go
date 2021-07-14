@@ -12,6 +12,7 @@ import (
 )
 
 // Handler error handling
+//go:generate ifacemaker -f errs.go -s Handler -p errs -i HandlerIface -o errs_interfaces.go -c "AUTO GENERATED. DO NOT EDIT."
 type Handler struct {
 	ex     exit.HandlerIface  `validate:"required"` // Exit handler
 	Logger logger.OutputIface `validate:"required"` // Default logger

@@ -13,6 +13,7 @@ import (
 )
 
 // Init create repositories and templates
+//go:generate ifacemaker -f initialize.go -s Init -p initialize -i InitIface -o initialize_interfaces.go -c "AUTO GENERATED. DO NOT EDIT."
 type Init struct {
 	ErrHandler errs.HandlerIface  `validate:"required"`
 	Log        logger.OutputIface `validate:"required"`

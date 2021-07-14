@@ -1,4 +1,4 @@
-// DO NOT EDIT: Generated using "make interfaces"
+// AUTO GENERATED. DO NOT EDIT.
 
 package start
 
@@ -7,5 +7,5 @@ type StartIface interface {
 	// Start start command
 	Start(projectname, template, path string)
 	// List lists the output
-	List(long bool) int
+	List(long bool)
 }

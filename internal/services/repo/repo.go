@@ -26,6 +26,7 @@ import (
 )
 
 // Repo build a repository repo
+//go:generate ifacemaker -f repo.go -s Repo -p repo -i RepoIface -o repo_interfaces.go -c "AUTO GENERATED. DO NOT EDIT."
 type Repo struct {
 	client     *client.Client      // Git client
 	conf       *config.File        // Config file

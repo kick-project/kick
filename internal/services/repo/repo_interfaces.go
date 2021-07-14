@@ -1,4 +1,4 @@
-// DO NOT EDIT: Generated using "make interfaces"
+// AUTO GENERATED. DO NOT EDIT.
 
 package repo
 

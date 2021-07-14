@@ -18,6 +18,7 @@ import (
 )
 
 // Start manage listing of installed templates
+//go:generate ifacemaker -f start.go -s Start -p start -i StartIface -o start_interfaces.go -c "AUTO GENERATED. DO NOT EDIT."
 type Start struct {
 	check     *check.Check
 	checkvars *checkvars.Check
