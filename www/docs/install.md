@@ -11,7 +11,8 @@ brew install kick
 
 ## homebrew
 ```bash
-brew install kick
+wget https://github.com/kick-project/kick/releases/download/v1.0.0/kick.rb
+brew install kick.rb
 ```
 
 ## dpkg
@@ -36,7 +37,7 @@ go install github.com/kick-project/kick/cmd/kick@latest
 
 ## go get
 
-For version 1.15.x 
+For version 1.15.x
 ```bash
 go get -u github.com/kick-project/kick/cmd/kick
 ```
