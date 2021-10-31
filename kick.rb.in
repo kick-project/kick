@@ -4,7 +4,7 @@ class Kick < Formula
   url "${BASEURL}/kick-${VERSION}.tar.gz"
   version "${VERSION}"
   sha256 "${SHA256}"
-  license "APACHE-2.0"
+  license "Apache-2.0"
 
   depends_on "go@1.16" => :build
   depends_on "sqlite" => :build
