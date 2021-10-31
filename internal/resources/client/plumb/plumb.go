@@ -94,7 +94,7 @@ func (p *Plumb) Method() int {
 }
 
 // Local takes relative path returns absolute path.
-// Slash is replaced using path seperator.
+// Slash is replaced using path separator.
 func (p *Plumb) Local(relative string) string {
 	return filepath.Join(p.Path(), filepath.FromSlash(relative))
 }

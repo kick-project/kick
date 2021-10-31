@@ -10,6 +10,7 @@ import (
 	"github.com/kick-project/kick/internal/resources/options"
 )
 
+// UsageDoc help document passed to docopts
 var UsageDoc = `Remove an installed template
 
 Usage:
