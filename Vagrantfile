@@ -62,14 +62,17 @@ Vagrant.configure("2") do |config|
   # View the documentation for the provider you are using for more
   # information on available options.
 
+  # Extra disks
+  config.vm.disk :disk, name: "tmp", size: "4GB"
+
   # Enable provisioning with a shell script. Additional provisioners such as
   # Ansible, Chef, Docker, Puppet and Salt are also available. Please see the
   # documentation for more information about their specific syntax and use.
   config.vm.provision "shell", inline: <<-SHELL
     apt-get update
-    apt-get install -y make gcc sqlite3
+    apt-get install -qy make gcc
     mkdir -p /var/cache/downloads
-    wget -O /var/cache/downloads/go1.16.4.linux-amd64.tar.gz -c https://golang.org/dl/go1.16.4.linux-amd64.tar.gz
+    wget -nv -O /var/cache/downloads/go1.16.4.linux-amd64.tar.gz -c https://golang.org/dl/go1.16.4.linux-amd64.tar.gz
     test -d /usr/local/go || tar -C /usr/local -xzf /var/cache/downloads/go1.16.4.linux-amd64.tar.gz
 
     cat <<'EOF' > /etc/profile.d/go.sh
@@ -77,5 +80,9 @@ Vagrant.configure("2") do |config|
 export PATH=$PATH:$HOME/go/bin:/usr/local/go/bin
 EOF
     chmod 755 /etc/profile.d/go.sh
+
+    mkfs.ext4 /dev/sdb || true
+    grep -q "/dev/sdb" /etc/fstab || echo "/dev/sdb                   /tmp            ext4    errors=remount-ro 0       1" >> /etc/fstab
+    grep -q "/tmp" /proc/mounts || (mount /tmp && chmod -R 1777 /tmp)
   SHELL
 end

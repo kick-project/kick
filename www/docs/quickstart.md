@@ -59,7 +59,7 @@ mytemplate
 
 Examine the `.gitignore` file in your project.
 ```bash
-cat mytemplate/
+cat mytemplate/.gitignore
 ```
 
 Install the template using `kick` by specifying the path to the `mytemplate`

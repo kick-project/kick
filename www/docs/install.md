@@ -4,7 +4,8 @@
 
 ## homebrew
 ```bash
-brew install kick
+wget https://github.com/kick-project/kick/releases/download/v1.0.0/kick.rb
+brew install kick.rb
 ```
 
 # Linux

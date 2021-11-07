@@ -261,7 +261,7 @@ endif
 
 .PHONY: up
 up: ## Start vagrant
-	@(vagrant status --no-color | grep running 2>&1) > /dev/null || vagrant up
+	@(vagrant status --no-color | grep running 2>&1) > /dev/null || VAGRANT_EXPERIMENTAL=disks vagrant up
 
 .PHONY: ssh
 ssh: up ## Run vagrant ssh and cd to shared directory
@@ -270,6 +270,10 @@ ssh: up ## Run vagrant ssh and cd to shared directory
 .PHONY: halt
 halt: ## Run vagrant halt
 	vagrant halt
+
+.PHONY: destroy
+destroy: ## Run vagrant destroy
+	vagrant destroy
 
 #
 # File targets

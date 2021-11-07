@@ -32,7 +32,9 @@ Starting a project
 kick start gem ~/workspace/mygemproject
 kick start go ~/workspace/mygoproject
 kick start pypi ~/workspace/mypypiproject
-kick start mytemplate ~/mytemplate
+kick start mytemplate ~/myproject
+# Or simply to create a project in the currrent directory
+kick start mytemplate myproject
 ```
 
 Search and install templates from a repo
