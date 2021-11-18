@@ -1,149 +1,130 @@
 package file
 
 import (
+	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 	"path/filepath"
-	"sort"
-
-	"github.com/kick-project/kick/internal/resources/errs"
+	"strings"
 )
 
-// Rename mock os.Rename
-type Rename func(oldpath string, newpath string) error
+type MockMoveFunc func(src, dst string) error
 
-// OsRename mocked os.Rename assignment
-var OsRename Rename = os.Rename
+var (
+	MockMove MockMoveFunc
+)
 
-// Move moves a file from src to dest
+// Move recursively move a directory or file from src to dst.
 func Move(src, dst string) error {
-	err := OsRename(src, dst)
-	if err == nil {
-		return err
+	if MockMove != nil {
+		return MockMove(src, dst)
 	}
+	return MoveAll(src, dst)
+}
 
-	m := &mover{}
-	// Get information on files
-	sInfo, _ := Stat(src)
-	dInfo, _ := Stat(dst)
-	err = m.move(sInfo, dInfo)
+// MoveAll recursively move a directory or file from src to dst.
+func MoveAll(src, dst string) error {
+	err := CopyAll(src, dst)
 	if err != nil {
-		err := m.rollback()
-		errs.LogF(`error rollingback %v`, err)
 		return err
 	}
-
-	err = m.cleanup()
+	err = os.RemoveAll(src)
 	return err
+
 }
 
-type mover struct {
-	trashList    []Info
-	rollBackList []Info
-}
+// CopyAll recursively copy a directory or file from src to dst.
+func CopyAll(src, dst string) error {
+	/* Source Checks */
 
-// flagRemoval flag a file for cleanup
-func (m *mover) flagRemoval(path Info) {
-	m.trashList = append(m.trashList, path)
-}
-
-// flagRollback flag a file for rollback if needed
-func (m *mover) flagRollback(path Info) {
-	info, _ := Stat(path.Path())
-	m.rollBackList = append(m.rollBackList, info)
-}
-
-// move
-func (m *mover) move(sInfo, dInfo Info) error {
-	// Source doesn't exist
-	if !sInfo.Exists() {
-		return fmt.Errorf(`source file does not exists`)
-	}
-
-	// Mis-matching types
-	if dInfo.Exists() && sInfo.IsDir() != dInfo.IsDir() {
-		return fmt.Errorf(`source and destination exists but are have mis-matching file types`)
-	}
-
-	if sInfo.IsDir() {
-		err := m.dirMove(sInfo, dInfo)
-		if err != nil {
-			return err
-		}
-	}
-	err := m.fileMove(sInfo, dInfo)
-	if err != nil {
-		return err
-	}
-	return err
-}
-
-// fileMove move files
-func (m *mover) fileMove(src, dst Info) error {
-	// Move files using copy
-	_, err := Copy(src.Path(), dst.Path())
-	if err != nil {
-		return err
-	}
-	m.flagRemoval(src)
-	m.flagRollback(dst)
-	return nil
-}
-
-// dirMove move directories
-func (m *mover) dirMove(src, dst Info) error {
-	err := os.Mkdir(dst.Path(), 0755)
-	if err != nil {
+	// Check src exists
+	srcInfo, err := os.Stat(src)
+	if errors.Is(err, os.ErrNotExist) {
+		return fmt.Errorf("move %s %s: no such file or directory", src, dst)
+	} else if err != nil {
 		return err
 	}
 
-	files, err := ioutil.ReadDir(src.Abs())
-	if err != nil {
-		return err
+	// Check file is a regular file
+	if !srcInfo.Mode().IsRegular() && !srcInfo.Mode().IsDir() {
+		return fmt.Errorf("move %s %s: not a file or directory", src, dst)
 	}
 
-	for _, f := range files {
-		if f.Name() == "." || f.Name() == ".." {
-			continue
-		}
-		newSrc := filepath.Join(src.Path(), f.Name())
-		newDest := filepath.Join(dst.Path(), f.Name())
-
-		sInfo, _ := Stat(newSrc)
-		dInfo, _ := Stat(newDest)
-		err := m.move(sInfo, dInfo)
-		if err != nil {
-			return err
-		}
+	// Check parent directory of destination exits
+	dir := filepath.Dir(dst)
+	dstInfo, err := os.Stat(dir)
+	if errors.Is(err, os.ErrNotExist) {
+		return fmt.Errorf("move %s %s: no such file or directory", src, dst)
 	}
-	m.flagRemoval(src)
-	m.flagRollback(dst)
 
-	return nil
-}
+	// Check if parent of destination is a directory
+	if dstInfo.Mode()&os.ModeDir != os.ModeDir {
+		return fmt.Errorf("move %s %s: parent of destination is not a directory", src, dst)
+	}
 
-// rollback copied files
-func (m *mover) rollback() error {
-	m.unlink(m.trashList)
-	return nil
-}
-
-// cleanup clean up source files
-func (m *mover) cleanup() error {
-	m.unlink(m.trashList)
-	return nil
-}
-
-// unlink
-func (m *mover) unlink(unlinks []Info) {
-	sort.Slice(unlinks, func(i, j int) bool {
-		return len(unlinks[j].Abs()) < len(unlinks[i].Abs())
+	err = filepath.Walk(src, func(srcPath string, srcPathInfo os.FileInfo, err error) error {
+		return walkFunc(src, dst, srcPath, srcPathInfo, err)
 	})
-	for _, u := range unlinks {
-		if u.Exists() {
-			err := os.Remove(u.Abs())
-			errs.LogF(`can not remove file %s: %v`, u.Path(), err)
+
+	return err
+}
+
+func walkFunc(src, dst, srcPath string, srcPathInfo os.FileInfo, err error) error {
+	srcMode := srcPathInfo.Mode()
+	dstPath := filepath.Join(dst, strings.TrimPrefix(srcPath, src))
+	switch {
+	case errors.Is(err, os.ErrNotExist):
+		return err
+	case srcMode.IsDir():
+		err = os.MkdirAll(dstPath, os.ModePerm)
+		return err
+	case srcMode.IsRegular():
+		_, err := CopyFile(srcPath, dstPath)
+		return err
+	case srcMode&os.ModeSymlink != 0:
+		link, err := os.Readlink(srcPathInfo.Name())
+		if err != nil {
+			return err
 		}
+		err = os.Symlink(dstPath, link)
+		return err
 	}
+	return fmt.Errorf("move %s %s: unsupported file type", srcPath, dstPath)
+}
+
+// MoveFile move src file to dst, returns the number of bytes that were moved.
+func MoveFile(src, dst string) (int64, error) {
+	n, err := Copy(src, dst)
+	if err != nil {
+		return n, err
+	}
+	err = os.Remove(src)
+	return n, err
+}
+
+// CopyFile copy src file to dst, returns the number of bytes that were copied.
+func CopyFile(src, dst string) (int64, error) {
+	sourceFileStat, err := os.Stat(src)
+	if err != nil {
+		return 0, err
+	}
+
+	if !sourceFileStat.Mode().IsRegular() {
+		return 0, fmt.Errorf("%s is not a regular file", src)
+	}
+
+	source, err := os.Open(src)
+	if err != nil {
+		return 0, err
+	}
+	defer source.Close()
+
+	destination, err := os.Create(dst)
+	if err != nil {
+		return 0, err
+	}
+	defer destination.Close()
+	nBytes, err := io.Copy(destination, source)
+	return nBytes, err
 }

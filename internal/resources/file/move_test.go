@@ -1,7 +1,6 @@
 package file_test
 
 import (
-	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -14,10 +13,6 @@ import (
 
 // TestMove test moving of files
 func TestMove_File(t *testing.T) {
-	// Mock functions
-	mock()
-	defer mockRestore()
-
 	f, err := ioutil.TempFile("", "TestMove-*.txt")
 	assert.Nil(t, err)
 	_, _ = f.WriteString(`Original File`)
@@ -36,9 +31,6 @@ func TestMove_File(t *testing.T) {
 
 func TestMove_Dir(t *testing.T) {
 	// Mock functions
-	mock()
-	defer mockRestore()
-
 	src, err := ioutil.TempDir("", "TestMove-Dir-Source-*")
 	assert.Nil(t, err)
 
@@ -55,9 +47,6 @@ func TestMove_Dir(t *testing.T) {
 
 func TestMove_Recursive(t *testing.T) {
 	// Mock functions
-	mock()
-	defer mockRestore()
-
 	src, err := ioutil.TempDir("", "TestMove-Recursive-*")
 	assert.Nil(t, err)
 
@@ -79,14 +68,4 @@ func TestMove_Recursive(t *testing.T) {
 	assert.Nil(t, err)
 	assert.DirExists(t, dest)
 	assert.NoFileExists(t, src)
-}
-
-func mock() {
-	file.OsRename = func(oldpath, newpath string) error {
-		return fmt.Errorf(`mocked error`)
-	}
-}
-
-func mockRestore() {
-	file.OsRename = os.Rename
 }
