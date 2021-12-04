@@ -33,7 +33,7 @@ rpm -ivh https://github.com/kick-project/kick/releases/download/v1.0.0/kick-1.0.
 
 Requires go 1.16 or later
 ```bash
-go install github.com/kick-project/kick/cmd/kick@latest
+go install github.com/kick-project/kick/cmd/kick@v1.0.0
 ```
 
 ## go get

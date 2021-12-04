@@ -102,7 +102,7 @@ Usage:
 
 Options:
     -h --help    print help
-    repo         create repository       
+    repo         create repository
     template     create a template
     <name>       template or repo name
     <path>       directory path. if not set creates files in working directory
