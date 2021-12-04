@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 	"sync"
+	"syscall"
+	"time"
 
 	"github.com/docopt/docopt-go"
 	"github.com/sevlyar/go-daemon"
@@ -17,7 +19,7 @@ var testServerUp bool
 
 var usage string = `
 Usage:
-    testserver [-a <port>] [-s <serverpath>] [-p <pidfile>] [-l <logfile>] 
+    testserver [-a <port>] [-s <serverpath>] [-p <pidfile>] [-l <logfile>]
 
 Options:
     -a <port>           Listen on port number [default: 5000]
@@ -61,8 +63,27 @@ func main() {
 }
 
 type testServerStruct struct {
-	server *http.Server
-	home   string
+	server     *http.Server
+	home       string
+	lastActive time.Time
+	muTimeout  *sync.RWMutex
+}
+
+// Timeout Timeout server after inactivity.
+func (s *testServerStruct) Timeout(timeout time.Duration) {
+	s.lastActive = time.Now()
+	s.muTimeout = &sync.RWMutex{}
+	go func() {
+		for {
+			time.Sleep(30 * time.Second)
+			s.muTimeout.RLock()
+			exitTime := s.lastActive.Add(timeout)
+			s.muTimeout.RUnlock()
+			if exitTime.Before(time.Now()) {
+				syscall.Kill(syscall.Getpid(), syscall.SIGINT) // nolint
+			}
+		}
+	}()
 }
 
 func (s *testServerStruct) ServerUp(port, servepath, home string) {
@@ -90,7 +111,13 @@ func (s *testServerStruct) gitServer(addr string, dir string) *http.Server {
 		panic(err)
 	}
 
-	http.Handle("/", service)
+	http.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
+		s.muTimeout.Lock()
+		s.lastActive = time.Now()
+		s.muTimeout.Unlock()
+		service.ServeHTTP(w, req)
+	})
+
 	server := &http.Server{
 		Addr: addr,
 	}
@@ -107,6 +134,7 @@ func (s *testServerStruct) gitServer(addr string, dir string) *http.Server {
 
 func startTestServer(port, servepath, home string) {
 	testserver := &testServerStruct{}
+	testserver.Timeout(1 * time.Minute)
 	testserver.ServerUp(port, servepath, home)
 }
 

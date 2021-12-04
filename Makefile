@@ -59,7 +59,7 @@ _install: $(GOPATH)/bin/$(NAME) ## Install to $(GOPATH)/bin
 
 .PHONY: clean
 clean: ## Reset project to original state
-	-test -f tmp/server.pid && kill -TERM $$(cat tmp/server.pid)
+	-test -f tmp/server-$(USER).pid && kill -TERM $$(cat tmp/server-$(USER).pid)
 	rm -rf .cache kick dist reports tmp vendor nfpm.yaml www/site
 
 .PHONY: test
@@ -137,7 +137,7 @@ _test_setup_dirs:
 
 .PHONY: _test_setup_gitserver
 _test_setup_gitserver:
-	-kill -TERM $$(cat tmp/server.pid 2>/dev/null) >/dev/null 2>&1
+	-kill -TERM $$(cat tmp/server-$(USER).pid 2>/dev/null) >/dev/null 2>&1
 	rm -rf tmp/gitserve 2> /dev/null > /dev/null
 	set -e; find test/fixtures/gitserve -mindepth 1 -maxdepth 1 -type d | xargs -I {} basename {} | xargs -I {} bash -c "set -e; mkdir -p tmp/gitserve/{}.git; cd tmp/gitserve/{}.git; git init --bare"
 	go run test/fixtures/testserver.go
