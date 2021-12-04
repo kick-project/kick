@@ -43,7 +43,7 @@ func (r *RenderText) Text2File(text, dst string, vars *variables.Variables, noun
 	errs.PanicF("Error executing template: %v", err)
 	err = f.Close()
 	errs.PanicF("Error closing tempfile: %v", err)
-	err = file.Move(f.Name(), dst)
+	err = file.MoveAll(f.Name(), dst)
 	errs.PanicF("Error writing file %s: %v", dst, err)
 	return err
 }

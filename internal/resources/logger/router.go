@@ -1,5 +1,7 @@
 package logger
 
+// TODO: Unit test coverage. Increase from 58% to 80%
+
 // Router route log messages to multiple streams
 type Router struct {
 	ifaces []OutputIface

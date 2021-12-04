@@ -9,20 +9,6 @@ import (
 	"strings"
 )
 
-type MockMoveFunc func(src, dst string) error
-
-var (
-	MockMove MockMoveFunc
-)
-
-// Move recursively move a directory or file from src to dst.
-func Move(src, dst string) error {
-	if MockMove != nil {
-		return MockMove(src, dst)
-	}
-	return MoveAll(src, dst)
-}
-
 // MoveAll recursively move a directory or file from src to dst.
 func MoveAll(src, dst string) error {
 	err := CopyAll(src, dst)
@@ -31,7 +17,6 @@ func MoveAll(src, dst string) error {
 	}
 	err = os.RemoveAll(src)
 	return err
-
 }
 
 // CopyAll recursively copy a directory or file from src to dst.
@@ -80,31 +65,21 @@ func walkFunc(src, dst, srcPath string, srcPathInfo os.FileInfo, err error) erro
 		err = os.MkdirAll(dstPath, os.ModePerm)
 		return err
 	case srcMode.IsRegular():
-		_, err := CopyFile(srcPath, dstPath)
+		_, err := copyFile(srcPath, dstPath)
 		return err
 	case srcMode&os.ModeSymlink != 0:
-		link, err := os.Readlink(srcPathInfo.Name())
+		linkToDst, err := os.Readlink(srcPath)
 		if err != nil {
 			return err
 		}
-		err = os.Symlink(dstPath, link)
+		err = os.Symlink(linkToDst, dstPath)
 		return err
 	}
 	return fmt.Errorf("move %s %s: unsupported file type", srcPath, dstPath)
 }
 
-// MoveFile move src file to dst, returns the number of bytes that were moved.
-func MoveFile(src, dst string) (int64, error) {
-	n, err := Copy(src, dst)
-	if err != nil {
-		return n, err
-	}
-	err = os.Remove(src)
-	return n, err
-}
-
-// CopyFile copy src file to dst, returns the number of bytes that were copied.
-func CopyFile(src, dst string) (int64, error) {
+// copyFile copy src file to dst, returns the number of bytes that were copied.
+func copyFile(src, dst string) (int64, error) {
 	sourceFileStat, err := os.Stat(src)
 	if err != nil {
 		return 0, err

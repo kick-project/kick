@@ -12,14 +12,14 @@ import (
 )
 
 // TestMove test moving of files
-func TestMove_File(t *testing.T) {
+func TestMoveAll_File(t *testing.T) {
 	f, err := ioutil.TempFile("", "TestMove-*.txt")
 	assert.Nil(t, err)
 	_, _ = f.WriteString(`Original File`)
 	f.Close()
 
 	dest := filepath.Join(testtools.TempDir(), "TestMove-File-Target")
-	err = file.Move(f.Name(), dest)
+	err = file.MoveAll(f.Name(), dest)
 	assert.Nil(t, err)
 	assert.FileExists(t, dest)
 	assert.NoFileExists(t, f.Name())
@@ -29,13 +29,13 @@ func TestMove_File(t *testing.T) {
 	}
 }
 
-func TestMove_Dir(t *testing.T) {
+func TestMoveAll_Dir(t *testing.T) {
 	// Mock functions
 	src, err := ioutil.TempDir("", "TestMove-Dir-Source-*")
 	assert.Nil(t, err)
 
 	dest := filepath.Join(testtools.TempDir(), "TestMove-Dir-Target")
-	err = file.Move(src, dest)
+	err = file.MoveAll(src, dest)
 	assert.Nil(t, err)
 	assert.DirExists(t, dest)
 	assert.NoFileExists(t, src)
@@ -45,7 +45,7 @@ func TestMove_Dir(t *testing.T) {
 	}
 }
 
-func TestMove_Recursive(t *testing.T) {
+func TestMoveAll_Recursive(t *testing.T) {
 	// Mock functions
 	src, err := ioutil.TempDir("", "TestMove-Recursive-*")
 	assert.Nil(t, err)
@@ -63,8 +63,18 @@ func TestMove_Recursive(t *testing.T) {
 	f2.WriteString(`File2`) //nolint
 	f2.Close()
 
+	wd, _ := os.Getwd() // nolint
+	os.Chdir(lvl1)      // nolint
+	linkSrc := filepath.Base(f2.Name())
+	linkDst := "link.txt"
+	err = os.Symlink(linkSrc, linkDst)
+	if err != nil {
+		t.Errorf("Can not link %s to %s: %v\n", linkSrc, linkDst, err)
+	}
+	os.Chdir(wd) // nolint
+
 	dest := filepath.Join(testtools.TempDir(), "TestMove-Recursive-Target")
-	err = file.Move(src, dest)
+	err = file.MoveAll(src, dest)
 	assert.Nil(t, err)
 	assert.DirExists(t, dest)
 	assert.NoFileExists(t, src)

@@ -27,6 +27,8 @@ type OptRemove struct {
 	Handle string `docopt:"<handle>"`
 }
 
+// TODO: Unit test for removecommand.go
+
 // Remove remove a template
 func Remove(args []string, inject *di.DI) int {
 	opts := &OptRemove{}

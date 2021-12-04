@@ -1,4 +1,4 @@
-package file
+package atomicfile
 
 import (
 	"fmt"
@@ -7,25 +7,26 @@ import (
 	"os"
 
 	"github.com/kick-project/kick/internal/resources/errs"
+	"github.com/kick-project/kick/internal/resources/file"
 )
 
-// AtomicWrite atomically writes files by using a temp file.
+// AtomicFile atomically writes files by using a temp file.
 // When Close is called the temp file is closed and moved to its final destination.
-type AtomicWrite struct {
+type AtomicFile struct {
 	file    *os.File
 	dst     string
 	written int64
 }
 
-// NewAtomicWrite creates a io.WriteCloser to atomically write files.
-func NewAtomicWrite(dst string) *AtomicWrite {
-	return &AtomicWrite{
+// New creates a io.WriteCloser to atomically write files.
+func New(dst string) *AtomicFile {
+	return &AtomicFile{
 		dst: dst,
 	}
 }
 
 // Close closes the temporary file and moves to the destination
-func (a *AtomicWrite) Close() error {
+func (a *AtomicFile) Close() error {
 	if a.file == nil {
 		err := fmt.Errorf("Object is nil")
 		if err != nil {
@@ -33,7 +34,7 @@ func (a *AtomicWrite) Close() error {
 		}
 	}
 	a.file.Close()
-	err := Move(a.file.Name(), a.dst)
+	err := file.MoveAll(a.file.Name(), a.dst)
 	if err != nil {
 		return err
 	}
@@ -41,7 +42,7 @@ func (a *AtomicWrite) Close() error {
 }
 
 // Copy Reads until EOF or an error occurs. Data is written to the tempfile
-func (a *AtomicWrite) Copy(rdr io.Reader) (written int64, err error) {
+func (a *AtomicFile) Copy(rdr io.Reader) (written int64, err error) {
 	f, err := a.tempfile()
 	if err != nil {
 		return 0, err
@@ -53,7 +54,7 @@ func (a *AtomicWrite) Copy(rdr io.Reader) (written int64, err error) {
 }
 
 // Write writes bytes to the tempfile
-func (a *AtomicWrite) Write(data []byte) (written int, err error) {
+func (a *AtomicFile) Write(data []byte) (written int, err error) {
 	f, err := a.tempfile()
 	if err != nil {
 		return 0, err
@@ -66,7 +67,7 @@ func (a *AtomicWrite) Write(data []byte) (written int, err error) {
 }
 
 // tempfile returns the *os.File object for the temporary file
-func (a *AtomicWrite) tempfile() (*os.File, error) {
+func (a *AtomicFile) tempfile() (*os.File, error) {
 	if a.file != nil {
 		return a.file, nil
 	}

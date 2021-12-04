@@ -257,7 +257,7 @@ func (t *Template) Run() int {
 		return 255
 	}
 
-	err = file.Move(t.builddir, t.dest)
+	err = file.MoveAll(t.builddir, t.dest)
 	t.errs.PanicF("build error: %v", err)
 	t.log.Printf(`created project handle:%s -> project:%s`, t.src, t.dest)
 	return 0

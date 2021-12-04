@@ -17,7 +17,7 @@ Usage:
 
 Options:
     -h --help    print help
-    repo         create repository       
+    repo         create repository
     template     create a template
     <name>       template or repo name
     <path>       directory path. if not set creates files in working directory
@@ -31,6 +31,8 @@ type OptInit struct {
 	Name     string `docopt:"<name>"`
 	Path     string `docopt:"<path>"`
 }
+
+// TODO: Unit tests for initcmd.go
 
 // Init install a template
 func Init(args []string, inject *di.DI) int {

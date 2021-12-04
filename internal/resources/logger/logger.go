@@ -9,6 +9,8 @@ import (
 	"github.com/kick-project/kick/internal/resources/exit"
 )
 
+// TODO: Increase unit test coverage from 40% to 80%
+
 type Level int
 
 const (

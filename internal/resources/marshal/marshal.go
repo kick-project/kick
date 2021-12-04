@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/kick-project/kick/internal/resources/file"
+	"github.com/kick-project/kick/internal/resources/file/atomicfile"
 	"gopkg.in/yaml.v2"
 )
 
@@ -23,7 +23,7 @@ func ToFile(v interface{}, path string) error {
 		return fmt.Errorf("parent directory of %s does not exists: %w", path, err)
 	}
 
-	f := file.NewAtomicWrite(path)
+	f := atomicfile.New(path)
 	defer f.Close()
 	var out []byte
 	st, err := suffixType(path)

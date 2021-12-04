@@ -49,7 +49,7 @@ func (r *RenderEnv) Text2File(text, dst string, vars *variables.Variables, nouns
 	if err != nil {
 		return fmt.Errorf("Text2File: %w", err)
 	}
-	err = file.Move(f.Name(), dst)
+	err = file.MoveAll(f.Name(), dst)
 	if err != nil {
 		return fmt.Errorf("Text2File: %w", err)
 	}

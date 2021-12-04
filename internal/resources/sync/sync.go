@@ -21,6 +21,8 @@ import (
 	"gorm.io/gorm/clause"
 )
 
+// TODO: Unit test coverage. Increase from 64%
+
 // Sync synchronize database tables
 //go:generate ifacemaker -f sync.go -s Sync -p sync -i SyncIface -o sync_interfaces.go -c "AUTO GENERATED. DO NOT EDIT."
 type Sync struct {

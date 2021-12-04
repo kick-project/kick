@@ -34,7 +34,7 @@ func Compress(plainSrc, gzDst string) (written int64, err error) {
 	gzWriter.Close()
 	dstIO.Close()
 
-	err = file.Move(dstIO.Name(), gzDst)
+	err = file.MoveAll(dstIO.Name(), gzDst)
 	errs.Panic(err)
 	return written, nil
 }
@@ -65,7 +65,7 @@ func Decompress(gzSrc, plainDst string) (written int64, err error) {
 	errs.Panic(err)
 	dstIO.Close()
 
-	err = file.Move(dstIO.Name(), plainDst)
+	err = file.MoveAll(dstIO.Name(), plainDst)
 	errs.Panic(err)
 	return written, nil
 }

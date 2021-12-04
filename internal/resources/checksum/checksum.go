@@ -34,7 +34,7 @@ func Sha256SumFile(srcFile string, sumfile string) (sum string, err error) {
 	_, err = dstIO.WriteString(sum)
 	errs.Panic(err)
 	dstIO.Close()
-	err = file.Move(dstIO.Name(), sumfile)
+	err = file.MoveAll(dstIO.Name(), sumfile)
 	errs.Panic(err)
 	return sum, err
 }
