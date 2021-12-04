@@ -223,7 +223,7 @@ getversion:
 ### DOCUMENTATION
 
 .PHONY: builddocs
-builddocs: www/docs/cli.md ## Build documents
+builddocs: www/docs/cli.md www/docs/install.md ## Build documents
 
 deploydocs: builddocs ## Deploy documentaiton to github
 	cd www; mkdocs gh-deploy
@@ -317,6 +317,9 @@ dist/kick-$(VERSION).tar.gz: $(GOFILES)
 
 www/docs/cli.md: www/docs/cli.md.sh $(NAME)
 	bash $< > $@
+
+www/docs/install.md: www/docs/install.md.in VERSION
+	VERSION=$(VERSION) $(DOTENV) envsubst < $< > $@
 
 go.mod:
 	@$(DOTENV) $(MAKE) _go.mod

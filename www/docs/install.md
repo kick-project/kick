@@ -4,7 +4,7 @@
 
 ## homebrew
 ```bash
-wget https://github.com/kick-project/kick/releases/download/v1.0.0/kick.rb
+wget https://github.com/kick-project/kick/releases/download/v1.1.0/kick.rb
 brew install kick.rb
 ```
 
@@ -12,19 +12,19 @@ brew install kick.rb
 
 ## homebrew
 ```bash
-wget https://github.com/kick-project/kick/releases/download/v1.0.0/kick.rb
+wget https://github.com/kick-project/kick/releases/download/v1.1.0/kick.rb
 brew install kick.rb
 ```
 
 ## dpkg
 ```bash
-wget https://github.com/kick-project/kick/releases/download/v1.0.0/kick_1.0.0_amd64.deb
+wget https://github.com/kick-project/kick/releases/download/v1.1.0/kick_1.1.0_amd64.deb
 dpkg -i ./kick_1.0.0_amd64.deb
 ```
 
 ## rpm
 ```bash
-rpm -ivh https://github.com/kick-project/kick/releases/download/v1.0.0/kick-1.0.0.x86_64.rpm
+rpm -ivh https://github.com/kick-project/kick/releases/download/v1.1.0/kick-1.1.0.x86_64.rpm
 ```
 
 # Go CLI
@@ -33,7 +33,7 @@ rpm -ivh https://github.com/kick-project/kick/releases/download/v1.0.0/kick-1.0.
 
 Requires go 1.16 or later
 ```bash
-go install github.com/kick-project/kick/cmd/kick@v1.0.0
+go install github.com/kick-project/kick/cmd/kick@v1.1.0
 ```
 
 ## go get
