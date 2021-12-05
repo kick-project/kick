@@ -111,24 +111,22 @@
 <ul>
 <li>the ability to install templates using a git URL</li>
 <li>the use of a directory path as template</li>
-<li>use pre existing projects as templates </li>
+<li>use pre existing projects as templates</li>
 <li>create a repository of templates</li>
 <li>simple key/value pair or environment variables as template variables</li>
 <li>bash style template variables Examples: <code>$variable</code> <code>${variable}</code></li>
 </ul>
 <h1 id="examples">Examples</h1>
 <p>Installing templates directly from git</p>
-<pre><code class="language-bash">kick install gem git@github.com:kick-project/template-gem.git    # Install a gem template
-kick install go git@github.com:kick-project/template-go.git      # Install a go template
-kick install pypi git@github.com:kick-project/template-pypi.git  # Install a pypi template
-kick install project_handle git@example.com:your/git/project.git # Install a custom template for git
+<pre><code class="language-bash">kick install go https://github.com/kick-project/template-go.git      # Install a go template
+kick install pypi https://github.com/kick-project/template-pypi.git  # Install a pypi template
+kick install custom_handle1 git@example.com:your/git/project.git     # Install from a private git repository
 </code></pre>
 <p>Use a local directory as a template</p>
 <pre><code class="language-bash">kick install mytemplate ~/template_directory/mytemplate          # Install a custom template from disk
 </code></pre>
 <p>Starting a project</p>
-<pre><code class="language-bash">kick start gem ~/workspace/mygemproject
-kick start go ~/workspace/mygoproject
+<pre><code class="language-bash">kick start go ~/workspace/mygoproject
 kick start pypi ~/workspace/mypypiproject
 kick start mytemplate ~/myproject
 # Or simply to create a project in the currrent directory
@@ -236,5 +234,5 @@ kick install mytmpl1 tmpl1/repo1
 
 <!--
 MkDocs version : 1.1.2
-Build Date UTC : 2021-12-04 11:20:11.820229+00:00
+Build Date UTC : 2021-12-05 01:31:23.238937+00:00
 -->

@@ -1,0 +1,44 @@
+# Installation
+
+# MacOS
+
+## homebrew
+```bash
+wget https://github.com/kick-project/kick/releases/download/v${VERSION}/kick.rb
+brew install kick.rb
+```
+
+# Linux
+
+## homebrew
+```bash
+wget https://github.com/kick-project/kick/releases/download/v${VERSION}/kick.rb
+brew install kick.rb
+```
+
+## dpkg
+```bash
+wget https://github.com/kick-project/kick/releases/download/v${VERSION}/kick_${VERSION}_amd64.deb
+dpkg -i ./kick_1.0.0_amd64.deb
+```
+
+## rpm
+```bash
+rpm -ivh https://github.com/kick-project/kick/releases/download/v${VERSION}/kick-${VERSION}.x86_64.rpm
+```
+
+# Go CLI
+
+## go install
+
+Requires go 1.16 or later
+```bash
+go install github.com/kick-project/kick/cmd/kick@v${VERSION}
+```
+
+## go get
+
+For version 1.15.x
+```bash
+go get -u github.com/kick-project/kick/cmd/kick
+```
