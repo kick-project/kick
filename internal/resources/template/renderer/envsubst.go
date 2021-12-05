@@ -6,7 +6,7 @@ import (
 	"os"
 	"regexp"
 
-	"github.com/a8m/envsubst"
+	"github.com/drone/envsubst"
 	"github.com/kick-project/kick/internal/resources/file"
 	"github.com/kick-project/kick/internal/resources/template/variables"
 )
@@ -58,7 +58,7 @@ func (r *RenderEnv) Text2File(text, dst string, vars *variables.Variables, nouns
 
 // Text2String renders input text and returns result as a string.
 func (r *RenderEnv) Text2String(text string, vars *variables.Variables, nounset, noempty bool) (result string, err error) {
-	result, err = envsubst.StringRestricted(text, nounset, noempty)
+	result, err = envsubst.EvalEnv(text)
 	return
 }
 

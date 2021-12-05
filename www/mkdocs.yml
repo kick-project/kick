@@ -9,5 +9,6 @@ nav:
   - home: index.md
   - installation: install.md
   - quick start: quickstart.md
+  - reference: reference.md
   - repositories: repos.md
   - cli: cli.md

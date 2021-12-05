@@ -132,6 +132,11 @@ email=john.smith@email.com
 NOTE: The `~/.env` file isn't just for the `kick` utility but can be used by
 any other program in the same way that `~/.profile` is not for just one tool.
 
+### Variable Functions
+
+For a list of supported variable functions see [Supported Variable
+Functions](reference.md) in the reference section.
+
 ## Template files
 
 Templates files are any text file which contains a modeline. A modeline is a
@@ -140,7 +145,7 @@ the form `kick:render` and should be placed within the first 5 lines of a text
 file. Modeline lines are stripped from the file and can be placed inside any
 comment type.
 
-Example modlines
+Example modelines
 ```text
 kick:render
 ```
@@ -158,7 +163,7 @@ kick:render
 ```
 
 The next exercise is to add 4 template variables to the `README.md` file in our
-template.  
+template.
 
 * `${PROJECT_NAME}` - Predefined variable
 * `${USER}`         - Environment variable built into shells (E.G. Bash) which
@@ -172,7 +177,7 @@ pasting the whole text below...
 ```bash
 cat <<'EOF' > ~/templates/mytemplate/README.md
 <!--- kick:render -->
-# ${PROJECT_NAME} 
+# ${PROJECT_NAME}
 
 AUTHOR: ${author}
 EMAIL: ${email}
@@ -218,7 +223,7 @@ culpa qui officia deserunt mollit anim id est laborum.
 
 Kick can use remote git repositories as stores for project templates.  Using our
 freshly minted project template we can upload this to a git repository and use
-`kick install` to install the directory. 
+`kick install` to install the directory.
 
 Create a git repository and upload it to a remote repository.
 ```
