@@ -284,7 +284,7 @@ $(NAME): dist/$(NAME)_$(GOOS)_$(GOARCH)/$(NAME)
 dist/$(NAME)_$(GOOS)_$(GOARCH)/$(NAME) dist/$(NAME)_$(GOOS)_$(GOARCH)/$(NAME).exe: $(GOFILES) internal/version.go
 	@mkdir -p $$(dirname $@)
 	go generate ./...
-	go build -o $@ ./cmd/kick
+	go build -tags sqlite_foreign_keys -o $@ ./cmd/kick
 
 dist/$(NAME)-$(VERSION).$(ARCH).rpm: dist/$(NAME)_$(GOOS)_$(GOARCH)/$(NAME)
 	@mkdir -p $$(dirname $@)

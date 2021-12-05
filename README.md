@@ -21,7 +21,7 @@ kick install custom_handle1 git@example.com:your/git/project.git # Install a cus
 kick install custom_handle2 /path/to/template_directory          # Install a custom template from disk
 ```
 
-* A cli to start projects 
+* A cli to start projects
 
 ```bash
 kick start gem ~/workspace/mygemproject
@@ -31,10 +31,10 @@ kick start pypi ~/workspace/mypypiproject
 
 * Simple templates using environment variables or dotenv variables from
   `${HOME}/.env`.
-  
+
   Dotenv files provide a way to create "environment" variables without polluting the users environment variables as they are only loaded when a program sourcing the `.env` file runs. Note that `.env` variables will _not_ override existing environment variables.
   Using the sample variables below, a template file is easily populated.
-  - `${PROJECT_NAME}`: The directory name parsed from `<path>` when the command `kick start <handle> <path>` is called. 
+  - `${PROJECT_NAME}`: The directory name parsed from `<path>` when the command `kick start <handle> <path>` is called.
 
 ```text
 cat > Makefile <<EOF
@@ -69,7 +69,7 @@ following additions that a project may include...
 
 * CI Integration
   - Github Workflows: `.github/workflows/...`
-  - Gitlab CI: `.gitlab-ci.yml` 
+  - Gitlab CI: `.gitlab-ci.yml`
 * Ignore files
   - Git ignore: `.gitignore`
   - Docker ignore: `.dockerignore`
@@ -83,3 +83,7 @@ following additions that a project may include...
   - Ruby [Rake](https://github.com/ruby/rake): `Rakefile`
 
 This can all be added to a template which can be called from the command line.
+
+## Documents
+
+* [BUILD.md](BUILD.md) - Build and development guide
