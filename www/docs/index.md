@@ -8,7 +8,7 @@ kick is a project template tool, some of its features are...
 
 * the ability to install templates using a git URL
 * the use of a directory path as template
-* use pre existing projects as templates 
+* use pre existing projects as templates
 * create a repository of templates
 * simple key/value pair or environment variables as template variables
 * bash style template variables Examples: `$variable` `${variable}`
@@ -16,10 +16,9 @@ kick is a project template tool, some of its features are...
 
 Installing templates directly from git
 ```bash
-kick install gem git@github.com:kick-project/template-gem.git    # Install a gem template
-kick install go git@github.com:kick-project/template-go.git      # Install a go template
-kick install pypi git@github.com:kick-project/template-pypi.git  # Install a pypi template
-kick install project_handle git@example.com:your/git/project.git # Install a custom template for git
+kick install go https://github.com/kick-project/template-go.git      # Install a go template
+kick install pypi https://github.com/kick-project/template-pypi.git  # Install a pypi template
+kick install custom_handle1 git@example.com:your/git/project.git     # Install from a private git repository
 ```
 
 Use a local directory as a template
@@ -29,7 +28,6 @@ kick install mytemplate ~/template_directory/mytemplate          # Install a cus
 
 Starting a project
 ```bash
-kick start gem ~/workspace/mygemproject
 kick start go ~/workspace/mygoproject
 kick start pypi ~/workspace/mypypiproject
 kick start mytemplate ~/myproject

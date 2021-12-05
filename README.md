@@ -14,17 +14,15 @@ Its features include
 * A way to add templates using a git remote location, URL or local path.
 
 ```bash
-kick install gem git@github.com:kick-project/template-gem.git    # Install a gem template
-kick install go git@github.com:kick-project/template-go.git      # Install a go template
-kick install pypi git@github.com:kick-project/template-pypi.git  # Install a pypi template
-kick install custom_handle1 git@example.com:your/git/project.git # Install a custom template for git
-kick install custom_handle2 /path/to/template_directory          # Install a custom template from disk
+kick install go https://github.com/kick-project/template-go.git      # Install a go template
+kick install pypi https://github.com/kick-project/template-pypi.git  # Install a pypi template
+kick install custom_handle1 git@example.com:your/git/project.git     # Install from a private git repository
+kick install custom_handle2 /path/to/template_directory              # Install a custom template from disk
 ```
 
 * A cli to start projects
 
 ```bash
-kick start gem ~/workspace/mygemproject
 kick start go ~/workspace/mygoproject
 kick start pypi ~/workspace/mypypiproject
 ```
