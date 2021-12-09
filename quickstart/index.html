@@ -44,6 +44,9 @@
                                 <a href="./" class="nav-link">quick start</a>
                             </li>
                             <li class="navitem">
+                                <a href="../reference/" class="nav-link">reference</a>
+                            </li>
+                            <li class="navitem">
                                 <a href="../repos/" class="nav-link">repositories</a>
                             </li>
                             <li class="navitem">
@@ -63,7 +66,7 @@
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a rel="next" href="../repos/" class="nav-link">
+                                <a rel="next" href="../reference/" class="nav-link">
                                     Next <i class="fa fa-arrow-right"></i>
                                 </a>
                             </li>
@@ -214,13 +217,16 @@ email=john.smith@email.com
 </code></pre>
 <p>NOTE: The <code>~/.env</code> file isn't just for the <code>kick</code> utility but can be used by
 any other program in the same way that <code>~/.profile</code> is not for just one tool.</p>
+<h3 id="variable-functions">Variable Functions</h3>
+<p>For a list of supported variable functions see <a href="../reference/">Supported Variable
+Functions</a> in the reference section.</p>
 <h2 id="template-files">Template files</h2>
 <p>Templates files are any text file which contains a modeline. A modeline is a
 piece of text that informs kick that the file is a template. A modeline takes up
 the form <code>kick:render</code> and should be placed within the first 5 lines of a text
 file. Modeline lines are stripped from the file and can be placed inside any
 comment type.</p>
-<p>Example modlines</p>
+<p>Example modelines</p>
 <pre><code class="language-text">kick:render
 </code></pre>
 <pre><code class="language-bash"># kick:render
@@ -230,7 +236,7 @@ comment type.</p>
 <pre><code class="language-html">&lt;!--- kick:render --&gt;
 </code></pre>
 <p>The next exercise is to add 4 template variables to the <code>README.md</code> file in our
-template.  </p>
+template.</p>
 <ul>
 <li><code>${PROJECT_NAME}</code> - Predefined variable</li>
 <li><code>${USER}</code>         - Environment variable built into shells (E.G. Bash) which
@@ -242,7 +248,7 @@ template.  </p>
 pasting the whole text below...</p>
 <pre><code class="language-bash">cat &lt;&lt;'EOF' &gt; ~/templates/mytemplate/README.md
 &lt;!--- kick:render --&gt;
-# ${PROJECT_NAME} 
+# ${PROJECT_NAME}
 
 AUTHOR: ${author}
 EMAIL: ${email}
@@ -278,7 +284,7 @@ culpa qui officia deserunt mollit anim id est laborum.
 <h2 id="git-project-templates">Git Project Templates</h2>
 <p>Kick can use remote git repositories as stores for project templates.  Using our
 freshly minted project template we can upload this to a git repository and use
-<code>kick install</code> to install the directory. </p>
+<code>kick install</code> to install the directory.</p>
 <p>Create a git repository and upload it to a remote repository.</p>
 <pre><code>cd ~/templates/mytemplate
 git init

@@ -4,27 +4,27 @@
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta name="description" content="None">
         
         
-        <link rel="shortcut icon" href="img/favicon.ico">
-        <title>Kick template tool</title>
-        <link href="css/bootstrap.min.css" rel="stylesheet">
-        <link href="css/font-awesome.min.css" rel="stylesheet">
-        <link href="css/base.css" rel="stylesheet">
+        
+        <link rel="shortcut icon" href="../img/favicon.ico">
+        <title>reference - Kick template tool</title>
+        <link href="../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../css/base.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
 
-        <script src="js/jquery-1.10.2.min.js" defer></script>
-        <script src="js/bootstrap.min.js" defer></script>
+        <script src="../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../js/bootstrap.min.js" defer></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/bash.min.js"></script>
         <script>hljs.initHighlightingOnLoad();</script> 
     </head>
 
-    <body class="homepage">
+    <body>
         <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
             <div class="container">
-                <a class="navbar-brand" href=".">Kick template tool</a>
+                <a class="navbar-brand" href="..">Kick template tool</a>
                 <!-- Expander button -->
                 <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
                     <span class="navbar-toggler-icon"></span>
@@ -34,23 +34,23 @@
                 <div id="navbar-collapse" class="navbar-collapse collapse">
                         <!-- Main navigation -->
                         <ul class="nav navbar-nav">
+                            <li class="navitem">
+                                <a href=".." class="nav-link">home</a>
+                            </li>
+                            <li class="navitem">
+                                <a href="../install/" class="nav-link">installation</a>
+                            </li>
+                            <li class="navitem">
+                                <a href="../quickstart/" class="nav-link">quick start</a>
+                            </li>
                             <li class="navitem active">
-                                <a href="." class="nav-link">home</a>
+                                <a href="./" class="nav-link">reference</a>
                             </li>
                             <li class="navitem">
-                                <a href="install/" class="nav-link">installation</a>
+                                <a href="../repos/" class="nav-link">repositories</a>
                             </li>
                             <li class="navitem">
-                                <a href="quickstart/" class="nav-link">quick start</a>
-                            </li>
-                            <li class="navitem">
-                                <a href="reference/" class="nav-link">reference</a>
-                            </li>
-                            <li class="navitem">
-                                <a href="repos/" class="nav-link">repositories</a>
-                            </li>
-                            <li class="navitem">
-                                <a href="cli/" class="nav-link">cli</a>
+                                <a href="../cli/" class="nav-link">cli</a>
                             </li>
                         </ul>
 
@@ -61,12 +61,12 @@
                             </a>
                         </li>
                             <li class="nav-item">
-                                <a rel="prev" class="nav-link disabled">
+                                <a rel="prev" href="../quickstart/" class="nav-link">
                                     <i class="fa fa-arrow-left"></i> Previous
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a rel="next" href="install/" class="nav-link">
+                                <a rel="next" href="../repos/" class="nav-link">
                                     Next <i class="fa fa-arrow-right"></i>
                                 </a>
                             </li>
@@ -88,18 +88,12 @@
     <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
         <ul class="nav flex-column">
             
-            <li class="nav-item" data-level="1"><a href="#kick" class="nav-link">Kick</a>
+            <li class="nav-item" data-level="1"><a href="#reference" class="nav-link">Reference</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#variables" class="nav-link">Variables</a>
               <ul class="nav flex-column">
               </ul>
             </li>
-            
-            <li class="nav-item" data-level="1"><a href="#introduction" class="nav-link">Introduction</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            
-            <li class="nav-item" data-level="1"><a href="#examples" class="nav-link">Examples</a>
-              <ul class="nav flex-column">
               </ul>
             </li>
         </ul>
@@ -107,53 +101,100 @@
 </div></div>
                     <div class="col-md-9" role="main">
 
-<h1 id="kick">Kick</h1>
-<p>A project template tool that stores project templates in git repositories</p>
-<h1 id="introduction">Introduction</h1>
-<p>kick is a project template tool, some of its features are...</p>
-<ul>
-<li>the ability to install templates using a git URL</li>
-<li>the use of a directory path as template</li>
-<li>use pre existing projects as templates</li>
-<li>create a repository of templates</li>
-<li>simple key/value pair or environment variables as template variables</li>
-<li>bash style template variables Examples: <code>$variable</code> <code>${variable}</code></li>
-</ul>
-<h1 id="examples">Examples</h1>
-<p>Installing templates directly from git</p>
-<pre><code class="language-bash">kick install go https://github.com/kick-project/template-go.git      # Install a go template
-kick install pypi https://github.com/kick-project/template-pypi.git  # Install a pypi template
-kick install custom_handle1 git@example.com:your/git/project.git     # Install from a private git repository
-</code></pre>
-<p>Use a local directory as a template</p>
-<pre><code class="language-bash">kick install mytemplate ~/template_directory/mytemplate          # Install a custom template from disk
-</code></pre>
-<p>Starting a project</p>
-<pre><code class="language-bash">kick start go ~/workspace/mygoproject
-kick start pypi ~/workspace/mypypiproject
-kick start mytemplate ~/myproject
-# Or simply to create a project in the currrent directory
-kick start mytemplate myproject
-</code></pre>
-<p>Search and install templates from a repo</p>
-<pre><code class="language-bash"># Search for a template
-kick search tmpl
-+-------------+---------------------------------+
-|  TEMPLATE   |            LOCATION             |
-+-------------+---------------------------------+
-| tmpl/repo1  | http://gitservice.com/tmpl.git  |
-| tmpl1/repo1 | http://gitservice.com/tmpl1.git |
-| tmpl2/repo1 | http://gitservice.com/tmpl2.git |
-+-------------+---------------------------------+
-
-# Install template using &lt;template&gt; name
-kick install mytmpl tmpl
-
-# Install template using &lt;template&gt;/&lt;repo&gt; name
-kick install mytmpl1 tmpl1/repo1
-</code></pre>
-<p>Its that Simple!</p>
-<p>If you would like to see more, head on over to the install &amp; quick start sections</p></div>
+<h1 id="reference">Reference</h1>
+<h2 id="variables">Variables</h2>
+<h3 id="supported-variable-functions">Supported Variable Functions</h3>
+<p>Kick supports variable functions. These come directly from an upstream library <a href="https://github.com/drone/envsubst">Drone Envsubst</a></p>
+<table>
+<thead>
+<tr>
+<th><strong>Expression</strong></th>
+<th><strong>Meaning</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>${var}</code></td>
+<td>Value of <code>$var</code></td>
+</tr>
+<tr>
+<td><code>${#var}</code></td>
+<td>String length of <code>$var</code></td>
+</tr>
+<tr>
+<td><code>${var^}</code></td>
+<td>Uppercase first character of <code>$var</code></td>
+</tr>
+<tr>
+<td><code>${var^^}</code></td>
+<td>Uppercase all characters in <code>$var</code></td>
+</tr>
+<tr>
+<td><code>${var,}</code></td>
+<td>Lowercase first character of <code>$var</code></td>
+</tr>
+<tr>
+<td><code>${var,,}</code></td>
+<td>Lowercase all characters in <code>$var</code></td>
+</tr>
+<tr>
+<td><code>${var:n}</code></td>
+<td>Offset <code>$var</code> <code>n</code> characters from start</td>
+</tr>
+<tr>
+<td><code>${var:n:len}</code></td>
+<td>Offset <code>$var</code> <code>n</code> characters with max length of <code>len</code></td>
+</tr>
+<tr>
+<td><code>${var#pattern}</code></td>
+<td>Strip shortest <code>pattern</code> match from start</td>
+</tr>
+<tr>
+<td><code>${var##pattern}</code></td>
+<td>Strip longest <code>pattern</code> match from start</td>
+</tr>
+<tr>
+<td><code>${var%pattern}</code></td>
+<td>Strip shortest <code>pattern</code> match from end</td>
+</tr>
+<tr>
+<td><code>${var%%pattern}</code></td>
+<td>Strip longest <code>pattern</code> match from end</td>
+</tr>
+<tr>
+<td><code>${var-default</code></td>
+<td>If <code>$var</code> is not set, evaluate expression as <code>$default</code></td>
+</tr>
+<tr>
+<td><code>${var:-default</code></td>
+<td>If <code>$var</code> is not set or is empty, evaluate expression as <code>$default</code></td>
+</tr>
+<tr>
+<td><code>${var=default</code></td>
+<td>If <code>$var</code> is not set, evaluate expression as <code>$default</code></td>
+</tr>
+<tr>
+<td><code>${var:=default</code></td>
+<td>If <code>$var</code> is not set or is empty, evaluate expression as <code>$default</code></td>
+</tr>
+<tr>
+<td><code>${var/pattern/replacement}</code></td>
+<td>Replace as few <code>pattern</code> matches as possible with <code>replacement</code></td>
+</tr>
+<tr>
+<td><code>${var//pattern/replacement}</code></td>
+<td>Replace as many <code>pattern</code> matches as possible with <code>replacement</code></td>
+</tr>
+<tr>
+<td><code>${var/#pattern/replacement}</code></td>
+<td>Replace <code>pattern</code> match with <code>replacement</code> from <code>$var</code> start</td>
+</tr>
+<tr>
+<td><code>${var/%pattern/replacement}</code></td>
+<td>Replace <code>pattern</code> match with <code>replacement</code> from <code>$var</code> end</td>
+</tr>
+</tbody>
+</table></div>
             </div>
         </div>
 
@@ -162,11 +203,11 @@ kick install mytmpl1 tmpl1/repo1
             <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
         </footer>
         <script>
-            var base_url = ".",
+            var base_url = "..",
                 shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
         </script>
-        <script src="js/base.js" defer></script>
-        <script src="search/main.js" defer></script>
+        <script src="../js/base.js" defer></script>
+        <script src="../search/main.js" defer></script>
 
         <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
@@ -234,8 +275,3 @@ kick install mytmpl1 tmpl1/repo1
 
     </body>
 </html>
-
-<!--
-MkDocs version : 1.1.2
-Build Date UTC : 2021-12-09 15:30:57.135078+00:00
--->
