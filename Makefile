@@ -303,7 +303,7 @@ dist/kick-$(VERSION).rb: dist/kick.rb
 	@cp dist/kick{,-$(VERSION)}.rb
 
 dist/kick.rb: kick.rb.in dist/kick-$(VERSION).tar.gz
-	@BASEURL="https://github.com/kick-project/kick/releases/download/$(VERSION)" VERSION=$(VERSION) SHA256=$$(sha256sum dist/kick-$(VERSION).tar.gz | awk '{print $$1}') $(DOTENV) envsubst < $< > $@
+	@BASEURL="https://github.com/kick-project/kick/releases/download/v$(VERSION)" VERSION=$(VERSION) SHA256=$$(sha256sum dist/kick-$(VERSION).tar.gz | awk '{print $$1}') $(DOTENV) envsubst < $< > $@
 
 tmp/kick.rb: kick.rb.in dist/kick-$(VERSION).tar.gz
 	@mkdir -p tmp
