@@ -65,7 +65,6 @@ clean: ## Reset project to original state
 .PHONY: test
 test: ## Test
 	$(MAKE) test_setup
-	$(MAKE) goversion
 	$(MAKE) lint
 	@#echo FEATURE FLAGS ENABLED
 	@#FF_ENABLED=true $(MAKE) _test_fflags
@@ -86,10 +85,6 @@ _test_std:
 .PHONY: _test_fflags
 _test_fflags:
 	$(MAKE) unit
-
-.PHONY: goversion
-goversion:
-	@go version | grep go1.16
 
 .PHONY: _unit
 _unit:
