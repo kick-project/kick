@@ -3,6 +3,7 @@ package start
 import (
 	"fmt"
 	"io"
+	"os"
 	"sort"
 	"text/tabwriter"
 
@@ -67,7 +68,8 @@ func (s Start) Start(projectname, template, path string) {
 	// Sync DB table "installed" with configuration file
 	s.sync.Files()
 
-	// Set varaibles
+	// Set variables
+	os.Setenv("BASENAME", projectname)
 	vars := variables.New()
 	vars.ProjectVariable("NAME", projectname)
 	s.tmpl.SetVars(vars)

@@ -2,9 +2,18 @@
 
 ## Variables
 
-### Supported Variable Functions
+Kick variables are either predefined variables, environment variables or variables defined in a dotenv file `~/.env`. Variables defined in `~/.env` will not override any pre-existing environment variables.
 
-Kick supports variable functions. These come directly from an upstream library [Drone Envsubst](https://github.com/drone/envsubst)
+### Variables - Predefined
+
+| __Variable__      | __Description__
+| ---               | ---
+| `${BASENAME}`     | The basename of the `<project>` section when running `kick start <handle> <project>`
+| `${PROJECT_NAME}` | The same as `${BASENAME}`
+
+### Variables - Functions
+
+Variable functions come directly from an upstream library [Drone Envsubst](https://github.com/drone/envsubst)
 
 | __Expression__                | __Meaning__                                                     |
 | -----------------             | --------------                                                  |

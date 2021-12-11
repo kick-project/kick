@@ -525,6 +525,7 @@ func (s *DI) MakeTemplate() *template.Template {
 	if s.cacheTemplate != nil {
 		return s.cacheTemplate
 	}
+	os.Setenv("BASENAME", s.ProjectName)
 	vars := variables.New()
 	vars.ProjectVariable("NAME", s.ProjectName)
 	o := &template.Options{

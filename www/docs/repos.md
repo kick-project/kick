@@ -1,7 +1,8 @@
 # Repositories
 
-Repositories are git projects with yaml files that contain a set of URL
-locations within the repo.
+Kick template repositories are git projects with references to one ore more
+templates. Kick sub commands such as `kick search` and `kick install` will search and
+install from a kick repository.
 
 # Making a Repository
 
@@ -15,7 +16,8 @@ cd ~/templates
 wget http://github.com/kick-project/kick/releases/latest/website-template.tar.gz -O - | tar -zxvf -
 ```
 
-Initialize the template
+To initialize a template for kick repository use, run `kick init template <name>`.
+This command creates a `repo.yml`.
 ```bash
 cd website-template
 kick init template website
