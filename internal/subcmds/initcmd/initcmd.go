@@ -32,7 +32,7 @@ type OptInit struct {
 	Path     string `docopt:"<path>"`
 }
 
-// TODO: Unit tests for initcmd.go
+// TODO: Unit tests for Init
 
 // Init install a template
 func Init(args []string, inject *di.DI) int {

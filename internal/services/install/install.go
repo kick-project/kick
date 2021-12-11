@@ -238,6 +238,8 @@ func (i *Install) templateMatches(name, origin string) (entries []config.Templat
 	return entries
 }
 
+// TODO: Add unit tests for promptEntry
+
 // promptEntry prompts for an entry
 func (i *Install) promptEntry(handle string, entries []config.Template) {
 	l := len(entries)

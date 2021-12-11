@@ -47,6 +47,8 @@ func (t *Tables) Writer(w io.Writer, ch <-chan *entry.Entry) {
 	writer.Render()
 }
 
+// TODO: Unit tests for longFmt
+
 func (t *Tables) longFmt(ch <-chan *entry.Entry) (header []string, table [][]string) {
 	header = []string{"Template", "Repository", "Template description", "Template Location"}
 	for e := range ch {
@@ -55,6 +57,8 @@ func (t *Tables) longFmt(ch <-chan *entry.Entry) (header []string, table [][]str
 	}
 	return
 }
+
+// TODO: Unit tests for shortFmt
 
 func (t *Tables) shortFmt(ch <-chan *entry.Entry) (header []string, table [][]string) {
 	header = []string{"Template", "Location"}

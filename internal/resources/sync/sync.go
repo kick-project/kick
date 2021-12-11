@@ -140,6 +140,8 @@ func (s *Sync) loadRepo(path string) (repo serialize.RepoMain, err error) {
 	return
 }
 
+// TODO: Add unit test for loadTemplates
+
 // loadTemplates loads templates from a repo file
 func (s *Sync) loadTemplates(repo *model.Repo, templatedir string) {
 	matches, err := filepath.Glob(templatedir + "/*.yml")
