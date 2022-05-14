@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [1.2.0] - NOT RELEASED
 
+### Change
+
+- Bump Go version to 1.18 to pave the way for Generics
+
 ## [1.1.0] - 2021-12-10
 
 ### Added
