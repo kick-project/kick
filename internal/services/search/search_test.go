@@ -88,7 +88,7 @@ func TestSearch(t *testing.T) {
 func buildSearchDataORM(t *testing.T, db *gorm.DB) {
 	m1 := model.Repo{
 		Name: "testrepo",
-		URL:  "http://127.0.0.1:5000/repo1.git",
+		URL:  "http://127.0.0.1:8080/repo1.git",
 		Desc: "Repo 1",
 	}
 
@@ -103,22 +103,22 @@ func buildSearchDataORM(t *testing.T, db *gorm.DB) {
 	t1 := []model.Template{
 		{
 			Name: "firsttemplate",
-			URL:  "http://127.0.0.1:5000/tmpl.git",
+			URL:  "http://127.0.0.1:8080/tmpl.git",
 			Desc: "My First Template",
 		},
 		{
 			Name: "template1",
-			URL:  "http://127.0.0.1:5000/tmpl1.git",
+			URL:  "http://127.0.0.1:8080/tmpl1.git",
 			Desc: "My Template Description",
 		},
 		{
 			Name: "template2",
-			URL:  "http://127.0.0.1:5000/tmpl2.git",
+			URL:  "http://127.0.0.1:8080/tmpl2.git",
 			Desc: "My Template Description",
 		},
 		{
 			Name: "boilerplate3",
-			URL:  "http://127.0.0.1:5000/template3.git",
+			URL:  "http://127.0.0.1:8080/template3.git",
 			Desc: "My Template Description",
 		},
 	}
@@ -134,7 +134,7 @@ func buildSearchDataORM(t *testing.T, db *gorm.DB) {
 
 	m2 := model.Repo{
 		Name: "testrepo2",
-		URL:  "http://127.0.0.1:5000/repo2.git",
+		URL:  "http://127.0.0.1:8080/repo2.git",
 		Desc: "Repo 2",
 	}
 
@@ -147,37 +147,37 @@ func buildSearchDataORM(t *testing.T, db *gorm.DB) {
 	t2 := []model.Template{
 		{
 			Name: "mytemplate1",
-			URL:  "http://127.0.0.1:5000/tmpl3.git",
+			URL:  "http://127.0.0.1:8080/tmpl3.git",
 			Desc: "My Boiler Plate Description",
 		},
 		{
 			Name: "mytemplate1",
-			URL:  "http://127.0.0.1:5000/tmpl4.git",
+			URL:  "http://127.0.0.1:8080/tmpl4.git",
 			Desc: "My Boiler Plate Description",
 		},
 		{
 			Name: "mytemplate1",
-			URL:  "http://127.0.0.1:5000/tmpl4.git",
+			URL:  "http://127.0.0.1:8080/tmpl4.git",
 			Desc: "My Boiler Plate Description",
 		},
 		{
 			Name: "boilerplate1",
-			URL:  "http://127.0.0.1:5000/template1.git",
+			URL:  "http://127.0.0.1:8080/template1.git",
 			Desc: "My Boiler Plate Description",
 		},
 		{
 			Name: "boilerplate2",
-			URL:  "http://127.0.0.1:5000/template2.git",
+			URL:  "http://127.0.0.1:8080/template2.git",
 			Desc: "My Template Description",
 		},
 		{
 			Name: "boilerplate3",
-			URL:  "http://127.0.0.1:5000/boilerplate4.git",
+			URL:  "http://127.0.0.1:8080/boilerplate4.git",
 			Desc: "My Template Description",
 		},
 		{
 			Name: "boilerplate4",
-			URL:  "http://127.0.0.1:5000/boilerplate4.git",
+			URL:  "http://127.0.0.1:8080/boilerplate4.git",
 			Desc: "My Template Description",
 		},
 	}
@@ -194,12 +194,12 @@ func buildSearchDataORM(t *testing.T, db *gorm.DB) {
 	t3 := []model.Template{
 		{
 			Name: "mytemplate4",
-			URL:  "http://127.0.0.1:5000/template4.git",
+			URL:  "http://127.0.0.1:8080/template4.git",
 			Desc: "My Boiler Plate Description",
 		},
 		{
 			Name: "mytemplate5",
-			URL:  "http://127.0.0.1:5000/template5.git",
+			URL:  "http://127.0.0.1:8080/template5.git",
 			Desc: "My Boiler Plate Description",
 		},
 	}

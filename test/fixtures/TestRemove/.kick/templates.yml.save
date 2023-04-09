@@ -1,9 +1,9 @@
 - handle: handle1
   template: template1
-  url: http://127.0.0.1:5000/template1.git
+  url: http://127.0.0.1:8080/template1.git
 - handle: handle2
   template: template2
-  url: http://127.0.0.1:5000/tempalte2.git
+  url: http://127.0.0.1:8080/tempalte2.git
 - handle: handle3
   template: template3
-  url: http://127.0.0.1:5000/tempalte3.git
+  url: http://127.0.0.1:8080/tempalte3.git

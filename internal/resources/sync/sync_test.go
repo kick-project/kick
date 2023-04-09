@@ -57,7 +57,7 @@ func setup(t *testing.T, home string, models ...interface{}) (*sync.Sync, *di.DI
 func TestRepo(t *testing.T) {
 	m := model.Repo{
 		Name: "repo2",
-		URL:  "http://127.0.0.1:5000/repo2.git",
+		URL:  "http://127.0.0.1:8080/repo2.git",
 		Desc: "repo 2",
 	}
 
@@ -71,10 +71,10 @@ func TestFiles(t *testing.T) {
 
 	contents := []byte(`
 - handle: tmpl1	
-  url: http://127.0.0.1:5000/tmpl1.git
+  url: http://127.0.0.1:8080/tmpl1.git
   desc: Template 1
 - handle: tmpl2
-  url: http://127.0.0.1:5000/tmpl2.git
+  url: http://127.0.0.1:8080/tmpl2.git
   desc: Template 2
 `)
 	err := ioutil.WriteFile(inject.PathTemplateConf, contents, 0644)

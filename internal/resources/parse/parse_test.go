@@ -30,7 +30,7 @@ func TestHttpParseHTTPS(t *testing.T) {
 }
 
 func TestHttpParseHTTPPORT(t *testing.T) {
-	url := "http://bitbucket.org:5000/serve/git/pytmpl.git"
+	url := "http://bitbucket.org:8080/serve/git/pytmpl.git"
 	expectedScheme := "http"
 	expectedServer := "bitbucket.org"
 	expectedProject := "pytmpl"
@@ -40,7 +40,7 @@ func TestHttpParseHTTPPORT(t *testing.T) {
 }
 
 func TestHttpParseHTTPSPORT(t *testing.T) {
-	url := "https://127.0.0.1:5000/serve/git/template.git"
+	url := "https://127.0.0.1:8080/serve/git/template.git"
 	expectedScheme := "https"
 	expectedServer := "127.0.0.1"
 	expectedProject := "template"

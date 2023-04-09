@@ -137,8 +137,8 @@ _test_setup_gitserver:
 	set -e; find test/fixtures/gitserve -mindepth 1 -maxdepth 1 -type d | xargs -I {} basename {} | xargs -I {} bash -c "set -e; mkdir -p tmp/gitserve/{}.git; cd tmp/gitserve/{}.git; git init --bare"
 	go run test/fixtures/testserver.go
 	mkdir -p tmp/gitserveclient
-	echo "Waiting for git server to launch on 5000..."
-	bash -c 'while ! nc -z localhost 5000; do sleep 0.1; done'
+	echo "Waiting for git server to launch on 8080..."
+	bash -c 'while ! nc -z localhost 8080; do sleep 0.1; done'
 	echo "git server launched"
 	$(MAKE) _test_setup_gitclient
 
@@ -146,7 +146,7 @@ _test_setup_gitserver:
 _test_setup_gitclient:
 	rm -rf tmp/gitserverclient 2> /dev/null > /dev/null
 	(set -e; find test/fixtures/gitserve -mindepth 1 -maxdepth 1 -type d -exec cp -r {} tmp/gitserveclient \;) 2>&1 > /dev/null
-	find tmp/gitserveclient -type d -mindepth 1 -maxdepth 1 | xargs -I {} -n 1 bash -c "cd {}; git init; git add .; git commit -m 'Initial commit'; git tag 7.7.7; git remote add origin http://127.0.0.1:5000/\$$(basename {}).git; git push -u origin master; git push --tags"
+	find tmp/gitserveclient -type d -mindepth 1 -maxdepth 1 | xargs -I {} -n 1 bash -c "cd {}; git init; git add .; git commit -m 'Initial commit'; git tag 7.7.7; git remote add origin http://127.0.0.1:8080/\$$(basename {}).git; git push -u origin master; git push --tags"
 	sync
 
 .PHONY: _release

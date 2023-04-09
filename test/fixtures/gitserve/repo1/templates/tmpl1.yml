@@ -1,5 +1,5 @@
 name: tmpl1
-url: http://127.0.0.1:5000/tmpl1.git
+url: http://127.0.0.1:8080/tmpl1.git
 description: The Template1 Template
 versions:
 - "1.0.0"

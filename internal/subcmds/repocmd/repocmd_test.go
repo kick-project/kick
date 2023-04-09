@@ -35,11 +35,11 @@ func TestRepocmd_Build(t *testing.T) {
 		`name: repo1
 description: repo1 repo
 templates:
-    - http://127.0.0.1:5000/tmpl.git
-    - http://127.0.0.1:5000/tmpl1.git
-    - http://127.0.0.1:5000/tmpl2.git
-    - http://127.0.0.1:5000/tmpl3.git
-    - http://127.0.0.1:5000/tmpl4.git
+    - http://127.0.0.1:8080/tmpl.git
+    - http://127.0.0.1:8080/tmpl1.git
+    - http://127.0.0.1:8080/tmpl2.git
+    - http://127.0.0.1:8080/tmpl3.git
+    - http://127.0.0.1:8080/tmpl4.git
 `)
 
 	err = ioutil.WriteFile(filePath, data, 0644)
@@ -74,7 +74,7 @@ templates:
 		}
 
 		assert.Equal(t, d.Name, id)
-		assert.Equal(t, d.URL, fmt.Sprintf(`http://127.0.0.1:5000/%s.git`, id))
+		assert.Equal(t, d.URL, fmt.Sprintf(`http://127.0.0.1:8080/%s.git`, id))
 		assert.Equal(t, d.Desc, fmt.Sprintf(`%s template`, id))
 		assert.Greater(t, len(d.Versions), 0)
 	}
@@ -87,7 +87,7 @@ func TestRepocmd_List(t *testing.T) {
 	inject.Stdout = stdout
 	repocmd.Repo([]string{"repo", "list"}, inject)
 
-	mustMatch := regexp.MustCompile(`\| repo1 \| http://127.0.0.1:5000/repo1.git \|`)
+	mustMatch := regexp.MustCompile(`\| repo1 \| http://127.0.0.1:8080/repo1.git \|`)
 	mustNotMatch := regexp.MustCompile(`local`)
 	assert.Regexp(t, mustMatch, stdout.String())
 	assert.NotRegexp(t, mustNotMatch, stdout.String())
@@ -101,7 +101,7 @@ func TestRepocmd_Info(t *testing.T) {
 	repocmd.Repo([]string{"repo", "info", "repo1"}, inject)
 
 	mustMatch1 := regexp.MustCompile(`name: repo1`)
-	mustMatch2 := regexp.MustCompile(`url: http://127.0.0.1:5000/repo1.git`)
+	mustMatch2 := regexp.MustCompile(`url: http://127.0.0.1:8080/repo1.git`)
 	assert.Regexp(t, mustMatch1, stdout)
 	assert.Regexp(t, mustMatch2, stdout)
 }

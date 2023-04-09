@@ -25,11 +25,11 @@ func TestRepo_Build(t *testing.T) {
 		`name: repo1
 description: repo1 repo
 templates:
-    - http://127.0.0.1:5000/tmpl.git
-    - http://127.0.0.1:5000/tmpl1.git
-    - http://127.0.0.1:5000/tmpl2.git
-    - http://127.0.0.1:5000/tmpl3.git
-    - http://127.0.0.1:5000/tmpl4.git
+    - http://127.0.0.1:8080/tmpl.git
+    - http://127.0.0.1:8080/tmpl1.git
+    - http://127.0.0.1:8080/tmpl2.git
+    - http://127.0.0.1:8080/tmpl3.git
+    - http://127.0.0.1:8080/tmpl4.git
 `)
 
 	err = ioutil.WriteFile(filePath, data, 0644)

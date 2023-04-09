@@ -22,7 +22,7 @@ Usage:
     testserver [-n] [-a <port>] [-s <serverpath>] [-p <pidfile>] [-l <logfile>]
 
 Options:
-    -a <port>           Listen on port number [default: 5000]
+    -a <port>           Listen on port number [default: 8080]
     -s <serverpath>     Server path to git repositories [default: tmp/gitserve]
     -p <pidfile>        Path to pidfile [default: tmp/server.pid]
     -l <logfile>        Path to logfile [default: tmp/server.log]

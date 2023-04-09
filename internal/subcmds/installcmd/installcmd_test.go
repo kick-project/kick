@@ -36,7 +36,7 @@ func TestInstallTemplateOrigin(t *testing.T) {
 
 func TestInstallTemplateURL(t *testing.T) {
 	handle := "handle3"
-	template := "http://localhost:5000/tmpl2.git"
+	template := "http://localhost:8080/tmpl2.git"
 	installTest(t, "TestInstallTemplateURL", handle, template)
 }
 
