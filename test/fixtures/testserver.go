@@ -19,13 +19,14 @@ var testServerUp bool
 
 var usage string = `
 Usage:
-    testserver [-a <port>] [-s <serverpath>] [-p <pidfile>] [-l <logfile>]
+    testserver [-n] [-a <port>] [-s <serverpath>] [-p <pidfile>] [-l <logfile>]
 
 Options:
     -a <port>           Listen on port number [default: 5000]
     -s <serverpath>     Server path to git repositories [default: tmp/gitserve]
     -p <pidfile>        Path to pidfile [default: tmp/server.pid]
     -l <logfile>        Path to logfile [default: tmp/server.log]
+	-n                  Do not daemonize
 `
 
 func main() {
@@ -34,30 +35,33 @@ func main() {
 	serverpath := args["-s"].(string)
 	pidfile := args["-p"].(string)
 	logfile := args["-l"].(string)
+	nodaemon := args["-n"].(bool)
 	home, _ := filepath.Abs("tmp/home")
 	srvpath, _ := filepath.Abs(serverpath)
-	cntxt := &daemon.Context{
-		PidFileName: pidfile,
-		PidFilePerm: 0644,
-		LogFileName: logfile,
-		LogFilePerm: 0640,
-		WorkDir:     "./",
-		Umask:       027,
-		Args:        []string{"gitkit"},
-	}
-	d, err := cntxt.Reborn()
-	if err != nil {
-		panic(err)
-	}
-	if d != nil {
-		return
-	}
-	defer func() {
-		err = cntxt.Release()
+	if !nodaemon {
+		cntxt := &daemon.Context{
+			PidFileName: pidfile,
+			PidFilePerm: 0644,
+			LogFileName: logfile,
+			LogFilePerm: 0640,
+			WorkDir:     "./",
+			Umask:       027,
+			Args:        []string{"gitkit"},
+		}
+		d, err := cntxt.Reborn()
 		if err != nil {
 			panic(err)
 		}
-	}()
+		if d != nil {
+			return
+		}
+		defer func() {
+			err = cntxt.Release()
+			if err != nil {
+				panic(err)
+			}
+		}()
+	}
 
 	startTestServer(port, srvpath, home)
 }
