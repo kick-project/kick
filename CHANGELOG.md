@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Change
 
 - Bump Go version to 1.18 to pave the way for Generics
+- ReadFile function to read into a byte array from multiple inputs
+- Switch from regex to lexer based mode line parsing
 
 ## [1.1.0] - 2021-12-10
 

@@ -22,6 +22,7 @@ import (
 	"github.com/kick-project/kick/internal/resources/file"
 	"github.com/kick-project/kick/internal/resources/logger"
 	"github.com/kick-project/kick/internal/resources/marshal"
+	"github.com/kick-project/kick/internal/resources/modeline"
 	"github.com/kick-project/kick/internal/resources/template/renderer"
 	"github.com/kick-project/kick/internal/resources/template/variables"
 )
@@ -36,6 +37,7 @@ const (
 )
 
 // Template the template itself
+//
 //go:generate ifacemaker -f template.go -s Template -p template -i TemplateIface -o template_interfaces.go -c "AUTO GENERATED. DO NOT EDIT."
 type Template struct {
 	checkvars      *checkvars.Check
@@ -311,9 +313,7 @@ func (t *Template) loadTempateConf(path string) {
 	}
 }
 
-//
 // Source Destination pair
-//
 type filePair struct {
 	dstPath   string // Destination path
 	mlen      uint8  // Mode line length
@@ -328,16 +328,16 @@ type filePair struct {
 }
 
 func (fp *filePair) route() error {
-	action, lnum := fp.hasModeLine()
+	ml, lnum := fp.hasModeLine()
 	switch {
 	case fp.srcInfo.IsDir():
 		return fp.mkdir()
 	case fp.skipFile():
 		return nil
-	case lnum > 0 && action == MLrender:
+	case lnum > 0 && ml != nil && ml.Option("render"):
 		err := fp.render(lnum)
 		fp.errs.Panic(err)
-	case lnum > 0 && action == MLnorender:
+	case lnum > 0 && ml != nil && ml.Option("ignore"):
 		return nil
 	case fp.srcInfo.Mode().IsRegular():
 		return fp.copy()
@@ -440,44 +440,27 @@ func (fp *filePair) render(mline uint8) error {
 
 // hasModeLine scans the first mlen lines for a modeline
 // returns MLnone, MLrender depending on defined action
-func (fp *filePair) hasModeLine() (action int, lnum uint8) {
-	action = MLnone
+func (fp *filePair) hasModeLine() (ml *modeline.ModeLine, lnum uint8) {
 	len := fp.mlen
-	mlactions := hasML{}.Init()
 	source, err := os.Open(fp.srcPath)
 	fp.errs.FatalF("Can not open file %s: %v", fp.srcPath, err)
 
 	defer source.Close()
 	scner := bufio.NewScanner(source)
-LOOP:
 	for scner.Scan() {
 		lnum++
 		line := scner.Bytes()
-		for _, mlaction := range mlactions {
-			hasMatch := mlaction.Regex.Match(line)
-			if hasMatch {
-				action = mlaction.Action
-				break LOOP
-			}
+		ml, err := modeline.Parse("", line, 1)
+		if ml != nil {
+			return ml, lnum
+		} else if err != nil {
+			return nil, 0
 		}
 		if lnum > len {
-			lnum = 0
-			break
+			return nil, 0
 		}
 	}
-	return action, lnum
-}
-
-//
-// hasML
-//
-
-type hasML []hasMLAction
-
-func (ml hasML) Init() hasML {
-	ml = append(ml, regexCompile(`kick:render\W?`, MLrender))
-	ml = append(ml, regexCompile(`kick:ignore\W?`, MLnorender))
-	return ml
+	return nil, 0
 }
 
 //
@@ -486,22 +469,6 @@ func (ml hasML) Init() hasML {
 
 type templateConf struct {
 	Renderer string `yaml:"renderer"`
-}
-
-func regexCompile(rex string, action int) hasMLAction {
-	regex, err := regexp.Compile(rex)
-	errs.PanicF("Error compiling regex: %s", err) // nolint
-	ml := hasMLAction{
-		Regex:  regex,
-		Action: action,
-	}
-	return ml
-}
-
-// hasMLAction contains a regex and an action of MLignore, MLrender or MLnone
-type hasMLAction struct {
-	Regex  *regexp.Regexp
-	Action int
 }
 
 // scanLines is a split function for a Scanner that returns each line of
