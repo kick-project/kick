@@ -10,7 +10,7 @@ func Parse(path string, input any, lines int) (*ModeLine, error) {
 	empty := true
 	ml := ModeLine{
 		options: map[string]any{},
-		types:   map[string]any{},
+		labels:  map[string]any{},
 	}
 	src, err := file.ReadFile(path, input)
 	if err != nil {
@@ -22,8 +22,8 @@ func Parse(path string, input any, lines int) (*ModeLine, error) {
 			ml.options[i.Value] = struct{}{}
 			empty = false
 		}
-		if i.Type == parser.TYPE {
-			ml.types[i.Value] = struct{}{}
+		if i.Type == parser.LABEL {
+			ml.labels[i.Value] = struct{}{}
 			empty = false
 		}
 	}
@@ -35,7 +35,7 @@ func Parse(path string, input any, lines int) (*ModeLine, error) {
 
 type ModeLine struct {
 	options map[string]any
-	types   map[string]any
+	labels  map[string]any
 }
 
 func (m ModeLine) Option(option string) bool {
@@ -43,7 +43,7 @@ func (m ModeLine) Option(option string) bool {
 	return ok
 }
 
-func (m ModeLine) Type(typ string) bool {
-	_, ok := m.types[typ]
+func (m ModeLine) Label(label string) bool {
+	_, ok := m.labels[label]
 	return ok
 }

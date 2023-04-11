@@ -8,16 +8,15 @@ import (
 )
 
 var parseFile = `file.txt`
-var parseTest = `# kick:render type=core,editor`
+var parseTest = `# kick:render label=core,editor`
 var parseTestNoML = "# 1\n# 2\n# 3"
 var parseTestOutOfRange = "#\n#\n#\n# kick:render"
 
 func TestParse(t *testing.T) {
 	items := Parse(parseFile, parseTest, 5)
 	assert.Contains(t, items, Item{Type: OPTION, Value: "render"})
-	assert.Contains(t, items, Item{Type: OPTION, Value: "type"})
-	assert.Contains(t, items, Item{Type: TYPE, Value: "core"})
-	assert.Contains(t, items, Item{Type: TYPE, Value: "editor"})
+	assert.Contains(t, items, Item{Type: LABEL, Value: "core"})
+	assert.Contains(t, items, Item{Type: LABEL, Value: "editor"})
 }
 
 func TestParse_NoModeLine(t *testing.T) {

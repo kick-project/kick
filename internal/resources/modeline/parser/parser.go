@@ -29,7 +29,7 @@ const (
 
 	OPTION // "render" "ignore"
 	RHS    // type=
-	TYPE   // type value
+	LABEL  // type value
 )
 
 // Item represents a token returned by the scanner
@@ -185,19 +185,18 @@ func lexOPTION(l *lexer) stateFn {
 	return l.errorf("modeline error: unknown option: %s", id)
 }
 
-// TODO - Add RHS lexer
 func lexRHS(l *lexer) stateFn {
 	var id = l.input[l.start:l.pos]
-	if id == "type" && l.peek() == '=' {
+	if id == "label" && l.peek() == '=' {
 		l.emit(OPTION)
 		l.next()
 		l.ignore()
-		return lexTYPE
+		return lexLABEL
 	}
 	return nil
 }
 
-func lexTYPE(l *lexer) stateFn {
+func lexLABEL(l *lexer) stateFn {
 	var r rune
 	var p rune
 LOOP:
@@ -205,16 +204,16 @@ LOOP:
 		r = l.next()
 		p = l.peek()
 		switch {
-		case isType(l.input[l.start:l.pos]):
+		case isLabel(l.input[l.start:l.pos]):
 			if p == ',' {
-				l.emit(TYPE)
+				l.emit(LABEL)
 				continue LOOP
 			} else if p == ' ' {
-				l.emit(TYPE)
+				l.emit(LABEL)
 				return lexMLDATA
 			} else if p == '\n' || p == eof {
 				if len(l.input[l.start:l.pos]) > 0 {
-					l.emit(TYPE)
+					l.emit(LABEL)
 				}
 				return nil
 			} else if isAlphaNumeric(p) {
@@ -222,7 +221,7 @@ LOOP:
 			}
 		case r == ',':
 			l.ignore()
-			return lexTYPE
+			return lexLABEL
 		default:
 			break LOOP
 		}
@@ -266,8 +265,8 @@ func isOption(id string) bool {
 	return startsWithAlpha && isAlphaNum
 }
 
-// isType returns true if id is a valid type
-func isType(typ string) bool {
+// isLabel returns true if id is a valid type
+func isLabel(typ string) bool {
 	return isOption(typ)
 }
 
