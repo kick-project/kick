@@ -15,6 +15,7 @@ import (
 	"github.com/kick-project/kick/internal/resources/client"
 	"github.com/kick-project/kick/internal/resources/client/plumb"
 	"github.com/kick-project/kick/internal/resources/config"
+	"github.com/kick-project/kick/internal/resources/config/configtemplate"
 	"github.com/kick-project/kick/internal/resources/errs"
 	"github.com/kick-project/kick/internal/resources/logger"
 	"github.com/kick-project/kick/internal/resources/marshal"
@@ -26,6 +27,7 @@ import (
 )
 
 // Repo build a repository repo
+//
 //go:generate ifacemaker -f repo.go -s Repo -p repo -i RepoIface -o repo_interfaces.go -c "AUTO GENERATED. DO NOT EDIT."
 type Repo struct {
 	client     *client.Client      // Git client
@@ -122,7 +124,7 @@ func (r *Repo) downloadTemplate(url string) (plu *plumb.Plumb, ok bool) {
 
 func (r *Repo) constructRepo(destDir string, plu *plumb.Plumb) bool {
 	// Load .kick.yml
-	var templateMain serialize.TemplateMain
+	var templateMain configtemplate.TemplateMain
 	srcTemplate := filepath.Join(plu.Path(), ".kick.yml")
 	err := marshal.FromFile(&templateMain, srcTemplate)
 	if r.errs.LogF("Can not load file \"%s\": %v", srcTemplate, err) {

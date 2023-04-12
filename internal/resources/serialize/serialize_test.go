@@ -3,13 +3,13 @@ package serialize_test
 import (
 	"testing"
 
-	"github.com/kick-project/kick/internal/resources/serialize"
+	"github.com/kick-project/kick/internal/resources/config/configtemplate"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v2"
 )
 
 func TestSerialize(t *testing.T) {
-	tmpl := &serialize.TemplateMain{}
+	tmpl := &configtemplate.TemplateMain{}
 	txt := `---
 name: goms
 description: Go micro services template

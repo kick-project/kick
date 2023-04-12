@@ -6,9 +6,9 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/kick-project/kick/internal/resources/config/configtemplate"
 	"github.com/kick-project/kick/internal/resources/errs"
 	"github.com/kick-project/kick/internal/resources/logger"
-	"github.com/kick-project/kick/internal/resources/serialize"
 	"gopkg.in/yaml.v2"
 )
 
@@ -50,7 +50,7 @@ func (p *Check) Check(confin io.Reader) (bool, error) {
 		return false, fmt.Errorf(`prompt: %w`, err)
 	}
 
-	data := &serialize.TemplateMain{}
+	data := &configtemplate.TemplateMain{}
 	err = yaml.Unmarshal(buf, data)
 	if err != nil {
 		return false, fmt.Errorf(`prompt: %w`, err)

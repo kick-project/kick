@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/kick-project/kick/internal/resources/config/configtemplate"
 	"github.com/kick-project/kick/internal/resources/errs"
 	"github.com/kick-project/kick/internal/resources/logger"
 	"github.com/kick-project/kick/internal/resources/marshal"
@@ -13,6 +14,7 @@ import (
 )
 
 // Init create repositories and templates
+//
 //go:generate ifacemaker -f initialize.go -s Init -p initialize -i InitIface -o initialize_interfaces.go -c "AUTO GENERATED. DO NOT EDIT."
 type Init struct {
 	ErrHandler errs.HandlerIface  `validate:"required"`
@@ -72,7 +74,7 @@ func (i *Init) CreateTemplate(name, path string) int {
 		i.ErrHandler.FatalF(`can not find current directory: %v`, err)
 	}
 
-	tmpl := &serialize.TemplateMain{
+	tmpl := &configtemplate.TemplateMain{
 		Name: name,
 		Desc: fmt.Sprintf(`Template %s`, name),
 	}
