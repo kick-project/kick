@@ -3,7 +3,6 @@ package marshal
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -56,7 +55,7 @@ func FromFile(v interface{}, path string) error {
 		return fmt.Errorf("file %s does not exist: %w", path, err)
 	}
 
-	f, err := ioutil.ReadFile(path)
+	f, err := os.ReadFile(path)
 	if err != nil {
 		return fmt.Errorf("can not read file %s: %w", path, err)
 	}

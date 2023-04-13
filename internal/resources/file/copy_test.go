@@ -1,7 +1,6 @@
 package file_test
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
@@ -13,7 +12,7 @@ import (
 
 // TestCopy test coping of files
 func TestCopy(t *testing.T) {
-	f, err := ioutil.TempFile("", "TestCopy-*.txt")
+	f, err := os.CreateTemp("", "TestCopy-*.txt")
 	assert.Nil(t, err)
 	_, _ = f.WriteString(`Original File`)
 	f.Close()

@@ -2,7 +2,6 @@ package start_test
 
 import (
 	"bytes"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
@@ -38,7 +37,7 @@ func TestStart_List_Long(t *testing.T) {
 
 func TestStart_Start(t *testing.T) {
 	tmpdir := testtools.TempDir()
-	path, _ := ioutil.TempDir(tmpdir, "start-")
+	path, _ := os.MkdirTemp(tmpdir, "start-")
 	project := "tmpl"
 	tmpl := "tmpl"
 

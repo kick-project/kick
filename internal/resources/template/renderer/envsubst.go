@@ -2,7 +2,6 @@ package renderer
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"regexp"
 
@@ -19,7 +18,7 @@ type RenderEnv struct {
 // File2File takes a src file populates a dst file with the results of the
 // template populated with variables
 func (r *RenderEnv) File2File(src, dst string, vars *variables.Variables, nounset, noempty bool) (err error) {
-	b, err := ioutil.ReadFile(src)
+	b, err := os.ReadFile(src)
 	if err != nil {
 		return
 	}
@@ -30,7 +29,7 @@ func (r *RenderEnv) File2File(src, dst string, vars *variables.Variables, nounse
 // Text2File takes template text text and outputs to dst file
 func (r *RenderEnv) Text2File(text, dst string, vars *variables.Variables, nounset, noempty bool) (err error) {
 	td := os.Getenv("TEMP")
-	f, err := ioutil.TempFile(td, "kick-*")
+	f, err := os.CreateTemp(td, "kick-*")
 	if err != nil {
 		return fmt.Errorf("Text2File: %w", err)
 	}

@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -168,7 +167,7 @@ func (t *Template) renderer() renderer.Renderer {
 }
 
 func (t *Template) buildDir(id string) {
-	d, err := ioutil.TempDir(os.Getenv("TEMP"), fmt.Sprintf("kick-%s-", id))
+	d, err := os.MkdirTemp(os.Getenv("TEMP"), fmt.Sprintf("kick-%s-", id))
 	t.errs.PanicF("build error: %v", err)
 	t.builddir = d
 }
@@ -401,7 +400,7 @@ func (fp *filePair) stripModeline(lnum uint8) string {
 	defer inF.Close()                                        // nolint
 
 	tmpdir := os.Getenv("TMPDIR")
-	outF, err := ioutil.TempFile(tmpdir, "kick-")
+	outF, err := os.CreateTemp(tmpdir, "kick-")
 	fp.errs.PanicF("Can not create tempfile: %s", err) // nolint
 	defer outF.Close()                                 // nolint
 

@@ -5,7 +5,6 @@ import (
 	"crypto/sha256"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -27,7 +26,7 @@ func Sha256SumFile(srcFile string, sumfile string) (sum string, err error) {
 	}
 	fname := filepath.Base(srcFile)
 	sum = fmt.Sprintf("%x %s\n", bytesum, fname)
-	dstIO, err := ioutil.TempFile("", "")
+	dstIO, err := os.CreateTemp("", "")
 	if err != nil {
 		return "", fmt.Errorf("Failed to open temporary file for %s: %s", sumfile, err)
 	}

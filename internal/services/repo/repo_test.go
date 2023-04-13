@@ -1,7 +1,6 @@
 package repo_test
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
@@ -32,7 +31,7 @@ templates:
     - http://127.0.0.1:8080/tmpl4.git
 `)
 
-	err = ioutil.WriteFile(filePath, data, 0644)
+	err = os.WriteFile(filePath, data, 0644)
 	if err != nil {
 		t.Errorf("Can not write file %s: %v", filePath, err)
 		return

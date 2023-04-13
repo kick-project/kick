@@ -2,7 +2,6 @@ package update_test
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	fp "path/filepath"
 	"testing"
@@ -58,7 +57,7 @@ func TestRepo_Save(t *testing.T) {
 	m := update.Repo{}
 	err := m.Load(path)
 	errs.Panic(err)
-	tmpfile, err := ioutil.TempFile("", "*.json")
+	tmpfile, err := os.CreateTemp("", "*.json")
 	if err != nil {
 		t.Fatal("Error opening tempfile")
 	}
@@ -100,7 +99,7 @@ func TestTemplate_Save(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	tmpfile, err := ioutil.TempFile("", "*.json")
+	tmpfile, err := os.CreateTemp("", "*.json")
 	if err != nil {
 		t.Fatal("Error opening tempfile")
 	}
@@ -130,7 +129,7 @@ func fakeJSON(t *testing.T) (path, name, url, desc string) {
 	desc = faker.Internet().Slug()
 	template := fmt.Sprintf(`{"name": "%s", "URL": "%s", "description": "%s", "versions": ["1.0.0", "1.1.0", "2.0.0", "2.0.1"]}`, name, url, desc)
 
-	tf, err := ioutil.TempFile("", "*.json")
+	tf, err := os.CreateTemp("", "*.json")
 	if err != nil {
 		t.Fatalf("ERROR: Can not open temporary file: %v", err)
 	}

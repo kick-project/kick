@@ -1,6 +1,6 @@
 module github.com/kick-project/kick
 
-go 1.18
+go 1.20
 
 require (
 	github.com/coreos/go-semver v0.3.0
@@ -10,7 +10,7 @@ require (
 	github.com/go-playground/validator v9.31.0+incompatible
 	github.com/jinzhu/copier v0.2.9
 	github.com/joho/godotenv v1.3.0
-	github.com/mattn/go-sqlite3 v2.0.3+incompatible
+	github.com/mattn/go-sqlite3 v1.14.16
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/sevlyar/go-daemon v0.1.5
 	github.com/sosedoff/gitkit v0.2.0

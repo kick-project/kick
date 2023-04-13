@@ -2,7 +2,7 @@ package sync_test
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 	"testing"
 	"time"
 
@@ -77,7 +77,7 @@ func TestFiles(t *testing.T) {
   url: http://127.0.0.1:8080/tmpl2.git
   desc: Template 2
 `)
-	err := ioutil.WriteFile(inject.PathTemplateConf, contents, 0644)
+	err := os.WriteFile(inject.PathTemplateConf, contents, 0644)
 	if err != nil {
 		t.Error(err)
 	}

@@ -1,7 +1,6 @@
 package installcmd_test
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
@@ -135,7 +134,7 @@ func installTest(t *testing.T, id, handle, template string) {
 	ec = installcmd.Install([]string{"install", handle, template}, inject)
 	assert.Equal(t, 0, ec)
 
-	td, err := ioutil.TempDir(testtools.TempDir(), id+"-*")
+	td, err := os.MkdirTemp(testtools.TempDir(), id+"-*")
 	if err != nil {
 		t.Error(err)
 	}

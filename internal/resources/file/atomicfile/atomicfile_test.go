@@ -2,7 +2,6 @@ package atomicfile_test
 
 import (
 	"io"
-	"io/ioutil"
 	"math/rand"
 	"os"
 	"path/filepath"
@@ -33,7 +32,7 @@ func TestAtomicFile_Copy(t *testing.T) {
 	dstfile := filepath.Join(testtools.TempDir(), "atomicfile_copy.txt")
 
 	// Save data to tempfile
-	tmpfile, _ := ioutil.TempFile("", "atomicfile_copy*.txt") // nolint
+	tmpfile, _ := os.CreateTemp("", "atomicfile_copy*.txt") // nolint
 	defer func() {
 		_ = os.Remove(tmpfile.Name())
 	}()

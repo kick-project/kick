@@ -1,7 +1,6 @@
 package renderer
 
 import (
-	"io/ioutil"
 	"os"
 	"regexp"
 	tt "text/template"
@@ -23,7 +22,7 @@ type RenderText struct {
 // File2File takes a src file populates a dst file with the results of the
 // template populated with variables
 func (r *RenderText) File2File(src, dst string, vars *variables.Variables, nounset, noempty bool) error {
-	b, err := ioutil.ReadFile(src)
+	b, err := os.ReadFile(src)
 	errs.LogF("Can not open template file %s for reading: %v", src, err)
 	err = r.Text2File(string(b), dst, vars, nounset, noempty)
 	errs.Panic(err)
@@ -33,7 +32,7 @@ func (r *RenderText) File2File(src, dst string, vars *variables.Variables, nouns
 // Text2File takes template text text and outputs to dst file
 func (r *RenderText) Text2File(text, dst string, vars *variables.Variables, nounset, noempty bool) error {
 	td := os.Getenv("TEMP")
-	f, err := ioutil.TempFile(td, "kick-*")
+	f, err := os.CreateTemp(td, "kick-*")
 	errs.PanicF("Error creating tempfile %v", err)
 
 	t := tt.Must(tt.New("texttemplate").Parse(text))
@@ -51,12 +50,12 @@ func (r *RenderText) Text2File(text, dst string, vars *variables.Variables, noun
 // Text2String renders input text and returns result as a string.
 func (r *RenderText) Text2String(text string, vars *variables.Variables, nounset, noempty bool) (string, error) {
 	td := os.Getenv("TEMP")
-	f, err := ioutil.TempFile(td, "kick-*")
+	f, err := os.CreateTemp(td, "kick-*")
 	errs.PanicF("Error creating tempfile %v", err)
 	f.Close() // nolint
 	err = r.Text2File(text, f.Name(), vars, nounset, noempty)
 	errs.Panic(err)
-	b, err := ioutil.ReadFile(f.Name())
+	b, err := os.ReadFile(f.Name())
 	errs.LogF("Can not open template file %s for reading: %v", f.Name(), err)
 	os.Remove(f.Name()) // nolint
 	return string(b), err

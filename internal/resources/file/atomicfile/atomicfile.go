@@ -3,7 +3,6 @@ package atomicfile
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 
 	"github.com/kick-project/kick/internal/resources/errs"
@@ -71,7 +70,7 @@ func (a *AtomicFile) tempfile() (*os.File, error) {
 	if a.file != nil {
 		return a.file, nil
 	}
-	f, err := ioutil.TempFile("", "")
+	f, err := os.CreateTemp("", "")
 	if errs.LogF("Can not open temp file: %v", err) {
 		return nil, err
 	}

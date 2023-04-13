@@ -1,7 +1,6 @@
 package file_test
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
@@ -13,7 +12,7 @@ import (
 
 // TestMove test moving of files
 func TestMoveAll_File(t *testing.T) {
-	f, err := ioutil.TempFile("", "TestMove-*.txt")
+	f, err := os.CreateTemp("", "TestMove-*.txt")
 	assert.Nil(t, err)
 	_, _ = f.WriteString(`Original File`)
 	f.Close()
@@ -31,7 +30,7 @@ func TestMoveAll_File(t *testing.T) {
 
 func TestMoveAll_Dir(t *testing.T) {
 	// Mock functions
-	src, err := ioutil.TempDir("", "TestMove-Dir-Source-*")
+	src, err := os.MkdirTemp("", "TestMove-Dir-Source-*")
 	assert.Nil(t, err)
 
 	dest := filepath.Join(testtools.TempDir(), "TestMove-Dir-Target")
@@ -47,18 +46,18 @@ func TestMoveAll_Dir(t *testing.T) {
 
 func TestMoveAll_Recursive(t *testing.T) {
 	// Mock functions
-	src, err := ioutil.TempDir("", "TestMove-Recursive-*")
+	src, err := os.MkdirTemp("", "TestMove-Recursive-*")
 	assert.Nil(t, err)
 
-	f1, err := ioutil.TempFile(src, "TestMove-File1-*")
+	f1, err := os.CreateTemp(src, "TestMove-File1-*")
 	assert.Nil(t, err)
 	f1.WriteString(`File1`) //nolint
 	f1.Close()
 
-	lvl1, err := ioutil.TempDir(src, "TestMove-Level1-*")
+	lvl1, err := os.MkdirTemp(src, "TestMove-Level1-*")
 	assert.Nil(t, err)
 
-	f2, err := ioutil.TempFile(lvl1, "TestMove-File2-*")
+	f2, err := os.CreateTemp(lvl1, "TestMove-File2-*")
 	assert.Nil(t, err)
 	f2.WriteString(`File2`) //nolint
 	f2.Close()
