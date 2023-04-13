@@ -38,7 +38,7 @@ func TestAtomicFile_Copy(t *testing.T) {
 	}()
 
 	// Random string
-	rand.Seed(time.Now().UnixNano())
+	rand.New(rand.NewSource(time.Now().UnixNano()))
 	letters := []byte("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 	for i := range contentsrc {
 		contentsrc[i] = letters[rand.Intn(len(letters))]
