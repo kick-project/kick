@@ -169,7 +169,7 @@ _release_github: _package
 
 .PHONY: lint
 lint: internal/version.go
-	golangci-lint run --enable=gocyclo; echo $$? > reports/exitcode-golangci-lint.txt
+	golangci-lint run --enable=gocyclo --timeout 120s; echo $$? > reports/exitcode-golangci-lint.txt
 	golint -set_exit_status ./..; echo $$? > reports/exitcode-golint.txt
 
 .PHONY: tag
