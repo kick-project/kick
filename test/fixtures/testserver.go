@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"sync"
 	"syscall"
 	"time"
@@ -38,6 +39,9 @@ func main() {
 	nodaemon := args["-n"].(bool)
 	home, _ := filepath.Abs("tmp/home")
 	srvpath, _ := filepath.Abs(serverpath)
+	if len(pidfile) > 0 && checkPid(pidfile) {
+		os.Exit(0)
+	}
 	if !nodaemon {
 		cntxt := &daemon.Context{
 			PidFileName: pidfile,
@@ -153,4 +157,21 @@ func getAddr(port string) string {
 		panic("Port is not set")
 	}
 	return addr
+}
+
+func checkPid(pidfile string) bool {
+	b, err := os.ReadFile(pidfile)
+	if err != nil {
+		return false
+	}
+	i, err := strconv.Atoi(string(b))
+	if err != nil {
+		return false
+	}
+	p, err := os.FindProcess(i)
+	if err != nil {
+		return false
+	}
+	err = p.Signal(syscall.Signal(0))
+	return err == nil
 }
