@@ -1,0 +1,4 @@
+name: tmpl
+description: tmpl template
+label:
+  ".github": ["github"]

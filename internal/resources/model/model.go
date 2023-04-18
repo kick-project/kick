@@ -11,7 +11,7 @@ import (
 )
 
 //
-// Models
+// Model local storage
 //
 
 // Repo a set of templates
@@ -66,6 +66,43 @@ type Versions struct {
 }
 
 //
+// Model in memory
+//
+
+// Base
+type Base struct {
+	gorm.Model
+	ID   uint   `gorm:"primaryKey;not null"`
+	Base string `gorm:"index:,unique"`
+	File []File `gorm:"foreignKey:BaseID"`
+}
+
+// File
+type File struct {
+	gorm.Model
+	ID     uint     `gorm:"primaryKey;not null"`
+	File   string   `gorm:"index:idx_file_template,unique"`
+	BaseID uint     `gorm:"index:idx_file_template,unique"`
+	Option []Option `gorm:"many2many:file_option"`
+	Label  []Label  `gorm:"many2many:file_label"`
+}
+
+// Option
+type Option struct {
+	gorm.Model
+	ID     uint   `gorm:"primaryKey;not null"`
+	Option string `gorm:"index:,unique"`
+	File   []File `gorm:"many2many:file_option"`
+}
+
+// Label
+type Label struct {
+	ID    uint   `gorm:"primaryKey;not null"`
+	Label string `gorm:"index:,unique"`
+	File  []File `gorm:"many2many:file_label"`
+}
+
+//
 //
 //
 
@@ -104,6 +141,29 @@ func CreateModel(opts *Options) (db *gorm.DB) {
 	if result.Error != nil {
 		errs.FatalF("can not insert root record into database: %v", result.Error)
 	}
+
+	return db
+}
+
+// CreateModelTemporary
+func CreateModelTemporary(opts Options) (db *gorm.DB) {
+	dia := sqlite.Open(opts.File)
+	db, err := gorm.Open(dia, &gorm.Config{
+		NamingStrategy: schema.NamingStrategy{
+			SingularTable: true,
+		},
+	})
+
+	errs.FatalF("Can not initialize in memory database: %v", err)
+
+	err = db.AutoMigrate(
+		&Base{},
+		&File{},
+		&Label{},
+		&Option{},
+	)
+
+	errs.FatalF("Can not create in memory database: %v", err)
 
 	return db
 }

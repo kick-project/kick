@@ -155,7 +155,7 @@ LOOP:
 	for {
 		r = l.next()
 		switch {
-		case r == eof:
+		case r == eof || r == '\n':
 			l.ignore()
 			l.emit(END)
 			break LOOP
@@ -168,7 +168,6 @@ LOOP:
 		case isAlphaNumeric(r):
 			continue LOOP
 		default:
-			fmt.Printf("%c\n", r)
 			l.errorf("invalid character %c", r)
 		}
 	}
@@ -277,7 +276,7 @@ func isRHSEnd(r rune) bool {
 
 // isOptionEnd returns true if r is an identifier boundary
 func isOptionEnd(r rune) bool {
-	return r == ' ' || r == eof
+	return r == ' ' || r == '\n' || r == eof
 }
 
 // Parse

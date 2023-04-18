@@ -21,3 +21,7 @@ func TestCreateModel(t *testing.T) {
 		File: path,
 	})
 }
+
+func TestCreateModelMemory(t *testing.T) {
+	model.CreateModelTemporary(model.Options{File: "file::memory:"})
+}

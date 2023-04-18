@@ -1,0 +1,47 @@
+name: Go
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+
+  build:
+    name: Tests
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Set up go cache
+      uses: actions/cache@v1
+      with:
+        path: ~/go
+        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+    
+    - name: Set up vendor cache
+      uses: actions/cache@v1
+      with:
+        path: vendor
+        key: $${{ runner.os }}-vendor-${{ hashFiles('**/go.sum') }}
+    
+    - name: Set up dist cache
+      uses: actions/cache@v1
+      with:
+        path: dist
+        key: $${{ runner.os }}-dist-${{ hashFiles('dist/checksums.txt') }}
+
+    - name: Set up Go 1.14.x
+      uses: actions/setup-go@v1
+      with:
+        go-version: 1.14.x
+      id: go
+
+    - name: Git checkout
+      uses: actions/checkout@v2
+    
+    - name: go get
+      run: go get -u ./...
+    
+    - name: go test
+      run: go test ./...
