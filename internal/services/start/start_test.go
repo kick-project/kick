@@ -10,9 +10,14 @@ import (
 	"github.com/kick-project/kick/internal/resources/config"
 	"github.com/kick-project/kick/internal/resources/exit"
 	"github.com/kick-project/kick/internal/resources/marshal"
+	"github.com/kick-project/kick/internal/resources/templatescan"
 	"github.com/kick-project/kick/internal/resources/testtools"
 	"github.com/kick-project/kick/internal/services/start"
 	"github.com/stretchr/testify/assert"
+)
+
+var (
+	FixtureTemplate = filepath.Join(testtools.FixtureDir(), "gotemplate")
 )
 
 func TestStart_List_Short(t *testing.T) {
@@ -70,6 +75,11 @@ func TestStart_Start(t *testing.T) {
 	assert.Equal(t, d.Home, os.Getenv("HOME"))
 }
 
+func TestStart_Show(t *testing.T) {
+	s, _, _ := make()
+	s.Show(FixtureTemplate, []string{})
+}
+
 func make() (s *start.Start, stderr *bytes.Buffer, stdout *bytes.Buffer) {
 	home, _ := filepath.Abs(filepath.Join(testtools.TempDir(), "home"))
 	stderr, stdout, conf := getOptions()
@@ -78,11 +88,17 @@ func make() (s *start.Start, stderr *bytes.Buffer, stdout *bytes.Buffer) {
 	})
 	setup := inject.MakeSetup()
 	setup.Init()
+	scan := templatescan.Scan{
+		DB: inject.MakeORMInMemory(),
+	}
+	//nolint
+	scan.Run(FixtureTemplate, 5)
 	o := start.Options{
 		Conf:      conf,
 		Check:     inject.MakeCheck(),
 		CheckVars: inject.MakeCheckVars(),
 		Exit:      &exit.Handler{Mode: exit.MPanic},
+		DB:        inject.MakeORMInMemory(),
 		Stderr:    stderr,
 		Stdout:    stdout,
 		Sync:      inject.MakeSync(),

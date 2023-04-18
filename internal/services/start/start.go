@@ -8,21 +8,27 @@ import (
 
 	"github.com/kick-project/kick/internal/resources/check"
 	"github.com/kick-project/kick/internal/resources/checkvars"
+	"github.com/kick-project/kick/internal/resources/cond"
 	"github.com/kick-project/kick/internal/resources/config"
+	"github.com/kick-project/kick/internal/resources/errs"
 	"github.com/kick-project/kick/internal/resources/exit"
 	"github.com/kick-project/kick/internal/resources/sync"
 	"github.com/kick-project/kick/internal/resources/template"
 	"github.com/kick-project/kick/internal/resources/template/variables"
+	"github.com/kick-project/kick/internal/resources/templatescan"
 	"github.com/olekukonko/tablewriter"
 	terminal "github.com/wayneashleyberry/terminal-dimensions"
+	"gorm.io/gorm"
 )
 
 // Start manage listing of installed templates
+//
 //go:generate ifacemaker -f start.go -s Start -p start -i StartIface -o start_interfaces.go -c "AUTO GENERATED. DO NOT EDIT."
 type Start struct {
 	check     *check.Check
 	checkvars *checkvars.Check
 	conf      *config.File
+	db        *gorm.DB
 	exit      exit.HandlerIface
 	stderr    io.Writer
 	stdout    io.Writer
@@ -35,6 +41,7 @@ type Options struct {
 	Check     *check.Check           `validate:"required"`
 	CheckVars *checkvars.Check       `validate:"required"`
 	Conf      *config.File           `validate:"required"`
+	DB        *gorm.DB               `validate:"required"`
 	Exit      exit.HandlerIface      `validate:"required"`
 	Stderr    io.Writer              `validate:"required"`
 	Stdout    io.Writer              `validate:"required"`
@@ -49,6 +56,7 @@ func New(opts Options) *Start {
 		checkvars: opts.CheckVars,
 		conf:      opts.Conf,
 		exit:      opts.Exit,
+		db:        opts.DB,
 		stderr:    opts.Stderr,
 		stdout:    opts.Stdout,
 		sync:      opts.Sync,
@@ -83,6 +91,26 @@ func (s *Start) List(long bool) {
 		s.longFmt()
 	} else {
 		s.shortFmt()
+	}
+}
+
+// Show show files
+func (s *Start) Show(base string, filter []string) {
+	type Row struct {
+		Dir   string
+		Path  string
+		Label string
+	}
+	results := []Row{}
+	if len(filter) == 0 || cond.ContainsString("all", filter...) {
+		tx := s.db.Raw(templatescan.QueryScanLabel+" WHERE base = ?", base).Scan(&results)
+		errs.Fatal(tx.Error)
+	} else {
+		tx := s.db.Raw(templatescan.QueryScanLabel+" WHERE base = ? AND (label IS NULL OR label IN ?)", base, filter).Scan(&results)
+		errs.Fatal(tx.Error)
+	}
+	for _, r := range results {
+		fmt.Fprintf(s.stdout, "%s %s %s\n", r.Dir, r.Path, r.Label)
 	}
 }
 

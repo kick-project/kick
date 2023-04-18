@@ -21,6 +21,7 @@ import (
 	"github.com/kick-project/kick/internal/resources/errs"
 	"github.com/kick-project/kick/internal/resources/exit"
 	"github.com/kick-project/kick/internal/resources/logger"
+	"github.com/kick-project/kick/internal/resources/model"
 	"github.com/kick-project/kick/internal/resources/sync"
 	"github.com/kick-project/kick/internal/resources/template"
 	"github.com/kick-project/kick/internal/resources/template/renderer"
@@ -73,6 +74,7 @@ type DI struct {
 	// Cached objects
 	cacheConfigFile  *config.File
 	cacheORM         *gorm.DB
+	cacheORMInMemory *gorm.DB
 	cacheEnvVars     *env.Vars
 	cacheErrHandler  *errs.Handler
 	cacheExitHandler *exit.Handler
@@ -106,20 +108,20 @@ type Options struct {
 // contextualized by the home variable. For instance when home is
 // set the paths...
 //
-//     {{home}}/.kick/config.yml
-//     {{home}}/.kick/templates.yml
-//     {{home}}/.kick/metadata/metadata.db
-//     {{home}}/.kick/templates
-//     etc..
+//	{{home}}/.kick/config.yml
+//	{{home}}/.kick/templates.yml
+//	{{home}}/.kick/metadata/metadata.db
+//	{{home}}/.kick/templates
+//	etc..
 //
 // are then factored in when creating dependency injections.
 //
 // If initialization is needed for testing then the initialize package can be
 // used. For example
 //
-//   set := New(&Options{home: "/tmp/tmp_home"});
-//   init := set.MakeInitialize()
-//   init.Init()
+//	set := New(&Options{home: "/tmp/tmp_home"});
+//	init := set.MakeInitialize()
+//	init.Init()
 //
 // will create the structures under "/tmp/tmp_home"
 //
@@ -237,6 +239,16 @@ func (s *DI) MakeORM() *gorm.DB {
 
 	}
 	s.cacheORM = db
+	return db
+}
+
+// MakeORMInMemory return in memory database ORM
+func (s *DI) MakeORMInMemory() *gorm.DB {
+	if s.cacheORMInMemory != nil {
+		return s.cacheORMInMemory
+	}
+	db := model.CreateModelTemporary(model.Options{File: "file::memory:"})
+	s.cacheORMInMemory = db
 	return db
 }
 
