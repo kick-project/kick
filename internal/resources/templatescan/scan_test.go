@@ -1,7 +1,6 @@
-package scan
+package templatescan
 
 import (
-	_ "embed"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -11,12 +10,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
 )
-
-//go:embed scan_label_test.sql
-var queryScanLabel string
-
-//go:embed scan_option_test.sql
-var queryScanOption string
 
 func TestScan_Run(t *testing.T) {
 	root := filepath.Join(testtools.FixtureDir(), "gotemplate")
@@ -32,7 +25,7 @@ func TestScan_Run(t *testing.T) {
 }
 
 func testOptions(t *testing.T, db *gorm.DB) {
-	q := queryScanOption + " WHERE file = ?"
+	q := QueryScanOption + " WHERE file = ?"
 	type Result struct {
 		Dir    string
 		Path   string
@@ -46,7 +39,7 @@ func testOptions(t *testing.T, db *gorm.DB) {
 }
 
 func testLabels(t *testing.T, db *gorm.DB) {
-	q := queryScanLabel + " WHERE label = ?"
+	q := QueryScanLabel + " WHERE label = ?"
 	type Result struct {
 		Dir   string
 		Path  string

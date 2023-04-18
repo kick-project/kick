@@ -1,6 +1,7 @@
-package scan
+package templatescan
 
 import (
+	_ "embed"
 	"errors"
 	"fmt"
 	"io/fs"
@@ -17,6 +18,12 @@ import (
 )
 
 var ErrInvalidFileType = errors.New("Invalid file type")
+
+//go:embed scan_label.sql
+var QueryScanLabel string
+
+//go:embed scan_option.sql
+var QueryScanOption string
 
 type Scan struct {
 	DB *gorm.DB
