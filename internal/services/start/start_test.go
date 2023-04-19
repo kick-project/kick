@@ -2,6 +2,7 @@ package start_test
 
 import (
 	"bytes"
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -76,8 +77,15 @@ func TestStart_Start(t *testing.T) {
 }
 
 func TestStart_Show(t *testing.T) {
-	s, _, _ := make()
-	s.Show(FixtureTemplate, []string{})
+	s, _, stdout := make()
+	s.Show(FixtureTemplate, []string{}, start.SLABEL)
+	fmt.Print(stdout.String())
+	assert.Regexp(t, `\|\s+FILES\s+\|\s+LABELS\s+\|`, stdout)
+	assert.Regexp(t, `\|\s+.editorconfig\s+\|\s+editor\s+\|`, stdout)
+	assert.Regexp(t, `\|\s+.github\s+\|\s+github\s+\|`, stdout)
+	assert.Regexp(t, `\|\s+.github/workflows\s+\|\s+github\s+\|`, stdout)
+	assert.Regexp(t, `\|\s+.github/workflows/go.yml\s+\|\s+github\s+\|`, stdout)
+	assert.Regexp(t, `\|\s+go.mod\s+\|\s+go\s+core\s+\|`, stdout)
 }
 
 func make() (s *start.Start, stderr *bytes.Buffer, stdout *bytes.Buffer) {

@@ -8,4 +8,6 @@ type StartIface interface {
 	Start(projectname, template, path string)
 	// List lists the output
 	List(long bool)
+	// Show show files
+	Show(base string, filter []string)
 }

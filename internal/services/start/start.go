@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"sort"
+	"strings"
 	"text/tabwriter"
 
 	"github.com/kick-project/kick/internal/resources/check"
@@ -20,6 +21,18 @@ import (
 	terminal "github.com/wayneashleyberry/terminal-dimensions"
 	"gorm.io/gorm"
 )
+
+type ShowOptions uint
+
+const (
+	// Show entries
+	SLABEL ShowOptions = 1 << iota
+)
+
+type showRow struct {
+	file  string
+	label []string
+}
 
 // Start manage listing of installed templates
 //
@@ -49,7 +62,7 @@ type Options struct {
 	Template  template.TemplateIface `validate:"required"`
 }
 
-// New consructor
+// New constructor
 func New(opts Options) *Start {
 	s := &Start{
 		check:     opts.Check,
@@ -88,33 +101,54 @@ func (s Start) Start(projectname, template, path string) {
 // List lists the output
 func (s *Start) List(long bool) {
 	if long {
-		s.longFmt()
+		s.fmtListLong()
 	} else {
-		s.shortFmt()
+		s.fmtListShort()
 	}
 }
 
-// Show show files
-func (s *Start) Show(base string, filter []string) {
+// Show show files used in a template. base is the path to the template
+// directory on local disk. If a slice of incLabels is provided, only files,
+// directories that have matching labels will be displayed. If a file or
+// directory has no label it is always displayed.
+func (s *Start) Show(base string, incLabels []string, ops ShowOptions) {
 	type Row struct {
 		Dir   string
 		Path  string
 		Label string
 	}
 	results := []Row{}
-	if len(filter) == 0 || cond.ContainsString("all", filter...) {
+	if len(incLabels) == 0 || cond.ContainsString("all", incLabels...) {
 		tx := s.db.Raw(templatescan.QueryScanLabel+" WHERE base = ?", base).Scan(&results)
 		errs.Fatal(tx.Error)
 	} else {
-		tx := s.db.Raw(templatescan.QueryScanLabel+" WHERE base = ? AND (label IS NULL OR label IN ?)", base, filter).Scan(&results)
+		tx := s.db.Raw(templatescan.QueryScanLabel+" WHERE base = ? AND (label IS NULL OR label IN ?)", base, incLabels).Scan(&results)
 		errs.Fatal(tx.Error)
 	}
+	rows := []string{}
+	tblIdx := map[string]showRow{}
+	tbl := []showRow{}
 	for _, r := range results {
-		fmt.Fprintf(s.stdout, "%s %s %s\n", r.Dir, r.Path, r.Label)
+		if _, ok := tblIdx[r.Path]; !ok {
+			sr := showRow{
+				file: r.Path,
+			}
+			tblIdx[r.Path] = sr
+			rows = append(rows, r.Path)
+		}
+		if r.Label != "" {
+			idx := tblIdx[r.Path]
+			idx.label = append(idx.label, r.Label)
+			tblIdx[r.Path] = idx
+		}
 	}
+	for _, r := range rows {
+		tbl = append(tbl, tblIdx[r])
+	}
+	s.fmtShow(tbl, SLABEL)
 }
 
-func (s *Start) shortFmt() {
+func (s *Start) fmtListShort() {
 	templates := s.sort(s.conf.Templates)
 	sort.Sort(config.SortByName(templates))
 	data := []string{}
@@ -146,7 +180,7 @@ func (s *Start) shortFmt() {
 	w.Flush()
 }
 
-func (s *Start) longFmt() {
+func (s *Start) fmtListLong() {
 	var (
 		header []string
 		table  [][]string
@@ -176,6 +210,28 @@ func (s *Start) longFmt() {
 	writer.SetHeader(header)
 	for _, v := range table {
 		writer.Append(v)
+	}
+	writer.Render()
+}
+
+func (s *Start) fmtShow(tbl []showRow, show ShowOptions) {
+	displayLabel := show&SLABEL != 0
+	writer := tablewriter.NewWriter(s.stdout)
+	writer.SetAlignment(tablewriter.ALIGN_LEFT)
+	var (
+		header []string = []string{"Files"}
+		row    []string
+	)
+	if displayLabel {
+		header = append(header, "Labels")
+	}
+	writer.SetHeader(header)
+	for _, r := range tbl {
+		row = []string{r.file}
+		if displayLabel {
+			row = append(row, strings.Join(r.label, " "))
+		}
+		writer.Append(row)
 	}
 	writer.Render()
 }
