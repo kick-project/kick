@@ -8,10 +8,11 @@ import (
 	"testing"
 
 	"github.com/kick-project/kick/internal/di"
+	"github.com/kick-project/kick/internal/resources/client/plumb"
 	"github.com/kick-project/kick/internal/resources/config"
 	"github.com/kick-project/kick/internal/resources/exit"
+	"github.com/kick-project/kick/internal/resources/handle"
 	"github.com/kick-project/kick/internal/resources/marshal"
-	"github.com/kick-project/kick/internal/resources/templatescan"
 	"github.com/kick-project/kick/internal/resources/testtools"
 	"github.com/kick-project/kick/internal/services/start"
 	"github.com/stretchr/testify/assert"
@@ -78,7 +79,7 @@ func TestStart_Start(t *testing.T) {
 
 func TestStart_Show(t *testing.T) {
 	s, _, stdout := make()
-	s.Show(FixtureTemplate, []string{}, start.SLABEL)
+	s.Show("gotesthandle", []string{}, start.SLABEL)
 	fmt.Print(stdout.String())
 	assert.Regexp(t, `\|\s+FILES\s+\|\s+LABELS\s+\|`, stdout)
 	assert.Regexp(t, `\|\s+.editorconfig\s+\|\s+editor\s+\|`, stdout)
@@ -96,17 +97,27 @@ func make() (s *start.Start, stderr *bytes.Buffer, stdout *bytes.Buffer) {
 	})
 	setup := inject.MakeSetup()
 	setup.Init()
-	scan := templatescan.Scan{
-		DB: inject.MakeORMInMemory(),
-	}
-	//nolint
-	scan.Run(FixtureTemplate, 5)
+	h := handle.New(handle.Options{
+		Config: config.File{
+			Templates: []config.Template{
+				{
+					Handle: "gotesthandle",
+					URL:    filepath.Join(testtools.FixtureDir(), "gotemplate"),
+				},
+			},
+		},
+		Plumb: func(url, ref string) (*plumb.Plumb, error) {
+			return plumb.New("", FixtureTemplate, "")
+		},
+	})
 	o := start.Options{
 		Conf:      conf,
 		Check:     inject.MakeCheck(),
 		CheckVars: inject.MakeCheckVars(),
 		Exit:      &exit.Handler{Mode: exit.MPanic},
 		DB:        inject.MakeORMInMemory(),
+		Handle:    h,
+		Scan:      inject.MakeScan(),
 		Stderr:    stderr,
 		Stdout:    stdout,
 		Sync:      inject.MakeSync(),

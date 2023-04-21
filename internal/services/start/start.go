@@ -13,6 +13,7 @@ import (
 	"github.com/kick-project/kick/internal/resources/config"
 	"github.com/kick-project/kick/internal/resources/errs"
 	"github.com/kick-project/kick/internal/resources/exit"
+	"github.com/kick-project/kick/internal/resources/handle"
 	"github.com/kick-project/kick/internal/resources/sync"
 	"github.com/kick-project/kick/internal/resources/template"
 	"github.com/kick-project/kick/internal/resources/template/variables"
@@ -43,6 +44,8 @@ type Start struct {
 	conf      *config.File
 	db        *gorm.DB
 	exit      exit.HandlerIface
+	handle    *handle.Handle
+	scan      *templatescan.Scan
 	stderr    io.Writer
 	stdout    io.Writer
 	sync      sync.SyncIface
@@ -56,6 +59,8 @@ type Options struct {
 	Conf      *config.File           `validate:"required"`
 	DB        *gorm.DB               `validate:"required"`
 	Exit      exit.HandlerIface      `validate:"required"`
+	Handle    *handle.Handle         `validate:"required"`
+	Scan      *templatescan.Scan     `validate:"required"`
 	Stderr    io.Writer              `validate:"required"`
 	Stdout    io.Writer              `validate:"required"`
 	Sync      sync.SyncIface         `validate:"required"`
@@ -68,8 +73,10 @@ func New(opts Options) *Start {
 		check:     opts.Check,
 		checkvars: opts.CheckVars,
 		conf:      opts.Conf,
-		exit:      opts.Exit,
 		db:        opts.DB,
+		exit:      opts.Exit,
+		handle:    opts.Handle,
+		scan:      opts.Scan,
 		stderr:    opts.Stderr,
 		stdout:    opts.Stdout,
 		sync:      opts.Sync,
@@ -107,11 +114,19 @@ func (s *Start) List(long bool) {
 	}
 }
 
-// Show show files used in a template. base is the path to the template
-// directory on local disk. If a slice of incLabels is provided, only files,
-// directories that have matching labels will be displayed. If a file or
-// directory has no label it is always displayed.
-func (s *Start) Show(base string, incLabels []string, ops ShowOptions) {
+// Show show template files generated within a handle. If a slice of incLabels
+// is provided, only files and directories that have matching labels will be
+// displayed. If a file or directory has no label it is always displayed.
+func (s *Start) Show(hdle string, incLabels []string, ops ShowOptions) {
+	tmplDir, err := s.handle.Handle2Path(hdle)
+	if err != nil {
+		if err == handle.ErrNoHandle {
+			return
+		}
+		errs.Fatal(err)
+	}
+	err = s.scan.Run(tmplDir, 5)
+	errs.Fatal(err)
 	type Row struct {
 		Dir   string
 		Path  string
@@ -119,10 +134,10 @@ func (s *Start) Show(base string, incLabels []string, ops ShowOptions) {
 	}
 	results := []Row{}
 	if len(incLabels) == 0 || cond.ContainsString("all", incLabels...) {
-		tx := s.db.Raw(templatescan.QueryScanLabel+" WHERE base = ?", base).Scan(&results)
+		tx := s.db.Raw(templatescan.QueryScanLabel+" WHERE base = ?", tmplDir).Scan(&results)
 		errs.Fatal(tx.Error)
 	} else {
-		tx := s.db.Raw(templatescan.QueryScanLabel+" WHERE base = ? AND (label IS NULL OR label IN ?)", base, incLabels).Scan(&results)
+		tx := s.db.Raw(templatescan.QueryScanLabel+" WHERE base = ? AND (label IS NULL OR label IN ?)", tmplDir, incLabels).Scan(&results)
 		errs.Fatal(tx.Error)
 	}
 	rows := []string{}

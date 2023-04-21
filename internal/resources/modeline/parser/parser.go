@@ -187,7 +187,6 @@ func lexOPTION(l *lexer) stateFn {
 func lexRHS(l *lexer) stateFn {
 	var id = l.input[l.start:l.pos]
 	if id == "label" && l.peek() == '=' {
-		l.emit(OPTION)
 		l.next()
 		l.ignore()
 		return lexLABEL

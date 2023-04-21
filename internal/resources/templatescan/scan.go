@@ -124,15 +124,13 @@ func (s Scan) scanBase(root string, lines int) error {
 func (s Scan) updateModeInfo(ml *modeline.ModeLine, mlf *model.File) {
 	if ml != nil {
 		for _, o := range ml.GetOptions() {
-			Option := &model.Option{Option: o}
-			err := s.DB.Model(mlf).Association("Option").Append(Option)
+			err := s.many2ManyFileOption(mlf, o)
 			if err != nil {
 				errs.Fatal(err)
 			}
 		}
 		for _, l := range ml.GetLabel() {
-			Label := &model.Label{Label: l}
-			err := s.DB.Model(mlf).Association("Label").Append(Label)
+			err := s.many2ManyFileLabel(mlf, l)
 			if err != nil {
 				errs.Fatal(err)
 			}
@@ -164,7 +162,21 @@ func (s Scan) fetchTemplate(root string) (*model.Base, error) {
 	return mlt, nil
 }
 
-// workaround to perform many2many association.
+// workaround to perform many2many association for options
+func (s Scan) many2ManyFileOption(file *model.File, option string) error {
+	o := model.Option{Option: option}
+	tx := s.DB.Where("option = ?", option).First(&o)
+	if tx.RowsAffected == 0 {
+		tx2 := s.DB.Create(&o)
+		if tx2.Error != nil {
+			return tx2.Error
+		}
+	}
+	tx = s.DB.Exec("INSERT OR IGNORE INTO file_option (file_id, option_id) VALUES (?, ?)", file.ID, o.ID)
+	return tx.Error
+}
+
+// workaround to perform many2many association for labels
 func (s Scan) many2ManyFileLabel(file *model.File, label string) error {
 	l := model.Label{Label: label}
 	tx := s.DB.Where("label = ?", label).First(&l)

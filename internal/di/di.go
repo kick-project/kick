@@ -20,12 +20,14 @@ import (
 	"github.com/kick-project/kick/internal/resources/dfaults"
 	"github.com/kick-project/kick/internal/resources/errs"
 	"github.com/kick-project/kick/internal/resources/exit"
+	"github.com/kick-project/kick/internal/resources/handle"
 	"github.com/kick-project/kick/internal/resources/logger"
 	"github.com/kick-project/kick/internal/resources/model"
 	"github.com/kick-project/kick/internal/resources/sync"
 	"github.com/kick-project/kick/internal/resources/template"
 	"github.com/kick-project/kick/internal/resources/template/renderer"
 	"github.com/kick-project/kick/internal/resources/template/variables"
+	"github.com/kick-project/kick/internal/resources/templatescan"
 	"github.com/kick-project/kick/internal/resources/vcs"
 	"github.com/kick-project/kick/internal/services/initialize"
 	"github.com/kick-project/kick/internal/services/install"
@@ -80,7 +82,9 @@ type DI struct {
 	cacheExitHandler *exit.Handler
 	cacheCheck       *check.Check
 	cacheCheckVars   *checkvars.Check
+	cacheScan        *templatescan.Scan
 	cacheSetup       *setup.Setup
+	cacheHandle      *handle.Handle
 	cacheList        *list.List
 	cacheLogFile     *os.File
 	cacheInit        *initialize.Init
@@ -344,6 +348,17 @@ func (s *DI) MakeClient() *client.Client {
 	return client.New(opts)
 }
 
+// MakeScan dependency injector
+func (s *DI) MakeScan() *templatescan.Scan {
+	if s.cacheScan != nil {
+		return s.cacheScan
+	}
+	s.cacheScan = &templatescan.Scan{
+		DB: s.MakeORMInMemory(),
+	}
+	return s.cacheScan
+}
+
 // MakeSetup dependency injector
 func (s *DI) MakeSetup() *setup.Setup {
 	if s.cacheSetup != nil {
@@ -396,6 +411,18 @@ func (s *DI) MakeInstall() *install.Install {
 	i := install.New(o)
 	s.cacheInstall = i
 	return i
+}
+
+// MakeHandle injector
+func (s *DI) MakeHandle() *handle.Handle {
+	if s.cacheHandle != nil {
+		return s.cacheHandle
+	}
+	s.cacheHandle = handle.New(handle.Options{
+		Config: *s.ConfigFile(),
+		Plumb:  s.CallMakePlumbTemplate(),
+	})
+	return s.cacheHandle
 }
 
 // MakeList dependency injector
@@ -498,6 +525,9 @@ func (s *DI) MakeStart() *start.Start {
 		CheckVars: s.MakeCheckVars(),
 		Conf:      s.ConfigFile(),
 		Exit:      s.MakeExitHandler(),
+		DB:        s.MakeORMInMemory(),
+		Handle:    s.MakeHandle(),
+		Scan:      s.MakeScan(),
 		Stderr:    s.Stderr,
 		Stdout:    s.Stdout,
 		Sync:      s.MakeSync(),

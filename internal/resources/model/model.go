@@ -7,6 +7,7 @@ import (
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"gorm.io/gorm/logger"
 	"gorm.io/gorm/schema"
 )
 
@@ -118,6 +119,7 @@ func CreateModel(opts *Options) (db *gorm.DB) {
 		NamingStrategy: schema.NamingStrategy{
 			SingularTable: true,
 		},
+		Logger: logger.Default.LogMode(logger.Silent),
 	})
 
 	errs.FatalF("Can not initialize an ORM database: %v", err)
@@ -152,6 +154,7 @@ func CreateModelTemporary(opts Options) (db *gorm.DB) {
 		NamingStrategy: schema.NamingStrategy{
 			SingularTable: true,
 		},
+		Logger: logger.Default.LogMode(logger.Silent),
 	})
 
 	errs.FatalF("Can not initialize in memory database: %v", err)
